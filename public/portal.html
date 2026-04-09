@@ -1,0 +1,539 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>My Submissions — RMV Portal</title>
+  <style>
+    :root {
+      --bg: #1a4078; --card: #101b33; --card2: #0d1829;
+      --muted: #9fb3d1; --text: #eaf1ff;
+      --accent: #58a6ff; --danger: #ff6b6b; --ok: #4cd964; --warn: #ffd166;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; background: var(--bg); color: var(--text); }
+    .wrap { max-width: 860px; margin: 0 auto; padding: 18px; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 10px 0 18px; border-bottom: 1px solid rgba(255,255,255,0.07); margin-bottom: 18px; }
+    .topbar-left { display: flex; align-items: center; gap: 14px; }
+    .topbar-left h1 { margin: 0 0 4px; font-size: 1.4rem; }
+    .topbar-left p { margin: 0; font-size: 13px; color: var(--muted); }
+    .pill { display: inline-block; font-size: 12px; padding: 4px 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.12); color: var(--muted); }
+    .card { background: var(--card); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 20px; margin-bottom: 14px; }
+    label { display: block; font-size: 12px; color: var(--muted); margin: 10px 0 4px; }
+    input, select { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.13); background: rgba(0,0,0,0.25); color: var(--text); font-size: 14px; font-family: inherit; }
+    .btn { display: inline-block; padding: 10px 20px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.14); background: rgba(88,166,255,0.16); color: var(--text); cursor: pointer; font-size: 14px; }
+    .btn:hover { opacity: 0.85; }
+    .btn-sm { padding: 6px 14px; font-size: 12px; border-radius: 9px; }
+    .msg { font-size: 13px; margin-top: 8px; min-height: 18px; color: var(--muted); }
+    .msg.ok { color: var(--ok); }
+    .msg.err { color: var(--danger); }
+    .nav { font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+    .nav a { color: var(--accent); text-decoration: none; }
+
+    /* Submission cards */
+    .sub-card {
+      background: var(--card); border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 14px; padding: 18px 20px; margin-bottom: 10px;
+      cursor: pointer; transition: border-color 0.15s;
+    }
+    .sub-card:hover { border-color: rgba(88,166,255,0.3); }
+    .sub-card.open { border-color: rgba(88,166,255,0.45); background: rgba(10,20,50,0.6); }
+    .sub-card-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+    .sub-card-title { font-size: 15px; font-weight: 600; margin: 0 0 4px; }
+    .sub-card-meta { font-size: 12px; color: var(--muted); }
+    .sub-card-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; flex-shrink: 0; }
+
+    /* Status badges */
+    .badge {
+      display: inline-block; font-size: 11px; padding: 3px 10px; border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.1); color: var(--muted);
+    }
+    .badge.submitted   { color: var(--accent); border-color: rgba(88,166,255,0.3); }
+    .badge.under_review { color: var(--warn); border-color: rgba(255,209,102,0.3); }
+    .badge.rmv_ready   { color: #c084fc; border-color: rgba(192,132,252,0.3); }
+    .badge.completed   { color: var(--ok); border-color: rgba(76,217,100,0.3); }
+    .badge.rejected    { color: var(--danger); border-color: rgba(255,107,107,0.3); }
+    .badge.draft       { color: var(--muted); border-color: rgba(159,179,209,0.2); }
+
+    .decision-pass { color: var(--ok); font-weight: 700; font-size: 14px; }
+    .decision-fail { color: var(--danger); font-weight: 700; font-size: 14px; }
+
+    /* Detail panel */
+    .detail-panel {
+      display: none; margin-top: 12px;
+      border-top: 1px solid rgba(255,255,255,0.07); padding-top: 16px;
+    }
+    .detail-panel.open { display: block; }
+
+    /* Status pipeline */
+    .pipeline {
+      display: flex; align-items: flex-start; gap: 0; margin-bottom: 20px;
+      overflow-x: auto; padding-bottom: 4px;
+    }
+    .pipe-step {
+      display: flex; flex-direction: column; align-items: center; flex: 1 1 80px; min-width: 64px;
+      position: relative;
+    }
+    .pipe-step:not(:last-child)::after {
+      content: "";
+      position: absolute; top: 14px; left: calc(50% + 14px);
+      width: calc(100% - 28px); height: 2px;
+      background: rgba(255,255,255,0.1);
+      z-index: 0;
+    }
+    .pipe-step.done:not(:last-child)::after { background: rgba(76,217,100,0.4); }
+    .pipe-step.active:not(:last-child)::after { background: rgba(88,166,255,0.3); }
+    .pipe-dot {
+      width: 28px; height: 28px; border-radius: 50%;
+      border: 2px solid rgba(255,255,255,0.15);
+      background: rgba(255,255,255,0.05);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 12px; position: relative; z-index: 1;
+      transition: all 0.2s;
+    }
+    .pipe-step.done .pipe-dot   { background: rgba(76,217,100,0.2); border-color: var(--ok); color: var(--ok); }
+    .pipe-step.active .pipe-dot { background: rgba(88,166,255,0.2); border-color: var(--accent); color: var(--accent); }
+    .pipe-step.fail .pipe-dot   { background: rgba(255,107,107,0.2); border-color: var(--danger); color: var(--danger); }
+    .pipe-label {
+      font-size: 10px; color: var(--muted); text-align: center; margin-top: 6px; line-height: 1.3;
+    }
+    .pipe-step.done .pipe-label { color: var(--ok); }
+    .pipe-step.active .pipe-label { color: var(--accent); font-weight: 600; }
+    .pipe-step.fail .pipe-label { color: var(--danger); }
+
+    /* Feedback box */
+    .feedback-box {
+      padding: 14px 16px; border-radius: 12px;
+      border: 1px solid rgba(88,166,255,0.25); background: rgba(88,166,255,0.07);
+      font-size: 13px; line-height: 1.65; color: var(--text); margin-bottom: 16px;
+    }
+    .feedback-box.pass-feedback {
+      border-color: rgba(76,217,100,0.25); background: rgba(76,217,100,0.07);
+    }
+    .feedback-box.fail-feedback {
+      border-color: rgba(255,107,107,0.25); background: rgba(255,107,107,0.07);
+    }
+
+    /* Decision banner */
+    .decision-banner {
+      display: flex; align-items: center; gap: 14px; padding: 14px 18px;
+      border-radius: 12px; margin-bottom: 16px;
+    }
+    .decision-banner.pass { background: rgba(76,217,100,0.1); border: 1px solid rgba(76,217,100,0.3); }
+    .decision-banner.fail { background: rgba(255,107,107,0.1); border: 1px solid rgba(255,107,107,0.3); }
+    .decision-banner.pending { background: rgba(255,209,102,0.08); border: 1px solid rgba(255,209,102,0.2); }
+    .decision-icon { font-size: 28px; line-height: 1; flex-shrink: 0; }
+    .decision-text-label { font-size: 11px; color: var(--muted); margin-bottom: 2px; }
+    .decision-text-value { font-size: 16px; font-weight: 700; }
+    .decision-banner.pass  .decision-text-value { color: var(--ok); }
+    .decision-banner.fail  .decision-text-value { color: var(--danger); }
+    .decision-banner.pending .decision-text-value { color: var(--warn); }
+
+    /* Timeline */
+    .timeline { display: flex; flex-direction: column; gap: 0; margin-bottom: 16px; }
+    .tl-item { display: flex; gap: 14px; align-items: flex-start; }
+    .tl-left { display: flex; flex-direction: column; align-items: center; min-width: 18px; }
+    .tl-dot { width: 10px; height: 10px; border-radius: 50%; background: rgba(88,166,255,0.5); border: 2px solid rgba(88,166,255,0.8); flex-shrink: 0; margin-top: 3px; }
+    .tl-line { flex: 1; width: 2px; background: rgba(255,255,255,0.07); min-height: 16px; }
+    .tl-body { padding-bottom: 14px; flex: 1; }
+    .tl-event { font-size: 12px; font-weight: 600; color: var(--text); }
+    .tl-time  { font-size: 11px; color: var(--muted); }
+    .tl-detail { font-size: 12px; color: var(--muted); margin-top: 3px; line-height: 1.5; }
+
+    hr { border: none; border-top: 1px solid rgba(255,255,255,0.07); margin: 16px 0; }
+    section-hd { display: block; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; }
+
+    .meta-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px,1fr)); gap: 10px; margin-bottom: 16px; }
+    .meta-item label { margin: 0 0 2px; }
+    .meta-item .val { font-size: 13px; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="nav"><a href="/">&larr; Home</a> &nbsp;&bull;&nbsp; <a href="/submit">Submit a case</a></div>
+
+  <div class="topbar">
+    <div class="topbar-left">
+      <img src="/rmv-logo.png" alt="RMV Logo" style="height:52px;" />
+      <div>
+        <h1>My Submission Status</h1>
+        <p>Track your RMV case submissions and reviewer feedback.</p>
+      </div>
+    </div>
+    <div>
+      <span class="pill" id="authStatus">Not signed in</span>
+    </div>
+  </div>
+
+  <!-- Sign in -->
+  <div class="card" id="signinCard">
+    <h2 style="margin:0 0 12px;font-size:1rem;">Sign in to view your submissions</h2>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;">
+      <div style="flex:1 1 260px;">
+        <label>Email address</label>
+        <input id="loginEmail" type="email" placeholder="you@example.com" autocomplete="email" />
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;">
+        <button class="btn" id="devLoginBtn">Sign in (Dev)</button>
+        <button class="btn" id="logoutBtn" style="display:none;">Sign out</button>
+      </div>
+    </div>
+    <div class="msg" id="loginMsg">Use your registered email address to sign in.</div>
+  </div>
+
+  <!-- Submissions list -->
+  <div id="subsSection" style="display:none;">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px;">
+      <div style="font-size:14px;font-weight:600;">Your Submissions <span id="subCount" class="pill" style="font-weight:400;"></span></div>
+      <a href="/submit" class="btn btn-sm">+ New submission</a>
+    </div>
+    <div id="subsList"></div>
+  </div>
+
+  <div id="emptyMsg" style="display:none;" class="card">
+    <div style="text-align:center;padding:24px 0;">
+      <div style="font-size:2rem;margin-bottom:10px;">📂</div>
+      <div style="font-weight:600;margin-bottom:6px;">No submissions yet</div>
+      <div style="font-size:13px;color:var(--muted);margin-bottom:16px;">Upload your first case summary or case report to get started.</div>
+      <a href="/submit" class="btn">Submit a case</a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let me = { email: null, role: null };
+  const $ = id => document.getElementById(id);
+
+  // ── Auth ────────────────────────────────────────────────────────────────────
+
+  async function refreshMe() {
+    const r = await fetch("/auth/me");
+    me = await r.json().catch(() => ({}));
+
+    if (me.email) {
+      $("authStatus").textContent = me.email;
+      $("logoutBtn").style.display = "";
+      $("devLoginBtn").style.display = "none";
+      $("loginEmail").disabled = true;
+      $("loginMsg").textContent = `Signed in as ${me.email}`;
+      $("loginMsg").className = "msg ok";
+    } else {
+      $("authStatus").textContent = "Not signed in";
+      $("logoutBtn").style.display = "none";
+      $("devLoginBtn").style.display = "";
+      $("loginEmail").disabled = false;
+      $("loginMsg").textContent = "Use your registered email address to sign in.";
+      $("loginMsg").className = "msg";
+    }
+  }
+
+  $("devLoginBtn").addEventListener("click", async () => {
+    const email = $("loginEmail").value.trim();
+    if (!email) { $("loginMsg").textContent = "Enter your email first."; return; }
+    $("loginMsg").textContent = "Signing in...";
+    const r = await fetch("/auth/dev-login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    const j = await r.json().catch(() => ({}));
+    if (r.ok) {
+      await refreshMe();
+      await loadSubmissions();
+    } else {
+      $("loginMsg").textContent = `Sign in failed: ${j.error || r.status}`;
+      $("loginMsg").className = "msg err";
+    }
+  });
+
+  $("logoutBtn").addEventListener("click", async () => {
+    await fetch("/auth/logout", { method: "POST" });
+    await refreshMe();
+    $("subsSection").style.display = "none";
+    $("emptyMsg").style.display = "none";
+  });
+
+  // ── Helpers ─────────────────────────────────────────────────────────────────
+
+  function esc(s) {
+    return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+
+  function relTime(ts) {
+    if (!ts) return "";
+    const diff = Date.now() - ts;
+    const m = Math.floor(diff / 60000);
+    if (m < 2)  return "just now";
+    if (m < 60) return `${m}m ago`;
+    const h = Math.floor(m / 60);
+    if (h < 24) return `${h}h ago`;
+    const d = Math.floor(h / 24);
+    if (d < 30) return `${d}d ago`;
+    return new Date(ts).toLocaleDateString();
+  }
+
+  function fmtDate(ts) {
+    if (!ts) return "—";
+    return new Date(ts).toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
+  }
+
+  function statusLabel(s) {
+    const map = {
+      draft:        "Draft",
+      submitted:    "Submitted",
+      under_review: "Under Review",
+      rmv_ready:    "RMV Scheduled",
+      completed:    "Completed",
+      rejected:     "Not Passed",
+    };
+    return map[s] || s;
+  }
+
+  function statusDesc(s) {
+    const map = {
+      draft:        "Your submission is saved as a draft and has not been sent for review.",
+      submitted:    "Your submission has been received and is in the review queue.",
+      under_review: "A faculty reviewer is currently evaluating your submission.",
+      rmv_ready:    "Your submission passed initial review. Your RMV oral session will be scheduled soon.",
+      completed:    "The review process is complete. See the decision below.",
+      rejected:     "Your submission did not pass at this time. See the feedback below for guidance.",
+    };
+    return map[s] || "";
+  }
+
+  // Pipeline: submitted → under_review → rmv_ready → completed
+  // rejected can occur at any stage
+  const PIPE_STEPS = [
+    { key: "submitted",    label: "Submitted",    icon: "📤" },
+    { key: "under_review", label: "Under Review", icon: "🔍" },
+    { key: "rmv_ready",    label: "RMV Scheduled",icon: "📅" },
+    { key: "completed",    label: "Complete",      icon: "✅" },
+  ];
+  const STATUS_ORDER = { submitted: 0, under_review: 1, rmv_ready: 2, completed: 3 };
+
+  function buildPipeline(status) {
+    const rejected = status === "rejected";
+    const currentIdx = rejected ? 1 : (STATUS_ORDER[status] ?? 0);
+
+    return `<div class="pipeline">${PIPE_STEPS.map((step, i) => {
+      let cls = "";
+      if (rejected && i === currentIdx) cls = "fail";
+      else if (i < currentIdx) cls = "done";
+      else if (i === currentIdx) cls = "active";
+
+      const dotContent = rejected && i === currentIdx ? "✕"
+        : i < currentIdx ? "✓"
+        : i === currentIdx ? "●"
+        : "";
+
+      return `<div class="pipe-step ${cls}">
+        <div class="pipe-dot">${dotContent}</div>
+        <div class="pipe-label">${step.label}${rejected && i === currentIdx ? "<br><span style='color:var(--danger);font-size:9px;'>Not Passed</span>" : ""}</div>
+      </div>`;
+    }).join("")}</div>`;
+  }
+
+  function buildDecisionBanner(sub) {
+    const d = sub.final_decision;
+    if (!d || d === "pending") {
+      const inProgress = sub.status !== "submitted";
+      if (!inProgress) return "";
+      return `<div class="decision-banner pending">
+        <div class="decision-icon">⏳</div>
+        <div><div class="decision-text-label">Current status</div>
+        <div class="decision-text-value">${statusLabel(sub.status)}</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:3px;">${esc(statusDesc(sub.status))}</div></div>
+      </div>`;
+    }
+    if (d === "pass") return `<div class="decision-banner pass">
+      <div class="decision-icon">🎉</div>
+      <div><div class="decision-text-label">Final decision</div>
+        <div class="decision-text-value">PASS</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:3px;">Congratulations — your submission has been approved for credentialing.</div>
+      </div>
+    </div>`;
+    if (d === "fail") return `<div class="decision-banner fail">
+      <div class="decision-icon">📋</div>
+      <div><div class="decision-text-label">Final decision</div>
+        <div class="decision-text-value">NOT PASSED</div>
+        <div style="font-size:12px;color:var(--muted);margin-top:3px;">Please review the feedback below and consider resubmitting.</div>
+      </div>
+    </div>`;
+    return "";
+  }
+
+  function buildFeedbackBox(sub) {
+    const fb = (sub.applicant_feedback || "").trim();
+    if (!fb) return "";
+    const cls = sub.final_decision === "pass" ? "pass-feedback" : sub.final_decision === "fail" ? "fail-feedback" : "";
+    return `
+      <section-hd>Reviewer Feedback</section-hd>
+      <div class="feedback-box ${cls}">${esc(fb).replace(/\n/g, "<br>")}</div>
+    `;
+  }
+
+  function buildEventTimeline(events) {
+    if (!events?.length) return "";
+    const EVENT_LABELS = {
+      submission_created: "Submission received",
+      status_updated: "Status updated",
+    };
+    const items = events.map((e, i) => {
+      const label = EVENT_LABELS[e.event_type] || e.event_type;
+      const isLast = i === events.length - 1;
+
+      let detail = "";
+      if (e.event_type === "status_updated" && e.details?.status) {
+        detail = `Status changed to <strong>${statusLabel(e.details.status)}</strong>`;
+      } else if (e.event_type === "submission_created") {
+        detail = e.details?.filename ? `File: ${esc(e.details.filename)}` : "";
+      }
+
+      return `<div class="tl-item">
+        <div class="tl-left">
+          <div class="tl-dot"></div>
+          ${!isLast ? '<div class="tl-line"></div>' : ""}
+        </div>
+        <div class="tl-body">
+          <div class="tl-event">${esc(label)}</div>
+          <div class="tl-time">${fmtDate(e.ts)} &bull; ${relTime(e.ts)}</div>
+          ${detail ? `<div class="tl-detail">${detail}</div>` : ""}
+        </div>
+      </div>`;
+    });
+    return `<section-hd>Timeline</section-hd><div class="timeline">${items.join("")}</div>`;
+  }
+
+  // ── Submission cards ────────────────────────────────────────────────────────
+
+  let openCardId = null;
+  let cachedSubs = [];
+
+  async function loadSubmissions() {
+    if (!me.email) return;
+    const r = await fetch("/api/my-submissions");
+    const rows = await r.json().catch(() => []);
+    cachedSubs = Array.isArray(rows) ? rows : [];
+    renderList();
+  }
+
+  function renderList() {
+    const list = $("subsList");
+    if (!cachedSubs.length) {
+      $("subsSection").style.display = "none";
+      $("emptyMsg").style.display = "";
+      return;
+    }
+    $("subsSection").style.display = "";
+    $("emptyMsg").style.display = "none";
+    $("subCount").textContent = cachedSubs.length;
+
+    list.innerHTML = cachedSubs.map(sub => {
+      const isOpen = openCardId === sub.id;
+      const typeLabel = sub.submission_type === "case_summary" ? "Case Summary" : sub.submission_type === "case_report" ? "Case Report" : sub.submission_type || "";
+      return `<div class="sub-card ${isOpen ? "open" : ""}" id="card-${sub.id}" onclick="toggleCard(${sub.id})">
+        <div class="sub-card-header">
+          <div>
+            <div class="sub-card-title">${esc(sub.case_title || "Untitled")}</div>
+            <div class="sub-card-meta">${esc(typeLabel)}${sub.species ? " &bull; " + esc(sub.species) : ""}${sub.program ? " &bull; " + esc(sub.program) : ""}</div>
+          </div>
+          <div class="sub-card-right">
+            <span class="badge ${sub.status || ""}">${statusLabel(sub.status)}</span>
+            <span style="font-size:11px;color:var(--muted);">${fmtDate(sub.created_ts)}</span>
+          </div>
+        </div>
+        <div class="detail-panel ${isOpen ? "open" : ""}" id="detail-${sub.id}">
+          <div id="detail-content-${sub.id}">
+            <div class="msg" style="margin-top:10px;">Loading…</div>
+          </div>
+        </div>
+      </div>`;
+    }).join("");
+  }
+
+  async function toggleCard(id) {
+    if (openCardId === id) {
+      openCardId = null;
+      renderList();
+      return;
+    }
+    openCardId = id;
+    renderList();
+    await loadCardDetail(id);
+  }
+
+  async function loadCardDetail(id) {
+    const contentEl = $(`detail-content-${id}`);
+    if (!contentEl) return;
+
+    // Fetch submission detail and events in parallel
+    const [subRes, evtRes] = await Promise.all([
+      fetch(`/api/submissions/${id}`),
+      fetch(`/api/submissions/${id}/events`),
+    ]);
+    const sub = await subRes.json().catch(() => null);
+    const events = await evtRes.json().catch(() => []);
+
+    if (!sub || subRes.status >= 400) {
+      contentEl.innerHTML = `<div class="msg err">Failed to load details.</div>`;
+      return;
+    }
+
+    const typeLabel = sub.submission_type === "case_summary" ? "Case Summary"
+      : sub.submission_type === "case_report" ? "Case Report"
+      : sub.submission_type || "";
+
+    contentEl.innerHTML = `
+      <!-- Status pipeline -->
+      ${buildPipeline(sub.status)}
+
+      <!-- Decision banner -->
+      ${buildDecisionBanner(sub)}
+
+      <!-- Status description (only if no banner shown for it) -->
+      ${(!sub.final_decision || sub.final_decision === "pending") && sub.status === "submitted" ? `
+        <div style="font-size:13px;color:var(--muted);margin-bottom:16px;padding:10px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.07);background:rgba(0,0,0,0.15);">
+          ${esc(statusDesc(sub.status))}
+        </div>
+      ` : ""}
+
+      <!-- Applicant feedback (if any) -->
+      ${buildFeedbackBox(sub)}
+
+      <hr />
+
+      <!-- Case metadata -->
+      <section-hd>Submission Details</section-hd>
+      <div class="meta-grid">
+        <div class="meta-item"><label>Type</label><div class="val">${esc(typeLabel)}</div></div>
+        <div class="meta-item"><label>Case Title</label><div class="val">${esc(sub.case_title || "—")}</div></div>
+        ${sub.species ? `<div class="meta-item"><label>Species</label><div class="val">${esc(sub.species)}</div></div>` : ""}
+        ${sub.case_date ? `<div class="meta-item"><label>Case Date</label><div class="val">${esc(sub.case_date)}</div></div>` : ""}
+        ${sub.revision_number ? `<div class="meta-item"><label>Revision</label><div class="val">${esc(sub.revision_number)}</div></div>` : ""}
+        <div class="meta-item"><label>Submitted</label><div class="val">${fmtDate(sub.created_ts)}</div></div>
+        <div class="meta-item"><label>Last Updated</label><div class="val">${fmtDate(sub.updated_ts)}</div></div>
+      </div>
+
+      <!-- File download -->
+      <a href="/api/submissions/${sub.id}/file" target="_blank" class="btn btn-sm" style="margin-bottom:16px;">
+        ↓ Download my submitted file
+      </a>
+
+      <hr />
+
+      <!-- Event timeline -->
+      ${buildEventTimeline(events)}
+    `;
+  }
+
+  // ── Init ────────────────────────────────────────────────────────────────────
+
+  (async () => {
+    await refreshMe();
+    if (me.email) await loadSubmissions();
+  })();
+</script>
+</body>
+</html>

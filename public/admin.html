@@ -186,8 +186,11 @@
       </div>
     </div>
 
-    <label>Reviewer notes</label>
+    <label>Reviewer notes <span style="font-size:11px;color:var(--muted);">(internal — not shown to applicant)</span></label>
     <textarea id="reviewerNotes" placeholder="Internal notes for this submission..."></textarea>
+
+    <label style="margin-top:10px;">Applicant feedback <span style="font-size:11px;color:var(--muted);">(visible to applicant on their status page)</span></label>
+    <textarea id="applicantFeedback" placeholder="Feedback to share with the applicant — shown on their portal status page..."></textarea>
 
     <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
       <button class="btn btn-ok" id="saveStatusBtn">Save</button>
@@ -390,6 +393,7 @@
     $("statusSel").value = sub.status || "submitted";
     $("finalDecisionSel").value = sub.final_decision || "pending";
     $("reviewerNotes").value = sub.reviewer_notes || "";
+    $("applicantFeedback").value = sub.applicant_feedback || "";
     $("detailMsg").textContent = "";
     $("detailMsg").className = "msg";
 
@@ -407,7 +411,7 @@
     $("aiReviewStatus").className = "msg";
     loadAIReview(id);
 
-    $("detailPane").style.display = "";
+    $("detailPane").style.display = "block";
     $("detailPane").scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
@@ -619,6 +623,7 @@
       status: statusOverride || $("statusSel").value,
       final_decision: decisionOverride || $("finalDecisionSel").value || null,
       reviewer_notes: $("reviewerNotes").value,
+      applicant_feedback: $("applicantFeedback").value,
     };
 
     const r = await fetch(`/api/submissions/${currentId}/status`, {

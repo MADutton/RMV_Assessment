@@ -82,6 +82,7 @@ CREATE TABLE IF NOT EXISTS submissions (
   mime_type TEXT,
   file_size_bytes INTEGER,
   reviewer_notes TEXT,
+  applicant_feedback TEXT,
   ai_review_json TEXT,
   rmv_question_set_json TEXT,
   rmv_session_status TEXT DEFAULT 'not_started',
@@ -113,6 +114,7 @@ for (const col of [
   "ALTER TABLE submissions ADD COLUMN extraction_error TEXT",
   "ALTER TABLE submissions ADD COLUMN ai_review_json TEXT",
   "ALTER TABLE submissions ADD COLUMN rmv_question_set_json TEXT",
+  "ALTER TABLE submissions ADD COLUMN applicant_feedback TEXT",
 ]) {
   try { db.exec(col); } catch {}
 }
@@ -155,10 +157,15 @@ const updateSubmissionStatus = db.prepare(`
   UPDATE submissions
   SET status = @status,
       reviewer_notes = COALESCE(@reviewer_notes, reviewer_notes),
+      applicant_feedback = COALESCE(@applicant_feedback, applicant_feedback),
       final_decision = COALESCE(@final_decision, final_decision),
       updated_ts = @updated_ts
   WHERE id = @id
 `);
+
+const getSubEventsBySubmission = db.prepare(
+  "SELECT * FROM submission_events WHERE submission_id = ? ORDER BY ts ASC"
+);
 
 const getSubmissionById = db.prepare("SELECT * FROM submissions WHERE id = ?");
 const getSubmissionsByApplicant = db.prepare("SELECT * FROM submissions WHERE applicant_email = ? ORDER BY created_ts DESC");
@@ -554,6 +561,7 @@ async function handleUpdateStatus(req, res, id) {
     id,
     status: body.status,
     reviewer_notes: body.reviewer_notes || null,
+    applicant_feedback: body.applicant_feedback || null,
     final_decision: body.final_decision || null,
     updated_ts: Date.now(),
   });
@@ -562,10 +570,34 @@ async function handleUpdateStatus(req, res, id) {
     submission_id: Number(id),
     actor_email: admin,
     event_type: "status_updated",
-    details: { status: body.status, reviewer_notes: body.reviewer_notes || "" },
+    details: {
+      status: body.status,
+      reviewer_notes: body.reviewer_notes || "",
+      applicant_feedback: body.applicant_feedback || "",
+    },
   });
 
   return json(res, 200, { ok: true });
+}
+
+// GET /api/submissions/:id/events — event history (auth + ownership)
+function handleSubmissionEvents(req, res, id) {
+  const email = requireAuth(req, res);
+  if (!email) return;
+
+  const sub = getSubmissionById.get(id);
+  if (!sub) return apiError(res, 404, "Submission not found");
+
+  const role = getUserRole(email);
+  if (role !== "faculty" && role !== "admin" && sub.applicant_email !== email) {
+    return apiError(res, 403, "Forbidden");
+  }
+
+  const events = getSubEventsBySubmission.all(id).map(e => ({
+    ...e,
+    details: e.details_json ? JSON.parse(e.details_json) : {},
+  }));
+  return json(res, 200, events);
 }
 
 // GET /api/submissions/:id/file — serve uploaded file
@@ -1027,6 +1059,9 @@ async function router(req, res) {
   const fileMatch = pathname.match(/^\/api\/submissions\/(\d+)\/file$/);
   if (fileMatch && method === "GET") return handleSubmissionFile(req, res, fileMatch[1]);
 
+  const eventsMatch = pathname.match(/^\/api\/submissions\/(\d+)\/events$/);
+  if (eventsMatch && method === "GET") return handleSubmissionEvents(req, res, eventsMatch[1]);
+
   const textMatch = pathname.match(/^\/api\/submissions\/(\d+)\/text$/);
   if (textMatch && method === "GET") return handleSubmissionText(req, res, textMatch[1]);
 
@@ -1046,6 +1081,7 @@ async function router(req, res) {
   // Page routes — serve HTML files
   if (method === "GET" && pathname === "/submit") return serveFile(res, path.join(STATIC_ROOT, "submit.html"));
   if (method === "GET" && pathname === "/admin")  return serveFile(res, path.join(STATIC_ROOT, "admin.html"));
+  if (method === "GET" && pathname === "/portal") return serveFile(res, path.join(STATIC_ROOT, "portal.html"));
 
   // Static files
   if (method === "GET") return serveStatic(req, res);
