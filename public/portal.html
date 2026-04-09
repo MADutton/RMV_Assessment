@@ -421,6 +421,7 @@
     const rows = await r.json().catch(() => []);
     cachedSubs = Array.isArray(rows) ? rows : [];
     renderList();
+    if (openCardId) await loadCardDetail(openCardId);
   }
 
   function renderList() {
