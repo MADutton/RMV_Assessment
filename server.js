@@ -598,8 +598,8 @@ function serveStatic(req, res) {
 // ─── Router ───────────────────────────────────────────────────────────────────
 
 async function router(req, res) {
-  const url = new URL(req.url, BASE_URL);
-  const pathname = url.pathname;
+  const rawUrl = req.url || "/";
+  const pathname = rawUrl.split("?")[0];
   const method = req.method;
 
   // Health
