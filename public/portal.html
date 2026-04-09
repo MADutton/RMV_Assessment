@@ -141,6 +141,7 @@
     .tl-detail { font-size: 12px; color: var(--muted); margin-top: 3px; line-height: 1.5; }
 
     hr { border: none; border-top: 1px solid rgba(255,255,255,0.07); margin: 16px 0; }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
     section-hd { display: block; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 10px; }
 
     .meta-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px,1fr)); gap: 10px; margin-bottom: 16px; }
@@ -380,6 +381,7 @@
       submission_created:      "Submission received",
       status_updated:          "Status updated",
       rmv_questions_sent:      "RMV questions sent",
+      rmv_session_started:     "RMV session started",
       rmv_responses_submitted: "RMV responses submitted",
     };
     const items = events.map((e, i) => {
@@ -540,26 +542,70 @@
 
   // ── RMV Session ─────────────────────────────────────────────────────────────
 
+  // Active timer interval keyed by subId
+  const rmvTimers = {};
+
   function buildRMVSection(subId, rmv) {
     if (!rmv) return "";
     const status = rmv.session_status || "not_started";
     if (status === "not_started") return "";
 
+    // ── Questions ready — pre-start warning screen ───────────────────────────
     if (status === "questions_sent") {
       const qs = rmv.questions || [];
       if (!qs.length) return "";
       return `
         <div style="margin-bottom:20px;border:1px solid rgba(192,132,252,0.3);border-radius:14px;overflow:hidden;">
-          <div style="padding:14px 18px;background:rgba(192,132,252,0.1);border-bottom:1px solid rgba(192,132,252,0.15);">
-            <div style="font-size:14px;font-weight:700;color:#c084fc;margin-bottom:4px;">RMV Session — Questions Ready</div>
-            <div style="font-size:12px;color:var(--muted);line-height:1.5;">
-              Your examiner has sent you ${qs.length} questions. Please respond thoughtfully and in your own words —
-              your answers should reflect your direct experience with this case.
-              Aim for <strong>150–250 words per response</strong>. Once submitted, responses cannot be changed.
+          <div style="padding:18px 20px;background:rgba(192,132,252,0.1);">
+            <div style="font-size:15px;font-weight:700;color:#c084fc;margin-bottom:8px;">📋 RMV Session Ready</div>
+            <div style="font-size:13px;color:var(--text);line-height:1.7;margin-bottom:16px;">
+              Your examiner has sent you <strong>${qs.length} questions</strong> about your case submission.<br>
+              This is a <strong>timed exam — 50 minutes</strong>. The clock starts the moment you click Begin.
+            </div>
+            <div style="padding:12px 16px;border-radius:10px;border:1px solid rgba(255,107,107,0.25);background:rgba(255,107,107,0.08);font-size:12px;line-height:1.7;margin-bottom:16px;color:var(--text);">
+              <strong style="color:#ff9f9f;">⚠ Before you begin:</strong>
+              <ul style="margin:6px 0 0;padding-left:18px;color:var(--muted);">
+                <li>You will have exactly <strong>50 minutes</strong> — the form auto-submits at 0:00</li>
+                <li>You may <strong>not</strong> consult the case file, textbooks, or any reference</li>
+                <li>Answer from memory — your responses should reflect your direct experience with this case</li>
+                <li>Once started, the timer <strong>cannot be paused</strong></li>
+                <li>Partial responses are captured if time expires</li>
+              </ul>
+            </div>
+            <button class="btn" style="background:rgba(192,132,252,0.2);border-color:rgba(192,132,252,0.4);color:#e0aaff;font-size:14px;padding:12px 24px;"
+              onclick="beginRMVSession(${subId})">
+              Begin 50-Minute Session →
+            </button>
+            <div class="msg" id="rmv-begin-msg-${subId}" style="margin-top:8px;"></div>
+          </div>
+        </div>
+      `;
+    }
+
+    // ── In progress — timed exam interface ──────────────────────────────────
+    if (status === "in_progress") {
+      const qs = rmv.questions || [];
+      const remaining = rmv.expires_ts ? Math.max(0, rmv.expires_ts - Date.now()) : 0;
+      return `
+        <div style="margin-bottom:20px;border:1px solid rgba(192,132,252,0.4);border-radius:14px;overflow:hidden;" id="rmv-exam-${subId}">
+          <!-- Timer bar -->
+          <div style="padding:14px 20px;background:rgba(192,132,252,0.12);border-bottom:1px solid rgba(192,132,252,0.2);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;">
+            <div style="font-size:14px;font-weight:700;color:#c084fc;">RMV Timed Session</div>
+            <div style="display:flex;align-items:center;gap:12px;">
+              <div style="font-size:11px;color:var(--muted);">Time remaining</div>
+              <div id="rmv-timer-${subId}" style="font-size:28px;font-weight:800;font-variant-numeric:tabular-nums;color:#c084fc;letter-spacing:-1px;">50:00</div>
             </div>
           </div>
-          <div style="padding:18px;">
-            <div style="display:flex;flex-direction:column;gap:18px;" id="rmv-questions-${subId}">
+          <!-- Progress bar -->
+          <div style="height:3px;background:rgba(255,255,255,0.08);">
+            <div id="rmv-progress-${subId}" style="height:100%;background:#c084fc;transition:width 1s linear;width:100%;"></div>
+          </div>
+          <!-- Questions -->
+          <div style="padding:20px;">
+            <div style="font-size:12px;color:var(--muted);margin-bottom:16px;line-height:1.6;">
+              Answer each question from memory based on your direct experience with this case. No references allowed.
+            </div>
+            <div style="display:flex;flex-direction:column;gap:20px;" id="rmv-questions-${subId}">
               ${qs.map((q, i) => `
                 <div>
                   <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px;line-height:1.5;">
@@ -567,46 +613,54 @@
                   </div>
                   <textarea
                     id="rmv-resp-${subId}-${i}"
+                    data-q="${esc(q)}"
                     placeholder="Your response…"
                     style="width:100%;min-height:110px;font-size:13px;resize:vertical;font-family:inherit;line-height:1.55;"
-                    oninput="rmvUpdateWC(this,'rmv-wc-${subId}-${i}')"
                   ></textarea>
                   <div id="rmv-wc-${subId}-${i}" style="font-size:11px;color:var(--muted);text-align:right;margin-top:3px;">0 words</div>
                 </div>
               `).join("")}
             </div>
-            <div style="margin-top:20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
-              <button class="btn" style="background:rgba(192,132,252,0.2);border-color:rgba(192,132,252,0.35);color:#e0aaff;"
-                onclick="submitRMVResponses(${subId}, ${qs.length})">
-                Submit All Responses
+            <div style="margin-top:24px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+              <button class="btn" style="background:rgba(192,132,252,0.2);border-color:rgba(192,132,252,0.4);color:#e0aaff;"
+                onclick="submitRMVResponses(${subId}, ${qs.length}, false)">
+                Submit Now
               </button>
-              <div class="msg" id="rmv-submit-msg-${subId}" style="margin:0;"></div>
+              <div style="font-size:12px;color:var(--muted);">Or wait — form auto-submits when timer reaches 0:00</div>
             </div>
+            <div class="msg" id="rmv-submit-msg-${subId}" style="margin-top:8px;"></div>
           </div>
         </div>
       `;
     }
 
+    // ── Responses submitted ──────────────────────────────────────────────────
     if (status === "responses_submitted") {
       const qa = rmv.responses || [];
       const submittedAt = rmv.responses_ts ? fmtDate(rmv.responses_ts) : "";
+      const expiredBanner = rmv.timed_expired
+        ? `<div style="margin-bottom:10px;padding:8px 12px;border-radius:8px;border:1px solid rgba(255,209,102,0.3);background:rgba(255,209,102,0.07);font-size:12px;color:var(--warn);">⏱ Session auto-submitted at time expiry — partial responses may be present.</div>`
+        : "";
       return `
         <div style="margin-bottom:20px;border:1px solid rgba(76,217,100,0.2);border-radius:14px;overflow:hidden;">
           <div style="padding:14px 18px;background:rgba(76,217,100,0.08);border-bottom:1px solid rgba(76,217,100,0.12);">
             <div style="font-size:14px;font-weight:700;color:var(--ok);margin-bottom:4px;">✓ RMV Responses Submitted</div>
             <div style="font-size:12px;color:var(--muted);">
-              Your responses were submitted ${submittedAt ? `on ${submittedAt}` : ""}. Your examiner will review them and record a final decision.
+              Submitted ${submittedAt ? `on ${submittedAt}` : ""}. Your examiner will review and record a final decision.
             </div>
           </div>
-          <div style="padding:18px;display:flex;flex-direction:column;gap:14px;">
-            ${qa.map((item, i) => `
-              <div style="border:1px solid rgba(255,255,255,0.07);border-radius:10px;overflow:hidden;">
-                <div style="padding:9px 14px;background:rgba(0,0,0,0.2);font-size:12px;font-weight:600;color:var(--accent);border-bottom:1px solid rgba(255,255,255,0.06);">
-                  Q${i + 1}: ${esc(item.q)}
+          <div style="padding:18px;">
+            ${expiredBanner}
+            <div style="display:flex;flex-direction:column;gap:14px;">
+              ${qa.map((item, i) => `
+                <div style="border:1px solid rgba(255,255,255,0.07);border-radius:10px;overflow:hidden;">
+                  <div style="padding:9px 14px;background:rgba(0,0,0,0.2);font-size:12px;font-weight:600;color:var(--accent);border-bottom:1px solid rgba(255,255,255,0.06);">
+                    Q${i + 1}: ${esc(item.q)}
+                  </div>
+                  <div style="padding:11px 14px;font-size:13px;color:var(--muted);line-height:1.65;white-space:pre-wrap;">${item.a ? esc(item.a) : '<em style="color:rgba(255,255,255,0.2);">No response recorded</em>'}</div>
                 </div>
-                <div style="padding:11px 14px;font-size:13px;color:var(--muted);line-height:1.65;white-space:pre-wrap;">${esc(item.a)}</div>
-              </div>
-            `).join("")}
+              `).join("")}
+            </div>
           </div>
         </div>
       `;
@@ -615,67 +669,142 @@
     return "";
   }
 
-  window.rmvUpdateWC = function(textarea, wcId) {
-    const wc = textarea.value.trim().split(/\s+/).filter(Boolean).length;
-    const el = $(wcId);
-    if (el) {
-      el.textContent = `${wc} word${wc !== 1 ? "s" : ""}`;
-      el.style.color = wc < 50 ? "var(--danger)" : wc > 350 ? "var(--warn)" : "var(--ok)";
-    }
-  };
-
   function initRMVWordCounts(subId, rmv) {
-    if (!rmv || rmv.session_status !== "questions_sent") return;
+    if (!rmv || rmv.session_status !== "in_progress") return;
     const qs = rmv.questions || [];
     qs.forEach((_, i) => {
       const ta = $(`rmv-resp-${subId}-${i}`);
-      const wc = $(`rmv-wc-${subId}-${i}`);
-      if (ta && wc) ta.addEventListener("input", () => window.rmvUpdateWC(ta, `rmv-wc-${subId}-${i}`));
+      if (ta) {
+        ta.addEventListener("input", () => {
+          const wc = ta.value.trim().split(/\s+/).filter(Boolean).length;
+          const el = $(`rmv-wc-${subId}-${i}`);
+          if (el) {
+            el.textContent = `${wc} word${wc !== 1 ? "s" : ""}`;
+            el.style.color = wc < 50 ? "var(--danger)" : wc > 350 ? "var(--warn)" : "var(--ok)";
+          }
+        });
+      }
     });
+
+    // Start the countdown timer
+    startRMVTimer(subId, rmv.expires_ts, rmv.questions?.length || 0);
   }
 
-  window.submitRMVResponses = async function(subId, count) {
-    const msgEl = $(`rmv-submit-msg-${subId}`);
-    const responses = [];
+  function startRMVTimer(subId, expiresTs, qCount) {
+    // Clear any existing timer for this sub
+    if (rmvTimers[subId]) clearInterval(rmvTimers[subId]);
 
-    for (let i = 0; i < count; i++) {
-      const ta = $(`rmv-resp-${subId}-${i}`);
-      if (!ta || !ta.value.trim()) {
-        msgEl.textContent = `Please answer question ${i + 1} before submitting.`;
-        msgEl.className = "msg err";
-        return;
+    const TOTAL_MS = 50 * 60 * 1000;
+
+    function tick() {
+      const remaining = Math.max(0, expiresTs - Date.now());
+      const mins = Math.floor(remaining / 60000);
+      const secs = Math.floor((remaining % 60000) / 1000);
+      const display = `${String(mins).padStart(2,"0")}:${String(secs).padStart(2,"0")}`;
+
+      const timerEl = $(`rmv-timer-${subId}`);
+      const progressEl = $(`rmv-progress-${subId}`);
+
+      if (timerEl) {
+        timerEl.textContent = display;
+        // Color shifts: purple → amber at 10min → red at 5min
+        if (remaining <= 5 * 60000) {
+          timerEl.style.color = "#ff6b6b";
+          timerEl.style.animation = remaining <= 60000 ? "blink 1s step-end infinite" : "none";
+        } else if (remaining <= 10 * 60000) {
+          timerEl.style.color = "#ffd166";
+        }
       }
-      // Get the question text from the DOM label
-      const qLabel = document.querySelector(`#rmv-questions-${subId} > div:nth-child(${i + 1}) .rmv-q-text`);
-      responses.push({ q: ta.getAttribute("data-q") || `Question ${i + 1}`, a: ta.value.trim() });
+      if (progressEl) {
+        progressEl.style.width = `${(remaining / TOTAL_MS) * 100}%`;
+        if (remaining <= 5 * 60000) progressEl.style.background = "#ff6b6b";
+        else if (remaining <= 10 * 60000) progressEl.style.background = "#ffd166";
+      }
+
+      if (remaining <= 0) {
+        clearInterval(rmvTimers[subId]);
+        delete rmvTimers[subId];
+        // Auto-submit
+        autoSubmitRMV(subId, qCount);
+      }
     }
 
-    // Re-read question text from the rmv data via a fresh fetch (ta doesn't carry question text)
-    const rmvr = await fetch(`/api/submissions/${subId}/rmv`);
-    const rmvd = await rmvr.json().catch(() => ({}));
-    const qs = rmvd.questions || [];
-    const fullResponses = responses.map((r, i) => ({ q: qs[i] || r.q, a: r.a }));
+    tick(); // immediate first tick
+    rmvTimers[subId] = setInterval(tick, 1000);
+  }
 
-    const totalWords = fullResponses.reduce((sum, r) => sum + r.a.split(/\s+/).filter(Boolean).length, 0);
-    if (!confirm(`Submit ${fullResponses.length} responses (${totalWords} total words)? This cannot be undone.`)) return;
+  async function autoSubmitRMV(subId, qCount) {
+    const msgEl = $(`rmv-submit-msg-${subId}`);
+    if (msgEl) {
+      msgEl.textContent = "⏱ Time expired — auto-submitting your responses…";
+      msgEl.className = "msg";
+      msgEl.style.color = "#ffd166";
+    }
 
-    msgEl.textContent = "Submitting…";
-    msgEl.className = "msg";
+    // Disable all textareas
+    for (let i = 0; i < qCount; i++) {
+      const ta = $(`rmv-resp-${subId}-${i}`);
+      if (ta) ta.disabled = true;
+    }
+
+    await submitRMVResponses(subId, qCount, true);
+  }
+
+  window.beginRMVSession = async function(subId) {
+    const msgEl = $(`rmv-begin-msg-${subId}`);
+    if (!confirm("Start your 50-minute RMV session now?\n\nThe timer starts immediately and cannot be paused. Do not consult any references.")) return;
+
+    if (msgEl) { msgEl.textContent = "Starting session…"; msgEl.className = "msg"; }
+
+    const r = await fetch(`/api/submissions/${subId}/rmv/begin`, { method: "POST" });
+    const j = await r.json().catch(() => ({}));
+
+    if (!r.ok) {
+      if (msgEl) { msgEl.textContent = `Failed: ${j.error || r.status}`; msgEl.className = "msg err"; }
+      return;
+    }
+
+    // Reload the card — will now show in_progress state
+    openCardId = subId;
+    await loadSubmissions();
+  };
+
+  window.submitRMVResponses = async function(subId, qCount, timedExpired = false) {
+    const msgEl = $(`rmv-submit-msg-${subId}`);
+
+    // Fetch current question texts from server (stored in data-q attributes)
+    const responses = [];
+    for (let i = 0; i < qCount; i++) {
+      const ta = $(`rmv-resp-${subId}-${i}`);
+      const q = ta ? (ta.getAttribute("data-q") || `Question ${i + 1}`) : `Question ${i + 1}`;
+      const a = ta ? ta.value.trim() : "";
+      responses.push({ q, a });
+    }
+
+    if (!timedExpired) {
+      const unanswered = responses.filter(r => !r.a).length;
+      if (unanswered > 0) {
+        if (!confirm(`${unanswered} question(s) have no response. Submit anyway?`)) return;
+      } else {
+        const totalWords = responses.reduce((s, r) => s + r.a.split(/\s+/).filter(Boolean).length, 0);
+        if (!confirm(`Submit all ${responses.length} responses (${totalWords} words total)? This cannot be undone.`)) return;
+      }
+    }
+
+    if (msgEl) { msgEl.textContent = "Submitting…"; msgEl.className = "msg"; }
 
     const r = await fetch(`/api/submissions/${subId}/rmv/respond`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ responses: fullResponses }),
+      body: JSON.stringify({ responses, timed_expired: timedExpired }),
     });
     const j = await r.json().catch(() => ({}));
 
     if (!r.ok) {
-      msgEl.textContent = `Submission failed: ${j.error || r.status}`;
-      msgEl.className = "msg err";
+      if (msgEl) { msgEl.textContent = `Submission failed: ${j.error || r.status}`; msgEl.className = "msg err"; }
       return;
     }
 
-    // Reload this card
     openCardId = subId;
     await loadSubmissions();
   };

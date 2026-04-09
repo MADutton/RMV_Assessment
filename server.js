@@ -119,6 +119,10 @@ for (const col of [
   "ALTER TABLE submissions ADD COLUMN rmv_questions_sent_ts INTEGER",
   "ALTER TABLE submissions ADD COLUMN rmv_responses_json TEXT",
   "ALTER TABLE submissions ADD COLUMN rmv_responses_ts INTEGER",
+  "ALTER TABLE submissions ADD COLUMN rmv_session_started_ts INTEGER",
+  "ALTER TABLE submissions ADD COLUMN rmv_session_expires_ts INTEGER",
+  "ALTER TABLE submissions ADD COLUMN rmv_timed_expired INTEGER DEFAULT 0",
+  "ALTER TABLE submissions ADD COLUMN rmv_grading_json TEXT",
 ]) {
   try { db.exec(col); } catch {}
 }
@@ -945,12 +949,20 @@ function handleGetRMVSession(req, res, id) {
   try { questions = sub.rmv_questions_finalized_json ? JSON.parse(sub.rmv_questions_finalized_json) : null; } catch {}
   try { responses = sub.rmv_responses_json ? JSON.parse(sub.rmv_responses_json) : null; } catch {}
 
+  let grading = null;
+  try { grading = sub.rmv_grading_json && sub.rmv_grading_json !== "running" ? JSON.parse(sub.rmv_grading_json) : null; } catch {}
+
   return json(res, 200, {
     session_status: sub.rmv_session_status || "not_started",
     questions,
     responses,
-    sent_ts: sub.rmv_questions_sent_ts || null,
-    responses_ts: sub.rmv_responses_ts || null,
+    sent_ts:          sub.rmv_questions_sent_ts || null,
+    started_ts:       sub.rmv_session_started_ts || null,
+    expires_ts:       sub.rmv_session_expires_ts || null,
+    responses_ts:     sub.rmv_responses_ts || null,
+    timed_expired:    sub.rmv_timed_expired ? true : false,
+    grading_status:   sub.rmv_grading_json === "running" ? "running" : grading ? "done" : "none",
+    grading,
   });
 }
 
@@ -995,6 +1007,50 @@ async function handleSendRMVQuestions(req, res, id) {
   return json(res, 200, { ok: true, count: cleaned.length });
 }
 
+// POST /api/submissions/:id/rmv/begin — applicant starts the timed session
+async function handleBeginRMVSession(req, res, id) {
+  const email = requireAuth(req, res);
+  if (!email) return;
+
+  const sub = getSubmissionById.get(id);
+  if (!sub) return apiError(res, 404, "Submission not found");
+  if (sub.applicant_email !== email) return apiError(res, 403, "Forbidden");
+
+  if (sub.rmv_session_status === "in_progress") {
+    // Already started — return existing expiry so client can sync
+    return json(res, 200, {
+      ok: true,
+      started_ts: sub.rmv_session_started_ts,
+      expires_ts: sub.rmv_session_expires_ts,
+    });
+  }
+  if (sub.rmv_session_status !== "questions_sent") {
+    return apiError(res, 400, "Session is not in the correct state to begin");
+  }
+
+  const now = Date.now();
+  const DURATION_MS = 50 * 60 * 1000; // 50 minutes
+  const expires = now + DURATION_MS;
+
+  db.prepare(`
+    UPDATE submissions
+    SET rmv_session_started_ts = ?,
+        rmv_session_expires_ts = ?,
+        rmv_session_status = 'in_progress',
+        updated_ts = ?
+    WHERE id = ?
+  `).run(now, expires, now, id);
+
+  trackSubEvent({
+    submission_id: Number(id),
+    actor_email: email,
+    event_type: "rmv_session_started",
+    details: { expires_ts: expires },
+  });
+
+  return json(res, 200, { ok: true, started_ts: now, expires_ts: expires });
+}
+
 // POST /api/submissions/:id/rmv/respond — applicant submits responses
 async function handleSubmitRMVResponses(req, res, id) {
   const email = requireAuth(req, res);
@@ -1007,8 +1063,8 @@ async function handleSubmitRMVResponses(req, res, id) {
   if (sub.rmv_session_status === "responses_submitted") {
     return apiError(res, 400, "You have already submitted your responses");
   }
-  if (sub.rmv_session_status !== "questions_sent") {
-    return apiError(res, 400, "No active RMV session for this submission");
+  if (sub.rmv_session_status !== "in_progress") {
+    return apiError(res, 400, "No active timed session — click Begin Session first");
   }
 
   const raw = await readBody(req);
@@ -1022,27 +1078,149 @@ async function handleSubmitRMVResponses(req, res, id) {
     q: String(r.q || "").trim(),
     a: String(r.a || "").trim(),
   }));
-  const unanswered = cleaned.filter(r => !r.a).length;
-  if (unanswered > 0) return apiError(res, 400, `${unanswered} question(s) have no response`);
 
+  // Server-side expiry check — accept auto-submits even if a few seconds over
   const now = Date.now();
+  const expired = sub.rmv_session_expires_ts && now > (sub.rmv_session_expires_ts + 10000); // 10s grace
+  const timedExpired = body.timed_expired === true || (sub.rmv_session_expires_ts && now > sub.rmv_session_expires_ts);
+
+  if (expired) {
+    return apiError(res, 400, "Session has expired — responses can no longer be submitted");
+  }
+
   db.prepare(`
     UPDATE submissions
     SET rmv_responses_json = ?,
         rmv_responses_ts = ?,
+        rmv_timed_expired = ?,
         rmv_session_status = 'responses_submitted',
         updated_ts = ?
     WHERE id = ?
-  `).run(JSON.stringify(cleaned), now, now, id);
+  `).run(JSON.stringify(cleaned), now, timedExpired ? 1 : 0, now, id);
 
   trackSubEvent({
     submission_id: Number(id),
     actor_email: email,
     event_type: "rmv_responses_submitted",
-    details: { count: cleaned.length },
+    details: { count: cleaned.length, timed_expired: timedExpired },
   });
 
+  // Auto-trigger AI grading in background
+  runAIGrading(Number(id)).catch(e => console.error("RMV grading error:", e));
+
   return json(res, 200, { ok: true });
+}
+
+// ─── RMV AI Grading ───────────────────────────────────────────────────────────
+
+const RMV_GRADING_SYSTEM = `You are a veterinary ABVP credentials examiner evaluating whether an applicant genuinely authored the case they submitted. You have been given the original case text, the RMV questions asked, and the applicant's timed responses (50-minute exam, no references allowed).
+
+Your task is to grade each response and assess overall authorship confidence. Be rigorous — this is a high-stakes credentialing exam. Generic answers that could apply to any case should score low. Answers that cite specific details from THIS case (drug names, doses, exact findings, timeline, outcome) should score high.
+
+Respond with valid JSON only.`;
+
+function buildGradingPrompt(sub, questions, responses, caseText) {
+  return `CASE SUBMISSION:
+Type: ${sub.submission_type}
+Specialty: ${sub.specialty || "not specified"}
+Title: ${sub.case_title || "not specified"}
+
+CASE TEXT (first 8000 chars):
+---
+${(caseText || "").slice(0, 8000)}
+---
+
+RMV QUESTIONS AND APPLICANT RESPONSES:
+${responses.map((r, i) => `
+Q${i + 1}: ${r.q}
+A${i + 1}: ${r.a || "(no response — auto-submitted at time expiry)"}
+`).join("")}
+
+Grade each response and respond with ONLY this JSON:
+{
+  "response_grades": [
+    ${responses.map((_, i) => `{
+      "question_num": ${i + 1},
+      "score": 0,
+      "rationale": "...",
+      "flags": []
+    }`).join(",\n    ")}
+  ],
+  "authorship_confidence": "high",
+  "authorship_rationale": "...",
+  "concerns": [],
+  "recommendation": "pass"
+}
+
+Scoring rubric per response (0–4):
+- 4: Specific to this case, accurate, demonstrates direct clinical experience and ownership
+- 3: Mostly specific with minor gaps or one vague element
+- 2: Partially specific — some case details cited but relies on general knowledge
+- 1: Generic — could apply to any similar case, no case-specific details
+- 0: No meaningful response, incorrect, or contradicts the case as written
+
+flags (array of strings): cite specific concerns like "contradicts stated diagnosis", "dose not mentioned in case", "no case-specific detail", "copied rubric language"
+
+authorship_confidence: "high" | "medium" | "low" | "concerning"
+- high: majority of responses are specific and accurate
+- medium: mix of specific and generic responses
+- low: most responses are generic or vague
+- concerning: responses contradict the case or suggest applicant did not write it
+
+recommendation: "pass" | "borderline" | "fail"
+
+concerns: overall red flags (e.g., "3 of 8 responses contain no case-specific detail", "applicant could not recall treatment timeline")`;
+}
+
+async function runAIGrading(submissionId) {
+  if (!openai) return;
+
+  const sub = getSubmissionById.get(submissionId);
+  if (!sub || !sub.rmv_responses_json) return;
+
+  let responses, questions;
+  try { responses = JSON.parse(sub.rmv_responses_json); } catch { return; }
+  try { questions = sub.rmv_questions_finalized_json ? JSON.parse(sub.rmv_questions_finalized_json) : []; } catch { questions = []; }
+
+  if (!responses.length) return;
+
+  // Get extracted case text
+  let caseText = "";
+  if (sub.extracted_text_path && fs.existsSync(sub.extracted_text_path)) {
+    try { caseText = fs.readFileSync(sub.extracted_text_path, "utf8"); } catch {}
+  }
+
+  db.prepare("UPDATE submissions SET rmv_grading_json = 'running', updated_ts = ? WHERE id = ?")
+    .run(Date.now(), submissionId);
+
+  try {
+    const prompt = buildGradingPrompt(sub, questions, responses, caseText);
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        { role: "system", content: RMV_GRADING_SYSTEM },
+        { role: "user",   content: prompt },
+      ],
+      temperature: 0.1,
+      response_format: { type: "json_object" },
+    });
+
+    const raw = completion.choices[0]?.message?.content || "{}";
+    let parsed;
+    try { parsed = JSON.parse(raw); } catch { parsed = { error: "Failed to parse grading response", raw }; }
+    parsed.graded_at = Date.now();
+    parsed.timed_expired = sub.rmv_timed_expired ? true : false;
+
+    db.prepare("UPDATE submissions SET rmv_grading_json = ?, updated_ts = ? WHERE id = ?")
+      .run(JSON.stringify(parsed), Date.now(), submissionId);
+
+    console.log(`RMV grading complete for submission ${submissionId} — confidence: ${parsed.authorship_confidence}`);
+  } catch (e) {
+    console.error(`RMV grading failed for submission ${submissionId}:`, e.message);
+    db.prepare("UPDATE submissions SET rmv_grading_json = ?, updated_ts = ? WHERE id = ?")
+      .run(JSON.stringify({ error: e.message, graded_at: Date.now() }), Date.now(), submissionId);
+  }
 }
 
 // ─── Users CSV sync ───────────────────────────────────────────────────────────
@@ -1201,6 +1379,9 @@ async function router(req, res) {
 
   const rmvSendMatch = pathname.match(/^\/api\/submissions\/(\d+)\/rmv\/send$/);
   if (rmvSendMatch && method === "POST") return handleSendRMVQuestions(req, res, rmvSendMatch[1]);
+
+  const rmvBeginMatch = pathname.match(/^\/api\/submissions\/(\d+)\/rmv\/begin$/);
+  if (rmvBeginMatch && method === "POST") return handleBeginRMVSession(req, res, rmvBeginMatch[1]);
 
   const rmvRespondMatch = pathname.match(/^\/api\/submissions\/(\d+)\/rmv\/respond$/);
   if (rmvRespondMatch && method === "POST") return handleSubmitRMVResponses(req, res, rmvRespondMatch[1]);

@@ -793,6 +793,25 @@
     const panel = $("rmvSessionPanel");
     const status = session.session_status || "not_started";
 
+    if (status === "in_progress") {
+      const elapsed = session.started_ts ? Math.floor((Date.now() - session.started_ts) / 1000) : 0;
+      const remaining = session.expires_ts ? Math.max(0, Math.floor((session.expires_ts - Date.now()) / 1000)) : 0;
+      const mins = Math.floor(remaining / 60), secs = remaining % 60;
+      panel.innerHTML = `
+        <div style="padding:14px 16px;border-radius:10px;border:1px solid rgba(192,132,252,0.3);background:rgba(192,132,252,0.08);">
+          <div style="font-size:13px;font-weight:600;color:#c084fc;margin-bottom:6px;">Session in progress</div>
+          <div style="font-size:12px;color:var(--muted);">
+            Started: ${session.started_ts ? new Date(session.started_ts).toLocaleTimeString() : "—"} &bull;
+            Expires: ${session.expires_ts ? new Date(session.expires_ts).toLocaleTimeString() : "—"} &bull;
+            Time remaining: <strong style="color:#c084fc;">${String(mins).padStart(2,"0")}:${String(secs).padStart(2,"0")}</strong>
+          </div>
+          <div style="font-size:12px;color:var(--muted);margin-top:4px;">Applicant is actively answering. This view will update when they submit.</div>
+          <button class="btn" style="margin-top:10px;font-size:12px;" onclick="loadRMVSession(${id})">↻ Refresh</button>
+        </div>
+      `;
+      return;
+    }
+
     if (status === "not_started" || status === "questions_sent") {
       // Editable question list + send button
       // Pre-populate from finalized questions if resending, else from AI review
@@ -835,27 +854,78 @@
 
     if (status === "responses_submitted") {
       const qa = session.responses || [];
+      const grades = session.grading?.response_grades || [];
       const submittedAt = session.responses_ts
         ? `Submitted ${new Date(session.responses_ts).toLocaleString()}`
         : "Submitted";
+      const expiredNote = session.timed_expired
+        ? `<div style="margin-bottom:10px;padding:8px 12px;border-radius:8px;border:1px solid rgba(255,209,102,0.3);background:rgba(255,209,102,0.07);font-size:12px;color:var(--warn);">⏱ Auto-submitted at time expiry</div>`
+        : "";
 
-      panel.innerHTML = `
-        <div style="font-size:12px;color:#c084fc;margin-bottom:14px;">${submittedAt} &bull; ${qa.length} response(s)</div>
-        <div style="display:flex;flex-direction:column;gap:16px;">
-          ${qa.map((item, i) => `
-            <div style="border:1px solid rgba(255,255,255,0.08);border-radius:12px;overflow:hidden;">
-              <div style="padding:10px 14px;background:rgba(0,0,0,0.25);font-size:12px;font-weight:600;color:var(--accent);border-bottom:1px solid rgba(255,255,255,0.07);">
-                Q${i + 1}: ${esc(item.q)}
+      // Authorship confidence banner
+      let confidenceBanner = "";
+      if (session.grading_status === "running") {
+        confidenceBanner = `<div style="padding:10px 14px;border-radius:10px;border:1px solid rgba(192,132,252,0.2);background:rgba(192,132,252,0.07);font-size:12px;color:#c084fc;margin-bottom:14px;" id="rmvGradingPolling">
+          AI grading in progress… <button class="btn" style="font-size:11px;padding:4px 10px;margin-left:8px;" onclick="loadRMVSession(${id})">↻ Check</button>
+        </div>`;
+      } else if (session.grading) {
+        const g = session.grading;
+        const confColors = { high: "#4cd964", medium: "#7ec8e3", low: "#ffd166", concerning: "#ff6b6b" };
+        const recColors  = { pass: "#4cd964", borderline: "#ffd166", fail: "#ff6b6b" };
+        const conf = g.authorship_confidence || "unknown";
+        const rec  = g.recommendation || "unknown";
+        const concerns = g.concerns || [];
+        confidenceBanner = `
+          <div style="padding:14px 16px;border-radius:12px;border:1px solid rgba(255,255,255,0.1);background:rgba(0,0,0,0.2);margin-bottom:14px;">
+            <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:8px;">AI Grading — Authorship Assessment</div>
+            <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:8px;">
+              <div style="padding:8px 14px;border-radius:9px;border:1px solid ${confColors[conf] || "rgba(255,255,255,0.1)"}33;background:${confColors[conf] || "rgba(255,255,255,0.05)"}11;flex:1 1 160px;">
+                <div style="font-size:10px;color:var(--muted);">Authorship confidence</div>
+                <div style="font-size:16px;font-weight:700;color:${confColors[conf] || "var(--muted)"};">${conf.toUpperCase()}</div>
               </div>
-              <div style="padding:12px 14px;font-size:13px;color:var(--text);line-height:1.65;white-space:pre-wrap;">${esc(item.a)}</div>
-              <div style="padding:6px 14px;background:rgba(0,0,0,0.1);font-size:11px;color:var(--muted);border-top:1px solid rgba(255,255,255,0.05);">
-                ${item.a.trim().split(/\s+/).filter(Boolean).length} words
+              <div style="padding:8px 14px;border-radius:9px;border:1px solid ${recColors[rec] || "rgba(255,255,255,0.1)"}33;background:${recColors[rec] || "rgba(255,255,255,0.05)"}11;flex:1 1 160px;">
+                <div style="font-size:10px;color:var(--muted);">AI recommendation</div>
+                <div style="font-size:16px;font-weight:700;color:${recColors[rec] || "var(--muted)"};">${rec.toUpperCase()}</div>
               </div>
             </div>
-          `).join("")}
+            <div style="font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:${concerns.length ? "8px" : "0"};">${esc(g.authorship_rationale || "")}</div>
+            ${concerns.length ? `<div style="display:flex;flex-direction:column;gap:4px;">
+              ${concerns.map(c => `<div style="font-size:11px;padding:4px 10px;border-radius:6px;border:1px solid rgba(255,107,107,0.2);background:rgba(255,107,107,0.06);color:#ff9f9f;">${esc(c)}</div>`).join("")}
+            </div>` : ""}
+            <div style="font-size:10px;color:rgba(255,255,255,0.2);margin-top:8px;">Graded ${g.graded_at ? new Date(g.graded_at).toLocaleString() : ""} — AI assessment is advisory only</div>
+          </div>`;
+      }
+
+      const GRADE_COLORS = ["#ff6b6b","#ff9f9f","#ffd166","#7ec8e3","#4cd964"];
+
+      panel.innerHTML = `
+        <div style="font-size:12px;color:var(--muted);margin-bottom:10px;">${submittedAt} &bull; ${qa.length} response(s)</div>
+        ${expiredNote}
+        ${confidenceBanner}
+        <div style="display:flex;flex-direction:column;gap:14px;">
+          ${qa.map((item, i) => {
+            const grade = grades[i];
+            const gradeColor = grade ? (GRADE_COLORS[grade.score] || "var(--muted)") : null;
+            const wc = (item.a || "").trim().split(/\s+/).filter(Boolean).length;
+            return `
+              <div style="border:1px solid rgba(255,255,255,0.08);border-radius:12px;overflow:hidden;">
+                <div style="padding:10px 14px;background:rgba(0,0,0,0.25);display:flex;justify-content:space-between;align-items:flex-start;gap:10px;border-bottom:1px solid rgba(255,255,255,0.07);">
+                  <div style="font-size:12px;font-weight:600;color:var(--accent);">Q${i + 1}: ${esc(item.q)}</div>
+                  ${grade ? `<div style="flex-shrink:0;text-align:right;">
+                    <span style="font-size:13px;font-weight:700;color:${gradeColor};">${grade.score}/4</span>
+                    ${(grade.flags||[]).length ? `<div style="font-size:10px;color:#ffd166;margin-top:2px;">${grade.flags.map(f => esc(f)).join(" · ")}</div>` : ""}
+                  </div>` : ""}
+                </div>
+                <div style="padding:12px 14px;font-size:13px;color:var(--text);line-height:1.65;white-space:pre-wrap;">${item.a ? esc(item.a) : '<em style="color:rgba(255,255,255,0.2);">No response recorded</em>'}</div>
+                <div style="padding:6px 14px;background:rgba(0,0,0,0.1);font-size:11px;color:var(--muted);border-top:1px solid rgba(255,255,255,0.05);display:flex;justify-content:space-between;align-items:center;">
+                  <span>${wc} words</span>
+                  ${grade?.rationale ? `<span style="color:var(--muted);font-style:italic;max-width:70%;text-align:right;">${esc(grade.rationale)}</span>` : ""}
+                </div>
+              </div>`;
+          }).join("")}
         </div>
         <div style="margin-top:16px;padding:12px 16px;border-radius:10px;border:1px solid rgba(255,255,255,0.08);background:rgba(0,0,0,0.2);font-size:13px;color:var(--muted);">
-          Use the <strong>Final decision</strong> and <strong>Applicant feedback</strong> fields above to record your decision and notify the applicant.
+          Use the <strong>Final decision</strong> and <strong>Applicant feedback</strong> fields above to record your decision.
         </div>
       `;
       return;
