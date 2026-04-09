@@ -438,8 +438,8 @@
     list.innerHTML = cachedSubs.map(sub => {
       const isOpen = openCardId === sub.id;
       const typeLabel = sub.submission_type === "case_summary" ? "Case Summary" : sub.submission_type === "case_report" ? "Case Report" : sub.submission_type || "";
-      return `<div class="sub-card ${isOpen ? "open" : ""}" id="card-${sub.id}" onclick="toggleCard(${sub.id})">
-        <div class="sub-card-header">
+      return `<div class="sub-card ${isOpen ? "open" : ""}" id="card-${sub.id}">
+        <div class="sub-card-header" onclick="toggleCard(${sub.id})" style="cursor:pointer;">
           <div>
             <div class="sub-card-title">${esc(sub.case_title || "Untitled")}</div>
             <div class="sub-card-meta">${esc(typeLabel)}${sub.species ? " &bull; " + esc(sub.species) : ""}${sub.program ? " &bull; " + esc(sub.program) : ""}</div>
@@ -449,7 +449,7 @@
             <span style="font-size:11px;color:var(--muted);">${fmtDate(sub.created_ts)}</span>
           </div>
         </div>
-        <div class="detail-panel ${isOpen ? "open" : ""}" id="detail-${sub.id}">
+        <div class="detail-panel ${isOpen ? "open" : ""}" id="detail-${sub.id}" onclick="event.stopPropagation()">
           <div id="detail-content-${sub.id}">
             <div class="msg" style="margin-top:10px;">Loading…</div>
           </div>
