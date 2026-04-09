@@ -1,0 +1,432 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Admin Queue — RMV Portal</title>
+  <style>
+    :root {
+      --bg: #0b1220; --card: #101b33; --muted: #9fb3d1;
+      --text: #eaf1ff; --accent: #58a6ff; --danger: #ff6b6b; --ok: #4cd964; --warn: #ffd166;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; background: var(--bg); color: var(--text); }
+    .wrap { max-width: 1200px; margin: 0 auto; padding: 18px; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 10px 0 18px; border-bottom: 1px solid rgba(255,255,255,0.07); margin-bottom: 18px; }
+    .topbar-left h1 { margin: 0 0 4px; font-size: 1.4rem; }
+    .topbar-left p { margin: 0; font-size: 13px; color: var(--muted); }
+    .pill { display: inline-block; font-size: 12px; padding: 4px 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.12); color: var(--muted); }
+    .card { background: var(--card); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 20px; margin-bottom: 16px; }
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; flex-wrap: wrap; gap: 10px; }
+    .card-header h2 { margin: 0; font-size: 1rem; }
+    label { display: block; font-size: 12px; color: var(--muted); margin: 10px 0 5px; }
+    input, select, textarea {
+      width: 100%; padding: 10px 12px; border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.13); background: rgba(0,0,0,0.25);
+      color: var(--text); font-size: 14px; font-family: inherit;
+    }
+    select option { background: #1a2540; }
+    textarea { min-height: 100px; resize: vertical; }
+    .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; }
+    .row > div { flex: 1 1 200px; }
+    .btn {
+      display: inline-block; padding: 9px 18px; border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.14); background: rgba(88,166,255,0.14);
+      color: var(--text); cursor: pointer; font-size: 13px; white-space: nowrap;
+    }
+    .btn-ok   { background: rgba(76,217,100,0.13); border-color: rgba(76,217,100,0.25); }
+    .btn-warn { background: rgba(255,209,102,0.13); border-color: rgba(255,209,102,0.25); }
+    .btn-danger { background: rgba(255,107,107,0.13); border-color: rgba(255,107,107,0.25); }
+    .btn:hover { opacity: 0.8; }
+    .btn:disabled { opacity: 0.35; cursor: not-allowed; }
+    .msg { font-size: 13px; margin-top: 8px; min-height: 18px; color: var(--muted); }
+    .msg.ok { color: var(--ok); }
+    .msg.err { color: var(--danger); }
+    table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    th, td { text-align: left; padding: 9px 10px; border-bottom: 1px solid rgba(255,255,255,0.07); vertical-align: middle; }
+    th { color: var(--muted); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
+    tr:hover td { background: rgba(255,255,255,0.025); }
+    .status-badge {
+      display: inline-block; font-size: 11px; padding: 3px 9px; border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.1); color: var(--muted);
+    }
+    .status-badge.submitted    { color: var(--accent); border-color: rgba(88,166,255,0.3); }
+    .status-badge.under_review { color: var(--warn);   border-color: rgba(255,209,102,0.3); }
+    .status-badge.rmv_ready    { color: var(--ok);     border-color: rgba(76,217,100,0.3); }
+    .status-badge.completed    { color: var(--ok);     border-color: rgba(76,217,100,0.3); }
+    .status-badge.rejected     { color: var(--danger); border-color: rgba(255,107,107,0.3); }
+    .detail-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap: 12px; margin-bottom: 16px; }
+    .detail-item label { margin: 0 0 3px; }
+    .detail-item .val { font-size: 14px; }
+    a { color: var(--accent); }
+    .filter-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 10px; align-items: center; }
+    .filter-bar select { width: auto; padding: 7px 10px; font-size: 13px; }
+    .filter-bar input { width: 220px; padding: 7px 10px; font-size: 13px; }
+    .count { font-size: 12px; color: var(--muted); }
+    .nav { font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+    .nav a { color: var(--accent); text-decoration: none; }
+    .divider { border: none; border-top: 1px solid rgba(255,255,255,0.07); margin: 14px 0; }
+    #detailPane { display: none; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="nav"><a href="/">&larr; Home</a></div>
+
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>RMV Admin Queue</h1>
+      <p>Faculty / admin review queue for case summaries and case reports.</p>
+    </div>
+    <div>
+      <span class="pill" id="authStatus">Not signed in</span>
+    </div>
+  </div>
+
+  <!-- Sign in -->
+  <div class="card">
+    <h2>Sign in</h2>
+    <div class="row">
+      <div style="flex:1 1 280px;">
+        <label>Email address (faculty or admin)</label>
+        <input id="loginEmail" type="email" placeholder="you@example.com" />
+      </div>
+      <div>
+        <button class="btn" id="devLoginBtn">Sign in (Dev)</button>
+        <button class="btn" id="logoutBtn" style="display:none;">Sign out</button>
+      </div>
+    </div>
+    <div class="msg" id="loginMsg">Faculty or admin account required to view the queue.</div>
+  </div>
+
+  <!-- Queue -->
+  <div class="card">
+    <div class="card-header">
+      <h2>Submission Queue</h2>
+      <button class="btn" id="refreshBtn">Refresh</button>
+    </div>
+
+    <div class="filter-bar">
+      <select id="filterStatus">
+        <option value="">All statuses</option>
+        <option value="submitted">submitted</option>
+        <option value="under_review">under_review</option>
+        <option value="rmv_ready">rmv_ready</option>
+        <option value="completed">completed</option>
+        <option value="rejected">rejected</option>
+        <option value="draft">draft</option>
+      </select>
+      <select id="filterType">
+        <option value="">All types</option>
+        <option value="case_summary">case_summary</option>
+        <option value="case_report">case_report</option>
+      </select>
+      <input id="filterSearch" placeholder="Search applicant or title..." />
+    </div>
+
+    <div id="queueArea" class="msg">Sign in as faculty or admin to view submissions.</div>
+  </div>
+
+  <!-- Detail pane -->
+  <div class="card" id="detailPane">
+    <div class="card-header">
+      <h2 id="detailTitle">Submission Detail</h2>
+      <button class="btn" onclick="closeDetail()">Close</button>
+    </div>
+
+    <div class="detail-grid" id="detailMeta"></div>
+
+    <hr class="divider" />
+
+    <div style="margin-bottom:12px;">
+      <a id="detailFileLink" href="#" target="_blank" class="btn">Open uploaded file</a>
+    </div>
+
+    <div class="row">
+      <div>
+        <label>Update status</label>
+        <select id="statusSel">
+          <option value="draft">draft</option>
+          <option value="submitted">submitted</option>
+          <option value="under_review">under_review</option>
+          <option value="rmv_ready">rmv_ready</option>
+          <option value="completed">completed</option>
+          <option value="rejected">rejected</option>
+        </select>
+      </div>
+      <div>
+        <label>Final decision</label>
+        <select id="finalDecisionSel">
+          <option value="pending">pending</option>
+          <option value="pass">pass</option>
+          <option value="fail">fail</option>
+        </select>
+      </div>
+    </div>
+
+    <label>Reviewer notes</label>
+    <textarea id="reviewerNotes" placeholder="Internal notes for this submission..."></textarea>
+
+    <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
+      <button class="btn btn-ok" id="saveStatusBtn">Save</button>
+      <button class="btn btn-warn" id="markReadyBtn">Mark RMV Ready</button>
+      <button class="btn btn-danger" id="rejectBtn">Reject</button>
+    </div>
+    <div class="msg" id="detailMsg"></div>
+  </div>
+
+</div>
+
+<script>
+  let me = { email: null, role: null };
+  let allSubmissions = [];
+  let currentId = null;
+
+  const $ = (id) => document.getElementById(id);
+
+  function esc(s) {
+    return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+
+  function statusBadge(s) {
+    return `<span class="status-badge ${esc(s)}">${esc(s)}</span>`;
+  }
+
+  async function refreshMe() {
+    const r = await fetch("/auth/me");
+    me = await r.json();
+
+    if (me.email) {
+      $("authStatus").textContent = `${me.email} (${me.role || "learner"})`;
+      $("logoutBtn").style.display = "";
+      $("devLoginBtn").style.display = "none";
+      $("loginEmail").disabled = true;
+      $("loginMsg").textContent = `Signed in as ${me.email} — role: ${me.role || "learner"}`;
+      $("loginMsg").className = "msg ok";
+    } else {
+      $("authStatus").textContent = "Not signed in";
+      $("logoutBtn").style.display = "none";
+      $("devLoginBtn").style.display = "";
+      $("loginEmail").disabled = false;
+      $("loginMsg").textContent = "Faculty or admin account required.";
+      $("loginMsg").className = "msg";
+    }
+  }
+
+  function applyFilters() {
+    const status = $("filterStatus").value;
+    const type   = $("filterType").value;
+    const search = $("filterSearch").value.toLowerCase();
+
+    return allSubmissions.filter(r => {
+      if (status && r.status !== status) return false;
+      if (type   && r.submission_type !== type) return false;
+      if (search) {
+        const haystack = `${r.applicant_email} ${r.case_title || ""} ${r.applicant_name || ""}`.toLowerCase();
+        if (!haystack.includes(search)) return false;
+      }
+      return true;
+    });
+  }
+
+  function renderQueue() {
+    const area = $("queueArea");
+    const rows = applyFilters();
+
+    if (!rows.length) {
+      area.innerHTML = `<span class="count">No submissions match the current filter.</span>`;
+      return;
+    }
+
+    area.innerHTML = `
+      <div class="count" style="margin-bottom:8px;">${rows.length} submission${rows.length !== 1 ? "s" : ""}</div>
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Applicant</th>
+            <th>Type</th>
+            <th>Title</th>
+            <th>Status</th>
+            <th>Submitted</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map(r => `
+            <tr>
+              <td>${r.id}</td>
+              <td>${esc(r.applicant_email)}</td>
+              <td style="white-space:nowrap;">${esc(r.submission_type || "")}</td>
+              <td>${esc(r.case_title || "")}</td>
+              <td>${statusBadge(r.status)}</td>
+              <td style="white-space:nowrap;">${r.created_ts ? new Date(r.created_ts).toLocaleDateString() : ""}</td>
+              <td><button class="btn" onclick="openDetail(${r.id})">Review</button></td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    `;
+  }
+
+  async function loadQueue() {
+    const area = $("queueArea");
+    if (!me.email) {
+      area.textContent = "Sign in as faculty or admin to view submissions.";
+      area.className = "msg";
+      return;
+    }
+
+    area.className = "msg";
+    area.textContent = "Loading...";
+
+    const r = await fetch("/api/submissions");
+    const j = await r.json().catch(() => []);
+
+    if (!r.ok) {
+      area.textContent = `Unable to load queue: ${j.error || r.status}`;
+      area.className = "msg err";
+      return;
+    }
+
+    area.className = "";
+    allSubmissions = Array.isArray(j) ? j : [];
+    renderQueue();
+  }
+
+  window.openDetail = async function(id) {
+    currentId = id;
+    const r = await fetch(`/api/submissions/${id}`);
+    const sub = await r.json().catch(() => ({}));
+
+    if (!r.ok) {
+      alert(`Could not load submission ${id}: ${sub.error || r.status}`);
+      return;
+    }
+
+    $("detailTitle").textContent = `Submission #${sub.id} — ${esc(sub.case_title || "")}`;
+    $("detailFileLink").href = `/api/submissions/${id}/file`;
+
+    $("detailMeta").innerHTML = [
+      ["Applicant", sub.applicant_email],
+      ["Name", sub.applicant_name],
+      ["Program", sub.program],
+      ["Specialty", sub.specialty],
+      ["Type", sub.submission_type],
+      ["Species", sub.species],
+      ["Case date", sub.case_date],
+      ["Revision", sub.revision_number],
+      ["File", sub.original_filename],
+      ["File size", sub.file_size_bytes ? `${Math.round(sub.file_size_bytes / 1024)} KB` : ""],
+      ["RMV session", sub.rmv_session_status],
+      ["Final decision", sub.final_decision],
+    ].filter(([, v]) => v).map(([k, v]) => `
+      <div class="detail-item">
+        <label>${esc(k)}</label>
+        <div class="val">${esc(v)}</div>
+      </div>
+    `).join("");
+
+    if (sub.notes) {
+      $("detailMeta").innerHTML += `
+        <div class="detail-item" style="grid-column:1/-1;">
+          <label>Applicant notes</label>
+          <div class="val" style="font-size:13px;color:var(--muted);">${esc(sub.notes)}</div>
+        </div>
+      `;
+    }
+
+    $("statusSel").value = sub.status || "submitted";
+    $("finalDecisionSel").value = sub.final_decision || "pending";
+    $("reviewerNotes").value = sub.reviewer_notes || "";
+    $("detailMsg").textContent = "";
+    $("detailMsg").className = "msg";
+
+    $("detailPane").style.display = "";
+    $("detailPane").scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  window.closeDetail = function() {
+    $("detailPane").style.display = "none";
+    currentId = null;
+  };
+
+  async function saveStatus(statusOverride, decisionOverride) {
+    if (!currentId) return;
+    const msg = $("detailMsg");
+    msg.textContent = "Saving...";
+    msg.className = "msg";
+
+    const body = {
+      status: statusOverride || $("statusSel").value,
+      final_decision: decisionOverride || $("finalDecisionSel").value || null,
+      reviewer_notes: $("reviewerNotes").value,
+    };
+
+    const r = await fetch(`/api/submissions/${currentId}/status`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body),
+    });
+    const j = await r.json().catch(() => ({}));
+
+    if (!r.ok) {
+      msg.textContent = `Save failed: ${j.error || r.status}`;
+      msg.className = "msg err";
+      return;
+    }
+
+    msg.textContent = "Saved.";
+    msg.className = "msg ok";
+
+    if (statusOverride) $("statusSel").value = statusOverride;
+    if (decisionOverride) $("finalDecisionSel").value = decisionOverride;
+
+    await loadQueue();
+  }
+
+  $("saveStatusBtn").addEventListener("click", () => saveStatus());
+  $("markReadyBtn").addEventListener("click", () => saveStatus("rmv_ready"));
+  $("rejectBtn").addEventListener("click", () => {
+    if (confirm("Mark this submission as rejected?")) saveStatus("rejected", "fail");
+  });
+
+  [$("filterStatus"), $("filterType")].forEach(el => el.addEventListener("change", renderQueue));
+  $("filterSearch").addEventListener("input", renderQueue);
+
+  $("devLoginBtn").addEventListener("click", async () => {
+    const email = $("loginEmail").value.trim();
+    if (!email) { $("loginMsg").textContent = "Enter your email first."; return; }
+    $("loginMsg").textContent = "Signing in...";
+    const r = await fetch("/auth/dev-login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    if (r.ok) {
+      await refreshMe();
+      await loadQueue();
+    } else {
+      const j = await r.json().catch(() => ({}));
+      $("loginMsg").textContent = `Sign in failed: ${j.error || r.status}`;
+      $("loginMsg").className = "msg err";
+    }
+  });
+
+  $("logoutBtn").addEventListener("click", async () => {
+    await fetch("/auth/logout", { method: "POST" });
+    closeDetail();
+    await refreshMe();
+    await loadQueue();
+  });
+
+  $("refreshBtn").addEventListener("click", loadQueue);
+
+  (async () => {
+    await refreshMe();
+    await loadQueue();
+  })();
+</script>
+</body>
+</html>

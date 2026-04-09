@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Submit — RMV Portal</title>
+  <style>
+    :root {
+      --bg: #0b1220; --card: #101b33; --muted: #9fb3d1;
+      --text: #eaf1ff; --accent: #58a6ff; --danger: #ff6b6b; --ok: #4cd964;
+    }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif; background: var(--bg); color: var(--text); }
+    .wrap { max-width: 860px; margin: 0 auto; padding: 18px; }
+    .topbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 10px 0 18px; border-bottom: 1px solid rgba(255,255,255,0.07); margin-bottom: 18px; }
+    .topbar-left h1 { margin: 0 0 4px; font-size: 1.4rem; }
+    .topbar-left p { margin: 0; font-size: 13px; color: var(--muted); }
+    .pill { display: inline-block; font-size: 12px; padding: 4px 12px; border-radius: 999px; border: 1px solid rgba(255,255,255,0.12); color: var(--muted); }
+    .card { background: var(--card); border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; padding: 20px; margin-bottom: 16px; }
+    .card h2 { margin: 0 0 14px; font-size: 1rem; }
+    label { display: block; font-size: 12px; color: var(--muted); margin: 12px 0 5px; }
+    input, select, textarea {
+      width: 100%; padding: 10px 12px; border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.13); background: rgba(0,0,0,0.25);
+      color: var(--text); font-size: 14px; font-family: inherit;
+    }
+    input[type="file"] { padding: 8px; }
+    input[type="checkbox"] { width: auto; }
+    select option { background: #1a2540; }
+    textarea { min-height: 80px; resize: vertical; }
+    .row { display: flex; gap: 14px; flex-wrap: wrap; }
+    .row > div { flex: 1 1 220px; }
+    .btn {
+      display: inline-block; padding: 11px 22px; border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.14); background: rgba(88,166,255,0.16);
+      color: var(--text); cursor: pointer; font-size: 14px;
+    }
+    .btn-ok { background: rgba(76,217,100,0.15); border-color: rgba(76,217,100,0.25); }
+    .btn:hover { opacity: 0.85; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .attest-row { display: flex; gap: 10px; align-items: flex-start; margin-top: 14px; }
+    .attest-row input { margin-top: 3px; }
+    .attest-row span { font-size: 13px; line-height: 1.5; }
+    .msg { font-size: 13px; margin-top: 10px; min-height: 18px; color: var(--muted); }
+    .msg.ok { color: var(--ok); }
+    .msg.err { color: var(--danger); }
+    .status-badge {
+      display: inline-block; font-size: 11px; padding: 3px 9px; border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.1); color: var(--muted);
+    }
+    .status-badge.submitted { color: var(--accent); border-color: rgba(88,166,255,0.3); }
+    .status-badge.under_review { color: var(--warn,#ffd166); border-color: rgba(255,209,102,0.3); }
+    .status-badge.rmv_ready { color: var(--ok); border-color: rgba(76,217,100,0.3); }
+    .status-badge.completed { color: var(--ok); border-color: rgba(76,217,100,0.3); }
+    .status-badge.rejected { color: var(--danger); border-color: rgba(255,107,107,0.3); }
+    table { width: 100%; border-collapse: collapse; margin-top: 6px; font-size: 13px; }
+    th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid rgba(255,255,255,0.07); }
+    th { color: var(--muted); font-weight: 500; font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
+    a { color: var(--accent); }
+    .nav { font-size: 13px; color: var(--muted); margin-bottom: 4px; }
+    .nav a { color: var(--accent); text-decoration: none; }
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="nav"><a href="/">&larr; Home</a></div>
+
+  <div class="topbar">
+    <div class="topbar-left">
+      <h1>RMV Submission Portal</h1>
+      <p>Upload case summaries and case reports for reflective mastery verification review.</p>
+    </div>
+    <div>
+      <span class="pill" id="authStatus">Not signed in</span>
+    </div>
+  </div>
+
+  <!-- Sign in -->
+  <div class="card" id="signinCard">
+    <h2>Sign in</h2>
+    <div class="row">
+      <div style="flex:1 1 280px;">
+        <label>Email address</label>
+        <input id="loginEmail" type="email" placeholder="you@example.com" autocomplete="email" />
+      </div>
+      <div style="display:flex;align-items:flex-end;gap:8px;flex-wrap:wrap;">
+        <button class="btn" id="devLoginBtn">Sign in (Dev)</button>
+        <button class="btn" id="logoutBtn" style="display:none;">Sign out</button>
+      </div>
+    </div>
+    <div class="msg" id="loginMsg">Use dev login to sign in with any email address during testing.</div>
+  </div>
+
+  <!-- Submission form -->
+  <div class="card">
+    <h2>New Submission</h2>
+    <form id="submissionForm" autocomplete="off">
+
+      <div class="row">
+        <div>
+          <label>Your full name</label>
+          <input name="applicant_name" placeholder="Dr. Jane Smith" />
+        </div>
+        <div>
+          <label>Credentialing program</label>
+          <input name="program" placeholder="ABVP, ACZM, Fellowship..." />
+        </div>
+      </div>
+
+      <div class="row">
+        <div>
+          <label>Discipline / specialty</label>
+          <input name="specialty" placeholder="Canine & Feline, CAPM, Avian..." />
+        </div>
+        <div>
+          <label>Submission type <span style="color:var(--danger)">*</span></label>
+          <select name="submission_type" required>
+            <option value="">Select type...</option>
+            <option value="case_summary">Case Summary</option>
+            <option value="case_report">Case Report</option>
+          </select>
+        </div>
+      </div>
+
+      <label>Case title <span style="color:var(--danger)">*</span></label>
+      <input name="case_title" required placeholder="Brief descriptive title of the case" />
+
+      <div class="row">
+        <div>
+          <label>Species</label>
+          <input name="species" placeholder="Canine, Feline, Avian..." />
+        </div>
+        <div>
+          <label>Date of case</label>
+          <input name="case_date" type="date" />
+        </div>
+        <div>
+          <label>Revision</label>
+          <input name="revision_number" placeholder="v1, v2, revised..." />
+        </div>
+      </div>
+
+      <label>Upload file <span style="color:var(--danger)">*</span> <span style="font-size:11px;color:var(--muted);">(PDF, DOCX, or TXT &mdash; max 25 MB)</span></label>
+      <input name="submission_file" type="file" accept=".pdf,.docx,.txt" required />
+
+      <label>Notes to reviewer <span style="font-size:11px;color:var(--muted);">(optional)</span></label>
+      <textarea name="notes" placeholder="Any context you want the reviewer to know..."></textarea>
+
+      <div class="attest-row">
+        <input id="attestation" type="checkbox" />
+        <span>I attest that this submission represents my own clinical work and is ready for RMV review.</span>
+      </div>
+
+      <div style="margin-top:16px;">
+        <button type="submit" class="btn btn-ok" id="submitBtn">Submit for RMV Review</button>
+      </div>
+
+    </form>
+    <div class="msg" id="submitMsg"></div>
+  </div>
+
+  <!-- My submissions -->
+  <div class="card">
+    <h2>My Submissions</h2>
+    <div id="submissionsArea" class="msg">Sign in to view your submission history.</div>
+  </div>
+
+</div>
+
+<script>
+  let me = { email: null, role: null };
+
+  const $ = (id) => document.getElementById(id);
+
+  async function refreshMe() {
+    const r = await fetch("/auth/me");
+    me = await r.json();
+
+    if (me.email) {
+      $("authStatus").textContent = `${me.email}`;
+      $("logoutBtn").style.display = "";
+      $("devLoginBtn").style.display = "none";
+      $("loginEmail").disabled = true;
+      $("loginMsg").textContent = `Signed in as ${me.email}`;
+      $("loginMsg").className = "msg ok";
+    } else {
+      $("authStatus").textContent = "Not signed in";
+      $("logoutBtn").style.display = "none";
+      $("devLoginBtn").style.display = "";
+      $("loginEmail").disabled = false;
+      $("loginMsg").textContent = "Use dev login to sign in with any email during testing.";
+      $("loginMsg").className = "msg";
+    }
+  }
+
+  function statusBadge(s) {
+    return `<span class="status-badge ${s}">${s}</span>`;
+  }
+
+  async function loadMySubmissions() {
+    const area = $("submissionsArea");
+    if (!me.email) {
+      area.textContent = "Sign in to view your submission history.";
+      area.className = "msg";
+      return;
+    }
+
+    const r = await fetch("/api/my-submissions");
+    const rows = await r.json();
+
+    if (!Array.isArray(rows) || !rows.length) {
+      area.innerHTML = "No submissions yet.";
+      area.className = "msg";
+      return;
+    }
+
+    area.className = "";
+    area.innerHTML = `
+      <table>
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Type</th>
+            <th>Title</th>
+            <th>Status</th>
+            <th>Submitted</th>
+            <th>File</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${rows.map(r => `
+            <tr>
+              <td>${r.id}</td>
+              <td>${r.submission_type || ""}</td>
+              <td>${esc(r.case_title || "")}</td>
+              <td>${statusBadge(r.status || "")}</td>
+              <td>${r.created_ts ? new Date(r.created_ts).toLocaleDateString() : ""}</td>
+              <td><a href="/api/submissions/${r.id}/file" target="_blank">open</a></td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    `;
+  }
+
+  function esc(s) {
+    return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  }
+
+  $("devLoginBtn").addEventListener("click", async () => {
+    const email = $("loginEmail").value.trim();
+    if (!email) { $("loginMsg").textContent = "Enter your email first."; return; }
+    $("loginMsg").textContent = "Signing in...";
+    const r = await fetch("/auth/dev-login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email }),
+    });
+    if (r.ok) {
+      await refreshMe();
+      await loadMySubmissions();
+    } else {
+      const j = await r.json().catch(() => ({}));
+      $("loginMsg").textContent = `Sign in failed: ${j.error || r.status}`;
+      $("loginMsg").className = "msg err";
+    }
+  });
+
+  $("logoutBtn").addEventListener("click", async () => {
+    await fetch("/auth/logout", { method: "POST" });
+    await refreshMe();
+    await loadMySubmissions();
+  });
+
+  $("submissionForm").addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const msgEl = $("submitMsg");
+
+    if (!me.email) {
+      msgEl.textContent = "Please sign in before submitting.";
+      msgEl.className = "msg err";
+      return;
+    }
+    if (!$("attestation").checked) {
+      msgEl.textContent = "Please check the attestation box.";
+      msgEl.className = "msg err";
+      return;
+    }
+
+    const btn = $("submitBtn");
+    btn.disabled = true;
+    msgEl.textContent = "Uploading...";
+    msgEl.className = "msg";
+
+    const fd = new FormData($("submissionForm"));
+    fd.append("attestation", "true");
+
+    const r = await fetch("/api/submissions", { method: "POST", body: fd });
+    const j = await r.json().catch(() => ({}));
+
+    btn.disabled = false;
+
+    if (!r.ok) {
+      msgEl.textContent = `Submission failed: ${j.error || r.status}`;
+      msgEl.className = "msg err";
+      return;
+    }
+
+    msgEl.textContent = `Submission received. Your submission ID is ${j.submission_id}.`;
+    msgEl.className = "msg ok";
+    $("submissionForm").reset();
+    $("attestation").checked = false;
+    await loadMySubmissions();
+  });
+
+  (async () => {
+    await refreshMe();
+    await loadMySubmissions();
+  })();
+</script>
+</body>
+</html>

@@ -1,0 +1,19 @@
+{
+  "name": "rmv-portal",
+  "version": "1.0.0",
+  "description": "RMV Submission Portal — case summary and case report upload, review queue, and assessment workflow",
+  "type": "module",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": "20.x"
+  },
+  "dependencies": {
+    "better-sqlite3": "^9.4.0",
+    "busboy": "^1.6.0",
+    "nodemailer": "^6.9.14"
+  }
+}
