@@ -164,7 +164,63 @@
         <strong>Submissions with identifying information will automatically fail.</strong>
       </div>
 
-      <label>Notes to reviewer <span style="font-size:11px;color:var(--muted);">(optional)</span></label>
+      <!-- Pre-submission checklist -->
+      <div style="margin-top:18px;padding:14px;border-radius:12px;border:1px solid rgba(88,166,255,0.2);background:rgba(88,166,255,0.06);">
+        <div style="font-size:13px;font-weight:600;margin-bottom:10px;color:var(--accent);">Pre-Submission Checklist</div>
+
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px;font-weight:600;">Required section order</div>
+        <div style="display:flex;gap:20px;flex-wrap:wrap;margin-bottom:12px;">
+          <div style="flex:1 1 200px;">
+            <div style="font-size:11px;color:var(--accent);font-weight:600;margin-bottom:4px;">Case Summary</div>
+            <ol style="margin:0;padding-left:18px;font-size:12px;line-height:1.7;color:var(--muted);">
+              <li>Title</li>
+              <li>Introduction</li>
+              <li>Treatment / Management / Prognosis</li>
+              <li>Case History &amp; Presentation</li>
+              <li>Case Management &amp; Outcome</li>
+              <li>Discussion <span style="color:var(--warn,#ffd166);">(highest weight — 25%)</span></li>
+              <li>Endnotes</li>
+              <li>References <span style="color:var(--muted);">(1–5, within 10 yrs)</span></li>
+              <li>Lab Data / Imaging</li>
+            </ol>
+          </div>
+          <div style="flex:1 1 200px;">
+            <div style="font-size:11px;color:var(--accent);font-weight:600;margin-bottom:4px;">Case Report</div>
+            <ol style="margin:0;padding-left:18px;font-size:12px;line-height:1.7;color:var(--muted);">
+              <li>Title</li>
+              <li>Introduction of the Topic</li>
+              <li>Literature Review <span style="color:var(--muted);">(top 3 clinical problems)</span></li>
+              <li>Case Report</li>
+              <li>Discussion</li>
+              <li>Endnotes</li>
+              <li>References</li>
+              <li>Lab Results / Imaging / Tables</li>
+            </ol>
+          </div>
+        </div>
+
+        <div style="font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:600;">Before uploading — confirm all of the following:</div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:6px;">
+          <label style="display:flex;gap:8px;align-items:flex-start;font-size:12px;cursor:pointer;"><input type="checkbox" class="preflight-check" style="width:auto;margin-top:2px;flex-shrink:0;" /><span style="color:var(--muted);">All required sections present and in the correct order</span></label>
+          <label style="display:flex;gap:8px;align-items:flex-start;font-size:12px;cursor:pointer;"><input type="checkbox" class="preflight-check" style="width:auto;margin-top:2px;flex-shrink:0;" /><span style="color:var(--muted);">All lab work in table format with reference ranges and units</span></label>
+          <label style="display:flex;gap:8px;align-items:flex-start;font-size:12px;cursor:pointer;"><input type="checkbox" class="preflight-check" style="width:auto;margin-top:2px;flex-shrink:0;" /><span style="color:var(--muted);">Drug dosages in metric with route and interval (e.g., 10 mg/kg IV q12h)</span></label>
+          <label style="display:flex;gap:8px;align-items:flex-start;font-size:12px;cursor:pointer;"><input type="checkbox" class="preflight-check" style="width:auto;margin-top:2px;flex-shrink:0;" /><span style="color:var(--muted);">Supporting documentation included (radiographs, ECGs, photos) with legends</span></label>
+          <label style="display:flex;gap:8px;align-items:flex-start;font-size:12px;cursor:pointer;"><input type="checkbox" class="preflight-check" style="width:auto;margin-top:2px;flex-shrink:0;" /><span style="color:var(--muted);">No identifying information — no name, hospital, client, or location</span></label>
+          <label style="display:flex;gap:8px;align-items:flex-start;font-size:12px;cursor:pointer;"><input type="checkbox" class="preflight-check" style="width:auto;margin-top:2px;flex-shrink:0;" /><span style="color:var(--muted);">Document metadata cleared (File &rarr; Properties)</span></label>
+          <label style="display:flex;gap:8px;align-items:flex-start;font-size:12px;cursor:pointer;"><input type="checkbox" class="preflight-check" style="width:auto;margin-top:2px;flex-shrink:0;" /><span style="color:var(--muted);">Radiograph/image labels contain no names or patient IDs</span></label>
+          <label style="display:flex;gap:8px;align-items:flex-start;font-size:12px;cursor:pointer;"><input type="checkbox" class="preflight-check" style="width:auto;margin-top:2px;flex-shrink:0;" /><span style="color:var(--muted);">No first-person narrative (no "I examined" or patient names)</span></label>
+          <label style="display:flex;gap:8px;align-items:flex-start;font-size:12px;cursor:pointer;"><input type="checkbox" class="preflight-check" style="width:auto;margin-top:2px;flex-shrink:0;" /><span style="color:var(--muted);">References current (within 10 years) and peer-reviewed where possible</span></label>
+          <label style="display:flex;gap:8px;align-items:flex-start;font-size:12px;cursor:pointer;"><input type="checkbox" class="preflight-check" style="width:auto;margin-top:2px;flex-shrink:0;" /><span style="color:var(--muted);">Double-spaced, size 11–12 font (Times New Roman, Arial, Calibri, or Helvetica)</span></label>
+          <label style="display:flex;gap:8px;align-items:flex-start;font-size:12px;cursor:pointer;"><input type="checkbox" class="preflight-check" style="width:auto;margin-top:2px;flex-shrink:0;" /><span style="color:var(--muted);">Case was seen and managed within 5 years of Jan 15 submission date</span></label>
+          <label style="display:flex;gap:8px;align-items:flex-start;font-size:12px;cursor:pointer;"><input type="checkbox" class="preflight-check" style="width:auto;margin-top:2px;flex-shrink:0;" /><span style="color:var(--muted);">File saved as PDF</span></label>
+        </div>
+
+        <div style="margin-top:10px;font-size:11px;color:var(--muted);padding:8px;border-radius:8px;border:1px solid rgba(255,107,107,0.2);background:rgba(255,107,107,0.05);">
+          Any section scoring <strong>0</strong>, or a "No" on overall professional quality or Diplomate-level case management, results in <strong>automatic failure</strong> regardless of total score.
+        </div>
+      </div>
+
+      <label style="margin-top:16px;" >Notes to reviewer <span style="font-size:11px;color:var(--muted);">(optional)</span></label>
       <textarea name="notes" placeholder="Any context you want the reviewer to know..."></textarea>
 
       <div class="attest-row">
