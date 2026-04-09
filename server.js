@@ -28,6 +28,7 @@ const AUTH_SECRET = process.env.AUTH_SECRET || "dev-secret-change-me";
 const DEV_LOGIN = process.env.DEV_LOGIN === "true";
 const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || "").toLowerCase().trim();
 const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
+const USERS_CSV_URL = process.env.USERS_CSV_URL || "";
 
 // ─── Database ─────────────────────────────────────────────────────────────────
 
@@ -559,6 +560,76 @@ function handleSubmissionFile(req, res, id) {
   res.end(buf);
 }
 
+// ─── Users CSV sync ───────────────────────────────────────────────────────────
+
+function parseCSV(text) {
+  const lines = text.replace(/\r\n/g, "\n").replace(/\r/g, "\n").split("\n");
+  if (!lines.length) return [];
+  const headers = lines[0].split(",").map(h => h.trim().toLowerCase().replace(/[^a-z0-9_]/g, "_"));
+  const rows = [];
+  for (let i = 1; i < lines.length; i++) {
+    const line = lines[i].trim();
+    if (!line) continue;
+    const vals = line.split(",").map(v => v.trim());
+    const row = {};
+    headers.forEach((h, idx) => { row[h] = vals[idx] || ""; });
+    rows.push(row);
+  }
+  return rows;
+}
+
+async function syncUsersFromCSV() {
+  if (!USERS_CSV_URL) {
+    console.log("USERS_CSV_URL not set — skipping user sync");
+    return { synced: 0, skipped: 0, error: null };
+  }
+
+  let text;
+  try {
+    const res = await fetch(USERS_CSV_URL);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    text = await res.text();
+  } catch (e) {
+    console.error("User CSV fetch failed:", e.message);
+    return { synced: 0, skipped: 0, error: e.message };
+  }
+
+  const rows = parseCSV(text);
+  const allowedRoles = new Set(["admin", "faculty", "learner"]);
+  let synced = 0, skipped = 0;
+
+  for (const row of rows) {
+    const email = (row.email || "").trim().toLowerCase();
+    if (!email || !email.includes("@")) { skipped++; continue; }
+
+    const role = allowedRoles.has(row.role) ? row.role : "learner";
+    const name = row.name || null;
+    const program = row.program || null;
+
+    db.prepare(`
+      INSERT INTO users (email, role, name, program, created_ts, last_seen_ts)
+      VALUES (@email, @role, @name, @program, @ts, @ts)
+      ON CONFLICT(email) DO UPDATE SET
+        role = excluded.role,
+        name = COALESCE(excluded.name, name),
+        program = COALESCE(excluded.program, program)
+    `).run({ email, role, name, program, ts: Date.now() });
+
+    synced++;
+  }
+
+  console.log(`User CSV sync: ${synced} upserted, ${skipped} skipped`);
+  return { synced, skipped, error: null };
+}
+
+// POST /api/admin/sync-users
+async function handleSyncUsers(req, res) {
+  const admin = requireFaculty(req, res);
+  if (!admin) return;
+  const result = await syncUsersFromCSV();
+  return json(res, result.error ? 500 : 200, result);
+}
+
 // GET /api/admin/users — admin: all users
 function handleAllUsers(req, res) {
   const admin = requireFaculty(req, res);
@@ -628,6 +699,7 @@ async function router(req, res) {
   if (fileMatch && method === "GET") return handleSubmissionFile(req, res, fileMatch[1]);
 
   // Admin user management
+  if (method === "POST" && pathname === "/api/admin/sync-users") return handleSyncUsers(req, res);
   if (method === "GET"  && pathname === "/api/admin/users") return handleAllUsers(req, res);
   const roleMatch = pathname.match(/^\/api\/admin\/users\/(.+)\/role$/);
   if (roleMatch && method === "POST") return handleSetUserRole(req, res, roleMatch[1]);
@@ -667,6 +739,7 @@ const server = http.createServer(async (req, res) => {
 
 server.listen(PORT, () => {
   console.log(`RMV Portal running on port ${PORT}`);
+  syncUsersFromCSV().catch(e => console.error("Startup user sync error:", e));
   console.log(`  Base URL : ${BASE_URL}`);
   console.log(`  Data dir : ${DATA_DIR}`);
   console.log(`  Dev login: ${DEV_LOGIN ? "ENABLED" : "disabled"}`);

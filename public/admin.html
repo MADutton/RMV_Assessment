@@ -103,6 +103,16 @@
     <div class="msg" id="loginMsg">Faculty or admin account required to view the queue.</div>
   </div>
 
+  <!-- Users -->
+  <div class="card">
+    <div class="card-header">
+      <h2>Users</h2>
+      <button class="btn" id="syncUsersBtn">Sync from CSV</button>
+    </div>
+    <div class="msg" id="syncMsg">Sync pulls the latest roles from the Google Sheet.</div>
+    <div id="usersArea"></div>
+  </div>
+
   <!-- Queue -->
   <div class="card">
     <div class="card-header">
@@ -409,6 +419,7 @@
     });
     if (r.ok) {
       await refreshMe();
+      await loadUsers();
       await loadQueue();
     } else {
       const j = await r.json().catch(() => ({}));
@@ -421,13 +432,57 @@
     await fetch("/auth/logout", { method: "POST" });
     closeDetail();
     await refreshMe();
+    await loadUsers();
     await loadQueue();
   });
 
   $("refreshBtn").addEventListener("click", loadQueue);
 
+  async function loadUsers() {
+    const area = $("usersArea");
+    if (!me.email) return;
+    const r = await fetch("/api/admin/users");
+    const rows = await r.json().catch(() => []);
+    if (!rows.length) { area.innerHTML = "<span class='msg'>No users yet.</span>"; return; }
+    area.innerHTML = `
+      <table style="margin-top:8px;">
+        <thead>
+          <tr><th>Email</th><th>Role</th><th>Name</th><th>Program</th><th>Last seen</th></tr>
+        </thead>
+        <tbody>
+          ${rows.map(u => `
+            <tr>
+              <td>${esc(u.email)}</td>
+              <td>${statusBadge(u.role)}</td>
+              <td>${esc(u.name || "")}</td>
+              <td>${esc(u.program || "")}</td>
+              <td>${u.last_seen_ts ? new Date(u.last_seen_ts).toLocaleDateString() : "—"}</td>
+            </tr>
+          `).join("")}
+        </tbody>
+      </table>
+    `;
+  }
+
+  $("syncUsersBtn").addEventListener("click", async () => {
+    const msg = $("syncMsg");
+    msg.textContent = "Syncing...";
+    msg.className = "msg";
+    const r = await fetch("/api/admin/sync-users", { method: "POST" });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) {
+      msg.textContent = `Sync failed: ${j.error || r.status}`;
+      msg.className = "msg err";
+    } else {
+      msg.textContent = `Synced ${j.synced} user(s), skipped ${j.skipped}.`;
+      msg.className = "msg ok";
+      await loadUsers();
+    }
+  });
+
   (async () => {
     await refreshMe();
+    await loadUsers();
     await loadQueue();
   })();
 </script>
