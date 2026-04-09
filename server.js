@@ -405,8 +405,17 @@ async function handleDevLogin(req, res) {
   if (!email || !email.includes("@")) return apiError(res, 400, "Valid email required");
 
   getOrCreateUser(email);
+
+  // If no admin exists yet, promote this user — first-login bootstrap
+  const adminCount = db.prepare("SELECT COUNT(*) as n FROM users WHERE role = 'admin'").get().n;
+  if (adminCount === 0) {
+    db.prepare("UPDATE users SET role = 'admin' WHERE email = ?").run(email);
+    console.log(`Bootstrap: promoted ${email} to admin (no admins existed)`);
+  }
+
   createSession(res, email);
-  return json(res, 200, { ok: true, email });
+  const user = getUserByEmail.get(email);
+  return json(res, 200, { ok: true, email, role: user.role });
 }
 
 // POST /auth/logout

@@ -372,6 +372,11 @@
       body: JSON.stringify({ email }),
     });
     if (r.ok) {
+      const j = await r.json().catch(() => ({}));
+      if (j.role === "admin" || j.role === "faculty") {
+        $("loginMsg").textContent = `Signed in as ${j.role} — you can also access /admin`;
+        $("loginMsg").className = "msg ok";
+      }
       await refreshMe();
       await loadMySubmissions();
     } else {
