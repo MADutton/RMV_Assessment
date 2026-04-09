@@ -227,6 +227,18 @@
 
       </div>
     </div>
+
+    <hr class="divider" />
+
+    <!-- RMV Session Panel -->
+    <div>
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px;">
+        <div style="font-size:13px;font-weight:600;">RMV Session <span id="rmvSessionBadge" class="pill"></span></div>
+      </div>
+      <div class="msg" id="rmvSessionMsg">Loading session...</div>
+      <div id="rmvSessionPanel"></div>
+    </div>
+
   </div>
 
 </div>
@@ -410,6 +422,13 @@
     $("aiReviewStatus").textContent = "Loading AI review...";
     $("aiReviewStatus").className = "msg";
     loadAIReview(id);
+
+    // Load RMV session
+    $("rmvSessionPanel").innerHTML = "";
+    $("rmvSessionBadge").textContent = "";
+    $("rmvSessionMsg").textContent = "Loading session...";
+    $("rmvSessionMsg").className = "msg";
+    loadRMVSession(id);
 
     $("detailPane").style.display = "block";
     $("detailPane").scrollIntoView({ behavior: "smooth", block: "start" });
@@ -734,6 +753,191 @@
     await loadUsers();
     await loadQueue();
   })();
+
+  // ── RMV Session ────────────────────────────────────────────────────────────
+
+  // rmvQuestions holds the working draft in the editor (array of strings)
+  let rmvEditorQuestions = [];
+
+  const RMV_STATUS_LABELS = {
+    not_started:          "Not started",
+    questions_sent:       "Awaiting responses",
+    responses_submitted:  "Responses received",
+  };
+  const RMV_STATUS_COLORS = {
+    not_started:          "var(--muted)",
+    questions_sent:       "var(--warn)",
+    responses_submitted:  "#c084fc",
+  };
+
+  async function loadRMVSession(id) {
+    const r = await fetch(`/api/submissions/${id}/rmv`);
+    const j = await r.json().catch(() => ({}));
+
+    if (!r.ok) {
+      $("rmvSessionMsg").textContent = `Failed to load RMV session: ${j.error || r.status}`;
+      $("rmvSessionMsg").className = "msg err";
+      return;
+    }
+
+    const badge = $("rmvSessionBadge");
+    badge.textContent = RMV_STATUS_LABELS[j.session_status] || j.session_status;
+    badge.style.color = RMV_STATUS_COLORS[j.session_status] || "var(--muted)";
+    badge.style.borderColor = RMV_STATUS_COLORS[j.session_status] || "var(--muted)";
+    $("rmvSessionMsg").textContent = "";
+
+    renderRMVAdmin(id, j);
+  }
+
+  function renderRMVAdmin(id, session) {
+    const panel = $("rmvSessionPanel");
+    const status = session.session_status || "not_started";
+
+    if (status === "not_started" || status === "questions_sent") {
+      // Editable question list + send button
+      // Pre-populate from finalized questions if resending, else from AI review
+      let initialQs = session.questions || null;
+      if (!initialQs) {
+        // Try to pull from the rendered AI question list
+        const aiQsEl = $("aiRMVQuestions");
+        if (aiQsEl) {
+          const items = aiQsEl.querySelectorAll("li");
+          if (items.length) initialQs = Array.from(items).map(li => li.textContent.trim());
+        }
+      }
+      rmvEditorQuestions = initialQs ? [...initialQs] : [""];
+
+      const sentNote = status === "questions_sent"
+        ? `<div style="margin-bottom:12px;padding:10px 14px;border-radius:10px;border:1px solid rgba(255,209,102,0.25);background:rgba(255,209,102,0.07);font-size:12px;color:var(--warn);">
+            Questions already sent ${session.sent_ts ? `on ${new Date(session.sent_ts).toLocaleString()}` : ""}.
+            Saving will replace the current set — applicant will receive the updated questions.
+           </div>`
+        : "";
+
+      panel.innerHTML = `
+        ${sentNote}
+        <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">
+          Edit the questions below, then send to the applicant.
+          ${!initialQs ? '<span style="color:var(--warn);">Run AI Review first to auto-populate questions.</span>' : ""}
+        </div>
+        <div id="rmvQList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
+          <button class="btn" onclick="rmvAddQuestion()">+ Add question</button>
+          <button class="btn btn-ok" onclick="rmvSendQuestions(${id})">
+            ${status === "questions_sent" ? "Update &amp; Resend Questions" : "Send Questions to Applicant"}
+          </button>
+        </div>
+        <div class="msg" id="rmvSendMsg"></div>
+      `;
+      renderRMVEditor();
+      return;
+    }
+
+    if (status === "responses_submitted") {
+      const qa = session.responses || [];
+      const submittedAt = session.responses_ts
+        ? `Submitted ${new Date(session.responses_ts).toLocaleString()}`
+        : "Submitted";
+
+      panel.innerHTML = `
+        <div style="font-size:12px;color:#c084fc;margin-bottom:14px;">${submittedAt} &bull; ${qa.length} response(s)</div>
+        <div style="display:flex;flex-direction:column;gap:16px;">
+          ${qa.map((item, i) => `
+            <div style="border:1px solid rgba(255,255,255,0.08);border-radius:12px;overflow:hidden;">
+              <div style="padding:10px 14px;background:rgba(0,0,0,0.25);font-size:12px;font-weight:600;color:var(--accent);border-bottom:1px solid rgba(255,255,255,0.07);">
+                Q${i + 1}: ${esc(item.q)}
+              </div>
+              <div style="padding:12px 14px;font-size:13px;color:var(--text);line-height:1.65;white-space:pre-wrap;">${esc(item.a)}</div>
+              <div style="padding:6px 14px;background:rgba(0,0,0,0.1);font-size:11px;color:var(--muted);border-top:1px solid rgba(255,255,255,0.05);">
+                ${item.a.trim().split(/\s+/).filter(Boolean).length} words
+              </div>
+            </div>
+          `).join("")}
+        </div>
+        <div style="margin-top:16px;padding:12px 16px;border-radius:10px;border:1px solid rgba(255,255,255,0.08);background:rgba(0,0,0,0.2);font-size:13px;color:var(--muted);">
+          Use the <strong>Final decision</strong> and <strong>Applicant feedback</strong> fields above to record your decision and notify the applicant.
+        </div>
+      `;
+      return;
+    }
+
+    panel.innerHTML = `<div class="msg" style="color:var(--muted);">Session status: ${esc(status)}</div>`;
+  }
+
+  function renderRMVEditor() {
+    const list = $("rmvQList");
+    if (!list) return;
+    list.innerHTML = rmvEditorQuestions.map((q, i) => `
+      <div style="display:flex;gap:8px;align-items:flex-start;">
+        <span style="font-size:12px;color:var(--muted);padding-top:12px;min-width:20px;">${i + 1}.</span>
+        <textarea
+          id="rmvQ${i}"
+          style="flex:1;min-height:64px;font-size:13px;resize:vertical;"
+          oninput="rmvEditorQuestions[${i}]=this.value"
+        >${esc(q)}</textarea>
+        <button class="btn" style="padding:6px 10px;font-size:13px;flex-shrink:0;margin-top:6px;" onclick="rmvRemoveQuestion(${i})">✕</button>
+      </div>
+    `).join("");
+  }
+
+  window.rmvAddQuestion = function() {
+    // Read current values from DOM before re-rendering
+    rmvEditorQuestions = rmvEditorQuestions.map((_, i) => {
+      const el = $(`rmvQ${i}`);
+      return el ? el.value : rmvEditorQuestions[i];
+    });
+    rmvEditorQuestions.push("");
+    renderRMVEditor();
+    // Focus the new textarea
+    const last = $(`rmvQ${rmvEditorQuestions.length - 1}`);
+    if (last) last.focus();
+  };
+
+  window.rmvRemoveQuestion = function(idx) {
+    rmvEditorQuestions = rmvEditorQuestions.map((_, i) => {
+      const el = $(`rmvQ${i}`);
+      return el ? el.value : rmvEditorQuestions[i];
+    });
+    rmvEditorQuestions.splice(idx, 1);
+    if (!rmvEditorQuestions.length) rmvEditorQuestions = [""];
+    renderRMVEditor();
+  };
+
+  window.rmvSendQuestions = async function(id) {
+    // Read final values from DOM
+    const questions = rmvEditorQuestions.map((_, i) => {
+      const el = $(`rmvQ${i}`);
+      return el ? el.value.trim() : rmvEditorQuestions[i];
+    }).filter(Boolean);
+
+    const msgEl = $("rmvSendMsg");
+    if (!questions.length) {
+      msgEl.textContent = "Add at least one question before sending.";
+      msgEl.className = "msg err";
+      return;
+    }
+
+    msgEl.textContent = "Sending...";
+    msgEl.className = "msg";
+
+    const r = await fetch(`/api/submissions/${id}/rmv/send`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ questions }),
+    });
+    const j = await r.json().catch(() => ({}));
+
+    if (!r.ok) {
+      msgEl.textContent = `Failed: ${j.error || r.status}`;
+      msgEl.className = "msg err";
+      return;
+    }
+
+    msgEl.textContent = `${j.count} question(s) sent to applicant.`;
+    msgEl.className = "msg ok";
+    await loadRMVSession(id);
+    await loadQueue();
+  };
 </script>
 </body>
 </html>

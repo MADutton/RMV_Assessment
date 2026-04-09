@@ -115,6 +115,10 @@ for (const col of [
   "ALTER TABLE submissions ADD COLUMN ai_review_json TEXT",
   "ALTER TABLE submissions ADD COLUMN rmv_question_set_json TEXT",
   "ALTER TABLE submissions ADD COLUMN applicant_feedback TEXT",
+  "ALTER TABLE submissions ADD COLUMN rmv_questions_finalized_json TEXT",
+  "ALTER TABLE submissions ADD COLUMN rmv_questions_sent_ts INTEGER",
+  "ALTER TABLE submissions ADD COLUMN rmv_responses_json TEXT",
+  "ALTER TABLE submissions ADD COLUMN rmv_responses_ts INTEGER",
 ]) {
   try { db.exec(col); } catch {}
 }
@@ -921,6 +925,126 @@ function handleGetAIReview(req, res, id) {
   return json(res, 200, { status: "done", review });
 }
 
+// ─── RMV Session ─────────────────────────────────────────────────────────────
+
+// GET /api/submissions/:id/rmv
+function handleGetRMVSession(req, res, id) {
+  const email = requireAuth(req, res);
+  if (!email) return;
+
+  const sub = getSubmissionById.get(id);
+  if (!sub) return apiError(res, 404, "Submission not found");
+
+  const role = getUserRole(email);
+  if (role !== "faculty" && role !== "admin" && sub.applicant_email !== email) {
+    return apiError(res, 403, "Forbidden");
+  }
+
+  let questions = null;
+  let responses = null;
+  try { questions = sub.rmv_questions_finalized_json ? JSON.parse(sub.rmv_questions_finalized_json) : null; } catch {}
+  try { responses = sub.rmv_responses_json ? JSON.parse(sub.rmv_responses_json) : null; } catch {}
+
+  return json(res, 200, {
+    session_status: sub.rmv_session_status || "not_started",
+    questions,
+    responses,
+    sent_ts: sub.rmv_questions_sent_ts || null,
+    responses_ts: sub.rmv_responses_ts || null,
+  });
+}
+
+// POST /api/submissions/:id/rmv/send — faculty finalizes and sends questions to applicant
+async function handleSendRMVQuestions(req, res, id) {
+  const admin = requireFaculty(req, res);
+  if (!admin) return;
+
+  const sub = getSubmissionById.get(id);
+  if (!sub) return apiError(res, 404, "Submission not found");
+
+  if (sub.rmv_session_status === "responses_submitted") {
+    return apiError(res, 400, "Applicant has already submitted responses — cannot replace questions");
+  }
+
+  const raw = await readBody(req);
+  let body = {};
+  try { body = JSON.parse(raw || "{}"); } catch {}
+
+  const questions = body.questions;
+  if (!Array.isArray(questions) || !questions.length) return apiError(res, 400, "questions array required");
+  const cleaned = questions.map(q => String(q).trim()).filter(Boolean);
+  if (!cleaned.length) return apiError(res, 400, "No valid questions provided");
+
+  const now = Date.now();
+  db.prepare(`
+    UPDATE submissions
+    SET rmv_questions_finalized_json = ?,
+        rmv_questions_sent_ts = ?,
+        rmv_session_status = 'questions_sent',
+        updated_ts = ?
+    WHERE id = ?
+  `).run(JSON.stringify(cleaned), now, now, id);
+
+  trackSubEvent({
+    submission_id: Number(id),
+    actor_email: admin,
+    event_type: "rmv_questions_sent",
+    details: { count: cleaned.length },
+  });
+
+  return json(res, 200, { ok: true, count: cleaned.length });
+}
+
+// POST /api/submissions/:id/rmv/respond — applicant submits responses
+async function handleSubmitRMVResponses(req, res, id) {
+  const email = requireAuth(req, res);
+  if (!email) return;
+
+  const sub = getSubmissionById.get(id);
+  if (!sub) return apiError(res, 404, "Submission not found");
+  if (sub.applicant_email !== email) return apiError(res, 403, "Forbidden");
+
+  if (sub.rmv_session_status === "responses_submitted") {
+    return apiError(res, 400, "You have already submitted your responses");
+  }
+  if (sub.rmv_session_status !== "questions_sent") {
+    return apiError(res, 400, "No active RMV session for this submission");
+  }
+
+  const raw = await readBody(req);
+  let body = {};
+  try { body = JSON.parse(raw || "{}"); } catch {}
+
+  const responses = body.responses;
+  if (!Array.isArray(responses) || !responses.length) return apiError(res, 400, "responses array required");
+
+  const cleaned = responses.map(r => ({
+    q: String(r.q || "").trim(),
+    a: String(r.a || "").trim(),
+  }));
+  const unanswered = cleaned.filter(r => !r.a).length;
+  if (unanswered > 0) return apiError(res, 400, `${unanswered} question(s) have no response`);
+
+  const now = Date.now();
+  db.prepare(`
+    UPDATE submissions
+    SET rmv_responses_json = ?,
+        rmv_responses_ts = ?,
+        rmv_session_status = 'responses_submitted',
+        updated_ts = ?
+    WHERE id = ?
+  `).run(JSON.stringify(cleaned), now, now, id);
+
+  trackSubEvent({
+    submission_id: Number(id),
+    actor_email: email,
+    event_type: "rmv_responses_submitted",
+    details: { count: cleaned.length },
+  });
+
+  return json(res, 200, { ok: true });
+}
+
 // ─── Users CSV sync ───────────────────────────────────────────────────────────
 
 function parseCSV(text) {
@@ -1071,6 +1195,15 @@ async function router(req, res) {
   const aiReviewMatch = pathname.match(/^\/api\/submissions\/(\d+)\/ai-review$/);
   if (aiReviewMatch && method === "POST") return handleTriggerAIReview(req, res, aiReviewMatch[1]);
   if (aiReviewMatch && method === "GET")  return handleGetAIReview(req, res, aiReviewMatch[1]);
+
+  const rmvMatch = pathname.match(/^\/api\/submissions\/(\d+)\/rmv$/);
+  if (rmvMatch && method === "GET") return handleGetRMVSession(req, res, rmvMatch[1]);
+
+  const rmvSendMatch = pathname.match(/^\/api\/submissions\/(\d+)\/rmv\/send$/);
+  if (rmvSendMatch && method === "POST") return handleSendRMVQuestions(req, res, rmvSendMatch[1]);
+
+  const rmvRespondMatch = pathname.match(/^\/api\/submissions\/(\d+)\/rmv\/respond$/);
+  if (rmvRespondMatch && method === "POST") return handleSubmitRMVResponses(req, res, rmvRespondMatch[1]);
 
   // Admin user management
   if (method === "POST" && pathname === "/api/admin/sync-users") return handleSyncUsers(req, res);

@@ -377,8 +377,10 @@
   function buildEventTimeline(events) {
     if (!events?.length) return "";
     const EVENT_LABELS = {
-      submission_created: "Submission received",
-      status_updated: "Status updated",
+      submission_created:      "Submission received",
+      status_updated:          "Status updated",
+      rmv_questions_sent:      "RMV questions sent",
+      rmv_responses_submitted: "RMV responses submitted",
     };
     const items = events.map((e, i) => {
       const label = EVENT_LABELS[e.event_type] || e.event_type;
@@ -468,13 +470,15 @@
     const contentEl = $(`detail-content-${id}`);
     if (!contentEl) return;
 
-    // Fetch submission detail and events in parallel
-    const [subRes, evtRes] = await Promise.all([
+    // Fetch submission detail, events, and RMV session in parallel
+    const [subRes, evtRes, rmvRes] = await Promise.all([
       fetch(`/api/submissions/${id}`),
       fetch(`/api/submissions/${id}/events`),
+      fetch(`/api/submissions/${id}/rmv`),
     ]);
     const sub = await subRes.json().catch(() => null);
     const events = await evtRes.json().catch(() => []);
+    const rmv = await rmvRes.json().catch(() => null);
 
     if (!sub || subRes.status >= 400) {
       contentEl.innerHTML = `<div class="msg err">Failed to load details.</div>`;
@@ -498,6 +502,9 @@
           ${esc(statusDesc(sub.status))}
         </div>
       ` : ""}
+
+      <!-- RMV Session (when active) -->
+      ${buildRMVSection(sub.id, rmv)}
 
       <!-- Applicant feedback (if any) -->
       ${buildFeedbackBox(sub)}
@@ -526,7 +533,152 @@
       <!-- Event timeline -->
       ${buildEventTimeline(events)}
     `;
+
+    // Initialize RMV textarea word counters after DOM is set
+    initRMVWordCounts(sub.id, rmv);
   }
+
+  // ── RMV Session ─────────────────────────────────────────────────────────────
+
+  function buildRMVSection(subId, rmv) {
+    if (!rmv) return "";
+    const status = rmv.session_status || "not_started";
+    if (status === "not_started") return "";
+
+    if (status === "questions_sent") {
+      const qs = rmv.questions || [];
+      if (!qs.length) return "";
+      return `
+        <div style="margin-bottom:20px;border:1px solid rgba(192,132,252,0.3);border-radius:14px;overflow:hidden;">
+          <div style="padding:14px 18px;background:rgba(192,132,252,0.1);border-bottom:1px solid rgba(192,132,252,0.15);">
+            <div style="font-size:14px;font-weight:700;color:#c084fc;margin-bottom:4px;">RMV Session — Questions Ready</div>
+            <div style="font-size:12px;color:var(--muted);line-height:1.5;">
+              Your examiner has sent you ${qs.length} questions. Please respond thoughtfully and in your own words —
+              your answers should reflect your direct experience with this case.
+              Aim for <strong>150–250 words per response</strong>. Once submitted, responses cannot be changed.
+            </div>
+          </div>
+          <div style="padding:18px;">
+            <div style="display:flex;flex-direction:column;gap:18px;" id="rmv-questions-${subId}">
+              ${qs.map((q, i) => `
+                <div>
+                  <div style="font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px;line-height:1.5;">
+                    <span style="color:#c084fc;margin-right:6px;">Q${i + 1}.</span>${esc(q)}
+                  </div>
+                  <textarea
+                    id="rmv-resp-${subId}-${i}"
+                    placeholder="Your response…"
+                    style="width:100%;min-height:110px;font-size:13px;resize:vertical;font-family:inherit;line-height:1.55;"
+                    oninput="rmvUpdateWC(this,'rmv-wc-${subId}-${i}')"
+                  ></textarea>
+                  <div id="rmv-wc-${subId}-${i}" style="font-size:11px;color:var(--muted);text-align:right;margin-top:3px;">0 words</div>
+                </div>
+              `).join("")}
+            </div>
+            <div style="margin-top:20px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
+              <button class="btn" style="background:rgba(192,132,252,0.2);border-color:rgba(192,132,252,0.35);color:#e0aaff;"
+                onclick="submitRMVResponses(${subId}, ${qs.length})">
+                Submit All Responses
+              </button>
+              <div class="msg" id="rmv-submit-msg-${subId}" style="margin:0;"></div>
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    if (status === "responses_submitted") {
+      const qa = rmv.responses || [];
+      const submittedAt = rmv.responses_ts ? fmtDate(rmv.responses_ts) : "";
+      return `
+        <div style="margin-bottom:20px;border:1px solid rgba(76,217,100,0.2);border-radius:14px;overflow:hidden;">
+          <div style="padding:14px 18px;background:rgba(76,217,100,0.08);border-bottom:1px solid rgba(76,217,100,0.12);">
+            <div style="font-size:14px;font-weight:700;color:var(--ok);margin-bottom:4px;">✓ RMV Responses Submitted</div>
+            <div style="font-size:12px;color:var(--muted);">
+              Your responses were submitted ${submittedAt ? `on ${submittedAt}` : ""}. Your examiner will review them and record a final decision.
+            </div>
+          </div>
+          <div style="padding:18px;display:flex;flex-direction:column;gap:14px;">
+            ${qa.map((item, i) => `
+              <div style="border:1px solid rgba(255,255,255,0.07);border-radius:10px;overflow:hidden;">
+                <div style="padding:9px 14px;background:rgba(0,0,0,0.2);font-size:12px;font-weight:600;color:var(--accent);border-bottom:1px solid rgba(255,255,255,0.06);">
+                  Q${i + 1}: ${esc(item.q)}
+                </div>
+                <div style="padding:11px 14px;font-size:13px;color:var(--muted);line-height:1.65;white-space:pre-wrap;">${esc(item.a)}</div>
+              </div>
+            `).join("")}
+          </div>
+        </div>
+      `;
+    }
+
+    return "";
+  }
+
+  window.rmvUpdateWC = function(textarea, wcId) {
+    const wc = textarea.value.trim().split(/\s+/).filter(Boolean).length;
+    const el = $(wcId);
+    if (el) {
+      el.textContent = `${wc} word${wc !== 1 ? "s" : ""}`;
+      el.style.color = wc < 50 ? "var(--danger)" : wc > 350 ? "var(--warn)" : "var(--ok)";
+    }
+  };
+
+  function initRMVWordCounts(subId, rmv) {
+    if (!rmv || rmv.session_status !== "questions_sent") return;
+    const qs = rmv.questions || [];
+    qs.forEach((_, i) => {
+      const ta = $(`rmv-resp-${subId}-${i}`);
+      const wc = $(`rmv-wc-${subId}-${i}`);
+      if (ta && wc) ta.addEventListener("input", () => window.rmvUpdateWC(ta, `rmv-wc-${subId}-${i}`));
+    });
+  }
+
+  window.submitRMVResponses = async function(subId, count) {
+    const msgEl = $(`rmv-submit-msg-${subId}`);
+    const responses = [];
+
+    for (let i = 0; i < count; i++) {
+      const ta = $(`rmv-resp-${subId}-${i}`);
+      if (!ta || !ta.value.trim()) {
+        msgEl.textContent = `Please answer question ${i + 1} before submitting.`;
+        msgEl.className = "msg err";
+        return;
+      }
+      // Get the question text from the DOM label
+      const qLabel = document.querySelector(`#rmv-questions-${subId} > div:nth-child(${i + 1}) .rmv-q-text`);
+      responses.push({ q: ta.getAttribute("data-q") || `Question ${i + 1}`, a: ta.value.trim() });
+    }
+
+    // Re-read question text from the rmv data via a fresh fetch (ta doesn't carry question text)
+    const rmvr = await fetch(`/api/submissions/${subId}/rmv`);
+    const rmvd = await rmvr.json().catch(() => ({}));
+    const qs = rmvd.questions || [];
+    const fullResponses = responses.map((r, i) => ({ q: qs[i] || r.q, a: r.a }));
+
+    const totalWords = fullResponses.reduce((sum, r) => sum + r.a.split(/\s+/).filter(Boolean).length, 0);
+    if (!confirm(`Submit ${fullResponses.length} responses (${totalWords} total words)? This cannot be undone.`)) return;
+
+    msgEl.textContent = "Submitting…";
+    msgEl.className = "msg";
+
+    const r = await fetch(`/api/submissions/${subId}/rmv/respond`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ responses: fullResponses }),
+    });
+    const j = await r.json().catch(() => ({}));
+
+    if (!r.ok) {
+      msgEl.textContent = `Submission failed: ${j.error || r.status}`;
+      msgEl.className = "msg err";
+      return;
+    }
+
+    // Reload this card
+    openCardId = subId;
+    await loadSubmissions();
+  };
 
   // ── Init ────────────────────────────────────────────────────────────────────
 
