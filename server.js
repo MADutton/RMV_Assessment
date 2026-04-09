@@ -1,5 +1,6 @@
 // RMV Portal — standalone Node.js server
 // Phase 1: submission intake, file storage, admin queue
+// Phase 3: PDF/DOCX text extraction
 
 import http from "http";
 import fs from "fs";
@@ -8,6 +9,8 @@ import crypto from "crypto";
 import { fileURLToPath } from "url";
 import Database from "better-sqlite3";
 import Busboy from "busboy";
+import pdfParse from "pdf-parse/lib/pdf-parse.js";
+import mammoth from "mammoth";
 
 // ─── Paths ────────────────────────────────────────────────────────────────────
 
@@ -78,7 +81,10 @@ CREATE TABLE IF NOT EXISTS submissions (
   ai_review_json TEXT,
   rmv_question_set_json TEXT,
   rmv_session_status TEXT DEFAULT 'not_started',
-  final_decision TEXT DEFAULT 'pending'
+  final_decision TEXT DEFAULT 'pending',
+  extracted_text_path TEXT,
+  extraction_status TEXT DEFAULT 'pending',
+  extraction_error TEXT
 );
 
 CREATE TABLE IF NOT EXISTS submission_events (
@@ -95,6 +101,15 @@ CREATE INDEX IF NOT EXISTS idx_submissions_email ON submissions(applicant_email)
 CREATE INDEX IF NOT EXISTS idx_submissions_status ON submissions(status);
 CREATE INDEX IF NOT EXISTS idx_sub_events_sub_id ON submission_events(submission_id);
 `);
+
+// Migrate existing DBs — safe to run every startup
+for (const col of [
+  "ALTER TABLE submissions ADD COLUMN extracted_text_path TEXT",
+  "ALTER TABLE submissions ADD COLUMN extraction_status TEXT DEFAULT 'pending'",
+  "ALTER TABLE submissions ADD COLUMN extraction_error TEXT",
+]) {
+  try { db.exec(col); } catch {}
+}
 
 // ─── Prepared statements ──────────────────────────────────────────────────────
 
@@ -470,6 +485,9 @@ async function handleCreateSubmission(req, res) {
     details: { filename: cleanName, size: pf.size, submission_type: fields.submission_type },
   });
 
+  // Kick off text extraction in background — don't await
+  runExtraction(submissionId).catch(e => console.error("Extraction error:", e));
+
   return json(res, 200, { ok: true, submission_id: submissionId, message: "Submission received" });
 }
 
@@ -558,6 +576,96 @@ function handleSubmissionFile(req, res, id) {
     "Content-Disposition": `inline; filename="${sanitizeFilename(sub.original_filename)}"`,
   });
   res.end(buf);
+}
+
+// ─── Text extraction ──────────────────────────────────────────────────────────
+
+async function extractTextFromBuffer(buffer, filename) {
+  const lower = String(filename || "").toLowerCase();
+
+  if (lower.endsWith(".pdf")) {
+    const data = await pdfParse(buffer);
+    return data.text || "";
+  }
+
+  if (lower.endsWith(".docx")) {
+    const result = await mammoth.extractRawText({ buffer });
+    return result.value || "";
+  }
+
+  if (lower.endsWith(".txt")) {
+    return buffer.toString("utf8");
+  }
+
+  return "";
+}
+
+async function runExtraction(submissionId) {
+  const sub = getSubmissionById.get(submissionId);
+  if (!sub || !sub.stored_path) return;
+
+  db.prepare("UPDATE submissions SET extraction_status = 'running', updated_ts = ? WHERE id = ?")
+    .run(Date.now(), submissionId);
+
+  try {
+    const buffer = fs.readFileSync(sub.stored_path);
+    const text = await extractTextFromBuffer(buffer, sub.original_filename);
+
+    const subDir = path.join(UPLOADS_DIR, String(submissionId));
+    const extractedPath = path.join(subDir, "extracted.txt");
+    fs.writeFileSync(extractedPath, text, "utf8");
+
+    db.prepare(`
+      UPDATE submissions
+      SET extracted_text_path = ?, extraction_status = 'done', extraction_error = NULL, updated_ts = ?
+      WHERE id = ?
+    `).run(extractedPath, Date.now(), submissionId);
+
+    console.log(`Extraction complete for submission ${submissionId} (${text.length} chars)`);
+  } catch (e) {
+    console.error(`Extraction failed for submission ${submissionId}:`, e.message);
+    db.prepare("UPDATE submissions SET extraction_status = 'error', extraction_error = ?, updated_ts = ? WHERE id = ?")
+      .run(e.message, Date.now(), submissionId);
+  }
+}
+
+// GET /api/submissions/:id/text
+function handleSubmissionText(req, res, id) {
+  const email = requireAuth(req, res);
+  if (!email) return;
+
+  const sub = getSubmissionById.get(id);
+  if (!sub) return apiError(res, 404, "Submission not found");
+
+  const role = getUserRole(email);
+  if (role !== "faculty" && role !== "admin" && sub.applicant_email !== email) {
+    return apiError(res, 403, "Forbidden");
+  }
+
+  if (sub.extraction_status === "running") {
+    return json(res, 202, { status: "running", text: null });
+  }
+  if (sub.extraction_status === "error") {
+    return json(res, 200, { status: "error", error: sub.extraction_error, text: null });
+  }
+  if (!sub.extracted_text_path || !fs.existsSync(sub.extracted_text_path)) {
+    return json(res, 200, { status: "pending", text: null });
+  }
+
+  const text = fs.readFileSync(sub.extracted_text_path, "utf8");
+  return json(res, 200, { status: "done", text, word_count: text.split(/\s+/).filter(Boolean).length });
+}
+
+// POST /api/submissions/:id/extract — trigger re-extraction manually
+async function handleTriggerExtraction(req, res, id) {
+  const admin = requireFaculty(req, res);
+  if (!admin) return;
+
+  const sub = getSubmissionById.get(id);
+  if (!sub) return apiError(res, 404, "Submission not found");
+
+  json(res, 200, { ok: true, message: "Extraction started" });
+  runExtraction(Number(id)).catch(e => console.error("Re-extraction error:", e));
 }
 
 // ─── Users CSV sync ───────────────────────────────────────────────────────────
@@ -697,6 +805,12 @@ async function router(req, res) {
 
   const fileMatch = pathname.match(/^\/api\/submissions\/(\d+)\/file$/);
   if (fileMatch && method === "GET") return handleSubmissionFile(req, res, fileMatch[1]);
+
+  const textMatch = pathname.match(/^\/api\/submissions\/(\d+)\/text$/);
+  if (textMatch && method === "GET") return handleSubmissionText(req, res, textMatch[1]);
+
+  const extractMatch = pathname.match(/^\/api\/submissions\/(\d+)\/extract$/);
+  if (extractMatch && method === "POST") return handleTriggerExtraction(req, res, extractMatch[1]);
 
   // Admin user management
   if (method === "POST" && pathname === "/api/admin/sync-users") return handleSyncUsers(req, res);

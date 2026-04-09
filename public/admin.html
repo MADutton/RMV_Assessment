@@ -154,6 +154,14 @@
 
     <div style="margin-bottom:12px;">
       <a id="detailFileLink" href="#" target="_blank" class="btn">Open uploaded file</a>
+      <button class="btn" id="extractBtn" style="margin-left:8px;" onclick="triggerExtraction()">Re-extract text</button>
+
+      <div style="margin-top:14px;">
+        <div style="font-size:12px;color:var(--muted);font-weight:600;margin-bottom:6px;">Extracted Text <span id="wordCountBadge" class="pill"></span></div>
+        <div id="extractionStatus" class="msg"></div>
+        <textarea id="extractedText" readonly style="min-height:220px;font-size:12px;font-family:monospace;background:rgba(0,0,0,0.3);color:var(--muted);display:none;"></textarea>
+      </div>
+      <hr class="divider" />
     </div>
 
     <div class="row">
@@ -356,8 +364,49 @@
     $("detailMsg").textContent = "";
     $("detailMsg").className = "msg";
 
+    // Load extracted text
+    $("extractedText").style.display = "none";
+    $("wordCountBadge").textContent = "";
+    $("extractionStatus").textContent = "Loading extracted text...";
+    $("extractionStatus").className = "msg";
+    loadExtractedText(id);
+
     $("detailPane").style.display = "";
     $("detailPane").scrollIntoView({ behavior: "smooth", block: "start" });
+  };
+
+  async function loadExtractedText(id) {
+    const r = await fetch(`/api/submissions/${id}/text`);
+    const j = await r.json().catch(() => ({}));
+
+    if (j.status === "running") {
+      $("extractionStatus").textContent = "Extraction in progress...";
+      setTimeout(() => loadExtractedText(id), 2500);
+      return;
+    }
+    if (j.status === "error") {
+      $("extractionStatus").textContent = `Extraction error: ${j.error}`;
+      $("extractionStatus").className = "msg err";
+      return;
+    }
+    if (j.status === "pending" || !j.text) {
+      $("extractionStatus").textContent = "No extracted text yet. Click Re-extract text to try.";
+      return;
+    }
+
+    $("extractionStatus").textContent = "";
+    $("wordCountBadge").textContent = `${j.word_count?.toLocaleString() || "?"} words`;
+    $("extractedText").value = j.text;
+    $("extractedText").style.display = "";
+  }
+
+  window.triggerExtraction = async function() {
+    if (!currentId) return;
+    $("extractionStatus").textContent = "Starting extraction...";
+    $("extractionStatus").className = "msg";
+    $("extractedText").style.display = "none";
+    await fetch(`/api/submissions/${currentId}/extract`, { method: "POST" });
+    setTimeout(() => loadExtractedText(currentId), 1500);
   };
 
   window.closeDetail = function() {
