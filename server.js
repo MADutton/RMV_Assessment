@@ -11,6 +11,7 @@ import Database from "better-sqlite3";
 import Busboy from "busboy";
 import pdfParse from "pdf-parse/lib/pdf-parse.js";
 import mammoth from "mammoth";
+import OpenAI from "openai";
 
 // ─── Paths ────────────────────────────────────────────────────────────────────
 
@@ -32,6 +33,9 @@ const DEV_LOGIN = process.env.DEV_LOGIN === "true";
 const ADMIN_EMAIL = (process.env.ADMIN_EMAIL || "").toLowerCase().trim();
 const BASE_URL = process.env.BASE_URL || `http://localhost:${PORT}`;
 const USERS_CSV_URL = process.env.USERS_CSV_URL || "";
+const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
+
+const openai = OPENAI_API_KEY ? new OpenAI({ apiKey: OPENAI_API_KEY }) : null;
 
 // ─── Database ─────────────────────────────────────────────────────────────────
 
@@ -107,6 +111,8 @@ for (const col of [
   "ALTER TABLE submissions ADD COLUMN extracted_text_path TEXT",
   "ALTER TABLE submissions ADD COLUMN extraction_status TEXT DEFAULT 'pending'",
   "ALTER TABLE submissions ADD COLUMN extraction_error TEXT",
+  "ALTER TABLE submissions ADD COLUMN ai_review_json TEXT",
+  "ALTER TABLE submissions ADD COLUMN rmv_question_set_json TEXT",
 ]) {
   try { db.exec(col); } catch {}
 }
@@ -677,6 +683,212 @@ async function handleTriggerExtraction(req, res, id) {
   runExtraction(Number(id)).catch(e => console.error("Re-extraction error:", e));
 }
 
+// ─── AI Review Engine ─────────────────────────────────────────────────────────
+
+const CS_RUBRIC = `
+CASE SUMMARY RUBRIC (score each section 0-4):
+- Title (weight 2.5%, max 10 pts): 4=accurately describes contents; 2=somewhat describes; 0=does not accurately describe
+- Introduction (weight 5%, max 20 pts): 4=complete concise thorough description of pathophysiology, typical history/presentation, differentials, diagnostic approach; 3=mostly complete 1-2 omissions; 2=somewhat complete >2 omissions; 1=minimal many omissions; 0=incomplete or missing
+- Treatment/Management/Prognosis (weight 20%, max 80 pts): 4=complete synopsis of treatment/management options and current recommended therapies; 3=mostly complete 1-2 omissions; 2=somewhat complete >2 omissions; 1=minimal several omissions; 0=incomplete or missing
+- Case History & Presentation (weight 20%, max 80 pts): 4=complete brief description of patient/population, chief complaint, relevant history and clinical findings; 3=mostly complete 1-2 omissions; 2=somewhat complete >2 omissions; 1=minimal many omissions; 0=incomplete or missing
+- Case Management & Outcome (weight 20%, max 80 pts): 4=all relevant procedures, medications, complications, comorbidities, justification for deviations, full outcome and follow-up; 3=most present 1-2 omissions; 2=some present >2 omissions; 1=very few minimal follow-up; 0=incomplete or missing
+- Discussion & Critique (weight 25%, max 100 pts): 4=constructive evaluation of deficiencies/mistakes/complications, identifies changes, demonstrates learning, no new material added; 3=mostly constructive minimal new material 1-2 omissions; 2=somewhat constructive new material may be added >2 omissions; 1=minimal significant new material; 0=does not critically evaluate, unable to identify changes, new material added
+- References & Endnotes (weight 2.5%, max 10 pts): 4=1-5 refs preferably peer-reviewed; 2=refs listed but more current/applicable available; 0=no refs, >5 refs, or inappropriate
+- Lab Data & Imaging (weight 5%, max 20 pts): 4=labeled, legible, relevant, chronological order; 2=present but not entirely relevant or could be displayed more clearly; 0=not labeled, illegible, not relevant, not chronological
+
+PASS/FAIL OVERRIDES (automatic fail regardless of score):
+- Overall Impression A: Case management commensurate with ABVP diplomate level (Yes/No)
+- Overall Impression B: Professional presentation, minimal errors, succinct (Yes/No)
+- Word count 1,700-2,000 (excluding tables, labs, images, refs, endnotes, headings) (Yes/No)
+- Any section scoring 0 = automatic fail
+- Minimum passing score: 280/400 (70%)
+- Formatting deductions: -5 pts each for (1) not PDF, (2) wrong font/size, (3) labs not at end in chronological order
+`;
+
+const CR_RUBRIC = `
+CASE REPORT RUBRIC (score each section 0-4):
+- Title (weight 5%, max 20 pts): 4=accurately describes contents; 2=somewhat describes; 0=does not accurately describe
+- Introduction of Topic (weight 7.5%, max 30 pts): 4=complete overview of general concept ~1 paragraph; 3=mostly complete ~1 paragraph; 2=somewhat complete may exceed 1 paragraph; 1=incomplete overview; 0=missing or no overview
+- Literature Review (weight 20%, max 80 pts): 4=current high-quality refs, ≤3 top clinical problems, complete concise thorough pathophysiology/history/presentation/differentials/diagnostics/treatment/prognosis for each; 3=mostly complete 1-2 omissions; 2=somewhat complete possibly >3 problems; 1=not current, moderate-low quality; 0=not current, low quality, incomplete
+- Case Report Section (weight 30%, max 120 pts): 4=complete description of patient/population, chief complaint, history, clinical findings, all procedures/medications/complications/comorbidities/justifications, full outcome and follow-up; 3=most present 1-2 omissions; 2=some present partial follow-up >2 omissions; 1=minimal description minimal follow-up; 0=incomplete or missing
+- Discussion & Critique (weight 25%, max 100 pts): 4=constructive evaluation of deficiencies/mistakes/complications, identifies changes, demonstrates learning, no new material; 3=mostly constructive minimal new material 1-2 omissions; 2=somewhat constructive new material possible >2 omissions; 1=minimal significant new material; 0=does not critically evaluate
+- Endnotes (weight 5%, max 20 pts): 4=present and properly cited for all appropriate items; 2=mostly present and properly cited; 0=not present or improperly cited
+- References (weight 7.5%, max 30 pts): 4=current, applicable, comprehensive for all problems; 3=most relevant cited; 2=listed but more current/applicable available; 1=very few relevant; 0=inappropriate or incomplete
+- Labs/Tables (weight 5%, max 20 pts): 4=relevant, clearly displayed/described; 2=present but not entirely relevant or could be clearer; 0=missing, not relevant, or illegible
+
+PASS/FAIL OVERRIDES:
+- Overall Impression A: Case management commensurate with ABVP diplomate level (Yes/No)
+- Overall Impression B: Professional presentation, minimal errors (Yes/No)
+- Word count must NOT exceed 19,000 words (excluding tables, labs, images, refs, endnotes, headings) (Yes/No)
+- Any section scoring 0 = automatic fail
+- Minimum passing score: 294/420 (70%)
+- Formatting deductions: -5 pts each for (1) not PDF, (2) wrong font/size, (3) labs not at end in chronological order
+`;
+
+const SYSTEM_PROMPT = `You are an expert ABVP credentials reviewer with deep knowledge of veterinary clinical practice and the ABVP certification process. You evaluate case submissions using official ABVP rubric criteria and identify strengths, weaknesses, and areas for improvement. You also generate targeted Reflective Mastery Verification (RMV) questions designed to probe whether the applicant truly authored and understands their submission.
+
+Your evaluations must be:
+- Rigorous and fair, consistent with ABVP Diplomate standards
+- Specific to the actual content of the submission
+- Focused on clinical reasoning, completeness, and defensibility
+- Formatted as valid JSON only — no prose outside the JSON`;
+
+function buildReviewPrompt(submissionType, caseText, metadata) {
+  const rubric = submissionType === "case_summary" ? CS_RUBRIC : CR_RUBRIC;
+  const sections = submissionType === "case_summary"
+    ? ["title", "introduction", "treatment_management_prognosis", "case_history_presentation", "case_management_outcome", "discussion_critique", "references_endnotes", "lab_data_imaging"]
+    : ["title", "introduction_of_topic", "literature_review", "case_report_section", "discussion_critique", "endnotes", "references", "labs_tables"];
+  const maxScore = submissionType === "case_summary" ? 400 : 420;
+  const passScore = submissionType === "case_summary" ? 280 : 294;
+  const wcRule = submissionType === "case_summary"
+    ? "Word count must be 1,700-2,000 words"
+    : "Word count must not exceed 19,000 words";
+
+  return `You are reviewing a veterinary ${submissionType === "case_summary" ? "Case Summary" : "Case Report"} submission for ABVP credentialing.
+
+METADATA:
+- Applicant specialty: ${metadata.specialty || "not specified"}
+- Species: ${metadata.species || "not specified"}
+- Case title: ${metadata.case_title || "not specified"}
+- Revision: ${metadata.revision_number || "v1"}
+
+RUBRIC:
+${rubric}
+
+SUBMISSION TEXT:
+---
+${caseText.slice(0, 12000)}${caseText.length > 12000 ? "\n[... text truncated for length ...]" : ""}
+---
+
+Respond with ONLY a valid JSON object in this exact structure:
+{
+  "submission_type": "${submissionType}",
+  "section_scores": {
+    ${sections.map(s => `"${s}": {"score": 0, "rationale": "..."}`).join(",\n    ")}
+  },
+  "overall_impression_a": {"pass": true, "rationale": "..."},
+  "overall_impression_b": {"pass": true, "rationale": "..."},
+  "word_count_estimate": 0,
+  "word_count_pass": true,
+  "word_count_note": "${wcRule}",
+  "formatting_deductions": 0,
+  "formatting_notes": [],
+  "estimated_total": 0,
+  "estimated_max": ${maxScore},
+  "estimated_pass_score": ${passScore},
+  "estimated_pct": 0,
+  "estimated_pass": false,
+  "auto_fail_reasons": [],
+  "flags": [],
+  "strengths": [],
+  "weaknesses": [],
+  "rmv_questions": [],
+  "rmv_readiness": "not_ready",
+  "reviewed_at": ${Date.now()}
+}
+
+Rules:
+- section_scores: score each section 0-4 per rubric. Rationale must be specific to this submission.
+- auto_fail_reasons: list any automatic fail conditions triggered (0 score, impression fail, word count violation)
+- flags: specific technical issues (missing drug routes, no lab tables, identifying info present, etc.)
+- strengths: 2-4 specific strengths of this submission
+- weaknesses: 2-4 specific areas needing improvement
+- rmv_questions: exactly 8 targeted questions drawn directly from THIS case — mix of clinical reasoning, counterfactual, justification, error detection, and internal consistency types. Each question should cite a specific detail from the case.
+- rmv_readiness: "ready" (passes all criteria), "borderline" (minor issues), or "not_ready" (fails one or more criteria)
+- estimated_total: sum of (score × section_weight) across all sections minus formatting_deductions`;
+}
+
+async function runAIReview(submissionId) {
+  if (!openai) {
+    console.log("OPENAI_API_KEY not set — skipping AI review");
+    return;
+  }
+
+  const sub = getSubmissionById.get(submissionId);
+  if (!sub) return;
+
+  // Need extracted text
+  if (!sub.extracted_text_path || !fs.existsSync(sub.extracted_text_path)) {
+    console.log(`AI review for ${submissionId}: no extracted text yet, skipping`);
+    return;
+  }
+
+  db.prepare("UPDATE submissions SET ai_review_json = 'running', updated_ts = ? WHERE id = ?")
+    .run(Date.now(), submissionId);
+
+  try {
+    const caseText = fs.readFileSync(sub.extracted_text_path, "utf8");
+    const prompt = buildReviewPrompt(sub.submission_type, caseText, {
+      specialty: sub.specialty,
+      species: sub.species,
+      case_title: sub.case_title,
+      revision_number: sub.revision_number,
+    });
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o",
+      messages: [
+        { role: "system", content: SYSTEM_PROMPT },
+        { role: "user", content: prompt },
+      ],
+      temperature: 0.2,
+      response_format: { type: "json_object" },
+    });
+
+    const raw = completion.choices[0]?.message?.content || "{}";
+    let parsed;
+    try { parsed = JSON.parse(raw); } catch { parsed = { error: "Failed to parse AI response", raw }; }
+
+    parsed.reviewed_at = Date.now();
+
+    db.prepare("UPDATE submissions SET ai_review_json = ?, updated_ts = ? WHERE id = ?")
+      .run(JSON.stringify(parsed), Date.now(), submissionId);
+
+    // Also generate and save RMV question set separately
+    if (parsed.rmv_questions?.length) {
+      db.prepare("UPDATE submissions SET rmv_question_set_json = ?, updated_ts = ? WHERE id = ?")
+        .run(JSON.stringify(parsed.rmv_questions), Date.now(), submissionId);
+    }
+
+    console.log(`AI review complete for submission ${submissionId} — readiness: ${parsed.rmv_readiness}`);
+  } catch (e) {
+    console.error(`AI review failed for submission ${submissionId}:`, e.message);
+    db.prepare("UPDATE submissions SET ai_review_json = ?, updated_ts = ? WHERE id = ?")
+      .run(JSON.stringify({ error: e.message, reviewed_at: Date.now() }), Date.now(), submissionId);
+  }
+}
+
+// POST /api/submissions/:id/ai-review — trigger review
+async function handleTriggerAIReview(req, res, id) {
+  const admin = requireFaculty(req, res);
+  if (!admin) return;
+
+  if (!openai) return apiError(res, 503, "OPENAI_API_KEY not configured");
+
+  const sub = getSubmissionById.get(id);
+  if (!sub) return apiError(res, 404, "Submission not found");
+
+  json(res, 200, { ok: true, message: "AI review started" });
+  runAIReview(Number(id)).catch(e => console.error("AI review error:", e));
+}
+
+// GET /api/submissions/:id/ai-review — get results
+function handleGetAIReview(req, res, id) {
+  const admin = requireFaculty(req, res);
+  if (!admin) return;
+
+  const sub = getSubmissionById.get(id);
+  if (!sub) return apiError(res, 404, "Submission not found");
+
+  if (!sub.ai_review_json) return json(res, 200, { status: "none" });
+  if (sub.ai_review_json === "running") return json(res, 200, { status: "running" });
+
+  let review;
+  try { review = JSON.parse(sub.ai_review_json); } catch { return json(res, 200, { status: "error", error: "Corrupt review data" }); }
+
+  return json(res, 200, { status: "done", review });
+}
+
 // ─── Users CSV sync ───────────────────────────────────────────────────────────
 
 function parseCSV(text) {
@@ -820,6 +1032,10 @@ async function router(req, res) {
 
   const extractMatch = pathname.match(/^\/api\/submissions\/(\d+)\/extract$/);
   if (extractMatch && method === "POST") return handleTriggerExtraction(req, res, extractMatch[1]);
+
+  const aiReviewMatch = pathname.match(/^\/api\/submissions\/(\d+)\/ai-review$/);
+  if (aiReviewMatch && method === "POST") return handleTriggerAIReview(req, res, aiReviewMatch[1]);
+  if (aiReviewMatch && method === "GET")  return handleGetAIReview(req, res, aiReviewMatch[1]);
 
   // Admin user management
   if (method === "POST" && pathname === "/api/admin/sync-users") return handleSyncUsers(req, res);

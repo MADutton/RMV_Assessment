@@ -195,6 +195,35 @@
       <button class="btn btn-danger" id="rejectBtn">Reject</button>
     </div>
     <div class="msg" id="detailMsg"></div>
+
+    <hr class="divider" />
+
+    <!-- AI Review Panel -->
+    <div>
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:10px;">
+        <div style="font-size:13px;font-weight:600;">AI Review <span id="aiReadinessBadge" class="pill"></span></div>
+        <button class="btn" id="runAIReviewBtn" onclick="triggerAIReview()">Run AI Review</button>
+      </div>
+      <div class="msg" id="aiReviewStatus"></div>
+      <div id="aiReviewPanel" style="display:none;">
+
+        <!-- Score table -->
+        <div id="aiScoreTable" style="margin-bottom:14px;"></div>
+
+        <!-- Pass/fail summary -->
+        <div id="aiPassSummary" style="margin-bottom:14px;"></div>
+
+        <!-- Flags -->
+        <div id="aiFlags" style="margin-bottom:14px;"></div>
+
+        <!-- Strengths / Weaknesses -->
+        <div id="aiStrengthsWeaknesses" style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:14px;"></div>
+
+        <!-- RMV Questions -->
+        <div id="aiRMVQuestions"></div>
+
+      </div>
+    </div>
   </div>
 
 </div>
@@ -371,6 +400,13 @@
     $("extractionStatus").className = "msg";
     loadExtractedText(id);
 
+    // Load AI review
+    $("aiReviewPanel").style.display = "none";
+    $("aiReadinessBadge").textContent = "";
+    $("aiReviewStatus").textContent = "Loading AI review...";
+    $("aiReviewStatus").className = "msg";
+    loadAIReview(id);
+
     $("detailPane").style.display = "";
     $("detailPane").scrollIntoView({ behavior: "smooth", block: "start" });
   };
@@ -407,6 +443,165 @@
     $("extractedText").style.display = "none";
     await fetch(`/api/submissions/${currentId}/extract`, { method: "POST" });
     setTimeout(() => loadExtractedText(currentId), 1500);
+  };
+
+  // ── AI Review ──────────────────────────────────────────────────────────────
+
+  const SCORE_LABELS = ["Missing / Fail", "Minimal", "Partial", "Mostly Complete", "Complete"];
+  const SCORE_COLORS = ["#ff6b6b", "#ff9f9f", "#ffd166", "#7ec8e3", "#4cd964"];
+
+  function scoreBar(score) {
+    const pct = (score / 4) * 100;
+    const color = SCORE_COLORS[score] || "#9fb3d1";
+    return `<div style="display:flex;align-items:center;gap:8px;">
+      <div style="flex:1;height:6px;border-radius:3px;background:rgba(255,255,255,0.1);">
+        <div style="width:${pct}%;height:100%;border-radius:3px;background:${color};"></div>
+      </div>
+      <span style="font-size:11px;color:${color};min-width:18px;">${score}/4</span>
+    </div>`;
+  }
+
+  function renderAIReview(r) {
+    const panel = $("aiReviewPanel");
+    panel.style.display = "";
+
+    // Readiness badge
+    const readinessColors = { ready: "#4cd964", borderline: "#ffd166", not_ready: "#ff6b6b" };
+    $("aiReadinessBadge").textContent = r.rmv_readiness || "unknown";
+    $("aiReadinessBadge").style.color = readinessColors[r.rmv_readiness] || "#9fb3d1";
+    $("aiReadinessBadge").style.borderColor = readinessColors[r.rmv_readiness] || "#9fb3d1";
+
+    // Score table
+    const scores = r.section_scores || {};
+    const rows = Object.entries(scores).map(([key, val]) => `
+      <tr>
+        <td style="padding:6px 10px;font-size:12px;color:var(--muted);text-transform:capitalize;">${key.replace(/_/g," ")}</td>
+        <td style="padding:6px 10px;min-width:160px;">${scoreBar(val.score)}</td>
+        <td style="padding:6px 10px;font-size:11px;color:var(--muted);max-width:340px;">${esc(val.rationale || "")}</td>
+      </tr>
+    `).join("");
+
+    $("aiScoreTable").innerHTML = `
+      <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px;">Section Scores</div>
+      <div style="overflow-x:auto;">
+        <table style="font-size:12px;">
+          <thead><tr>
+            <th style="padding:6px 10px;">Section</th>
+            <th style="padding:6px 10px;">Score</th>
+            <th style="padding:6px 10px;">Rationale</th>
+          </tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+      </div>
+    `;
+
+    // Pass/fail summary
+    const pct = r.estimated_pct?.toFixed(1) || "?";
+    const passColor = r.estimated_pass ? "#4cd964" : "#ff6b6b";
+    const impA = r.overall_impression_a;
+    const impB = r.overall_impression_b;
+    const autoFails = r.auto_fail_reasons || [];
+
+    $("aiPassSummary").innerHTML = `
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <div style="padding:10px 14px;border-radius:10px;border:1px solid ${passColor}33;background:${passColor}11;flex:1 1 180px;">
+          <div style="font-size:11px;color:var(--muted);">Estimated score</div>
+          <div style="font-size:20px;font-weight:700;color:${passColor};">${r.estimated_total || 0} / ${r.estimated_max || 400}</div>
+          <div style="font-size:12px;color:${passColor};">${pct}% &mdash; ${r.estimated_pass ? "PASS" : "FAIL"}</div>
+        </div>
+        <div style="padding:10px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.1);background:rgba(0,0,0,0.15);flex:1 1 180px;">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Overall Impressions</div>
+          <div style="font-size:12px;margin-bottom:3px;">A: <span style="color:${impA?.pass ? '#4cd964' : '#ff6b6b'}">${impA?.pass ? "Pass" : "Fail"}</span> — ${esc(impA?.rationale || "")}</div>
+          <div style="font-size:12px;">B: <span style="color:${impB?.pass ? '#4cd964' : '#ff6b6b'}">${impB?.pass ? "Pass" : "Fail"}</span> — ${esc(impB?.rationale || "")}</div>
+        </div>
+        <div style="padding:10px 14px;border-radius:10px;border:1px solid rgba(255,255,255,0.1);background:rgba(0,0,0,0.15);flex:1 1 180px;">
+          <div style="font-size:11px;color:var(--muted);margin-bottom:4px;">Word Count</div>
+          <div style="font-size:16px;font-weight:600;color:${r.word_count_pass ? '#4cd964' : '#ff6b6b'};">${r.word_count_estimate?.toLocaleString() || "?"}</div>
+          <div style="font-size:11px;color:var(--muted);">${esc(r.word_count_note || "")}</div>
+        </div>
+      </div>
+      ${autoFails.length ? `<div style="margin-top:8px;padding:8px 12px;border-radius:8px;border:1px solid rgba(255,107,107,0.3);background:rgba(255,107,107,0.07);font-size:12px;color:#ff9f9f;">
+        <strong>Auto-fail conditions:</strong> ${autoFails.map(f => esc(f)).join(" &bull; ")}
+      </div>` : ""}
+      ${(r.formatting_deductions || 0) > 0 ? `<div style="margin-top:6px;font-size:12px;color:#ffd166;">Formatting deductions: -${r.formatting_deductions} pts &mdash; ${(r.formatting_notes || []).join(", ")}</div>` : ""}
+    `;
+
+    // Flags
+    const flags = r.flags || [];
+    $("aiFlags").innerHTML = flags.length ? `
+      <div style="font-size:12px;font-weight:600;color:var(--muted);margin-bottom:6px;">Flags</div>
+      <div style="display:flex;flex-direction:column;gap:4px;">
+        ${flags.map(f => `<div style="font-size:12px;padding:5px 10px;border-radius:8px;border:1px solid rgba(255,209,102,0.25);background:rgba(255,209,102,0.07);color:#ffd166;">${esc(f)}</div>`).join("")}
+      </div>
+    ` : "";
+
+    // Strengths / Weaknesses
+    const strengths = r.strengths || [];
+    const weaknesses = r.weaknesses || [];
+    $("aiStrengthsWeaknesses").innerHTML = `
+      <div style="flex:1 1 220px;">
+        <div style="font-size:12px;font-weight:600;color:#4cd964;margin-bottom:6px;">Strengths</div>
+        ${strengths.map(s => `<div style="font-size:12px;padding:5px 10px;border-radius:8px;border:1px solid rgba(76,217,100,0.2);background:rgba(76,217,100,0.06);color:var(--muted);margin-bottom:4px;">${esc(s)}</div>`).join("") || "<div class='msg'>None identified</div>"}
+      </div>
+      <div style="flex:1 1 220px;">
+        <div style="font-size:12px;font-weight:600;color:#ff9f9f;margin-bottom:6px;">Weaknesses</div>
+        ${weaknesses.map(w => `<div style="font-size:12px;padding:5px 10px;border-radius:8px;border:1px solid rgba(255,107,107,0.2);background:rgba(255,107,107,0.06);color:var(--muted);margin-bottom:4px;">${esc(w)}</div>`).join("") || "<div class='msg'>None identified</div>"}
+      </div>
+    `;
+
+    // RMV Questions
+    const questions = r.rmv_questions || [];
+    $("aiRMVQuestions").innerHTML = questions.length ? `
+      <div style="font-size:12px;font-weight:600;color:var(--accent);margin-bottom:8px;">RMV Questions (${questions.length})</div>
+      <ol style="margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px;">
+        ${questions.map(q => `<li style="font-size:13px;color:var(--text);line-height:1.5;">${esc(q)}</li>`).join("")}
+      </ol>
+    ` : "";
+  }
+
+  async function loadAIReview(id) {
+    const r = await fetch(`/api/submissions/${id}/ai-review`);
+    const j = await r.json().catch(() => ({}));
+
+    if (j.status === "none") {
+      $("aiReviewStatus").textContent = "No AI review yet. Click Run AI Review to start.";
+      $("aiReviewPanel").style.display = "none";
+      $("aiReadinessBadge").textContent = "";
+      return;
+    }
+    if (j.status === "running") {
+      $("aiReviewStatus").textContent = "AI review in progress...";
+      $("aiReviewPanel").style.display = "none";
+      setTimeout(() => loadAIReview(id), 3000);
+      return;
+    }
+    if (j.status === "error" || j.review?.error) {
+      $("aiReviewStatus").textContent = `Review error: ${j.review?.error || j.error}`;
+      $("aiReviewStatus").className = "msg err";
+      return;
+    }
+
+    $("aiReviewStatus").textContent = j.review?.reviewed_at
+      ? `Last reviewed: ${new Date(j.review.reviewed_at).toLocaleString()}`
+      : "";
+    renderAIReview(j.review);
+  }
+
+  window.triggerAIReview = async function() {
+    if (!currentId) return;
+    $("aiReviewStatus").textContent = "Starting AI review...";
+    $("aiReviewStatus").className = "msg";
+    $("aiReviewPanel").style.display = "none";
+    $("aiReadinessBadge").textContent = "";
+    const r = await fetch(`/api/submissions/${currentId}/ai-review`, { method: "POST" });
+    const j = await r.json().catch(() => ({}));
+    if (!r.ok) {
+      $("aiReviewStatus").textContent = `Failed to start: ${j.error || r.status}`;
+      $("aiReviewStatus").className = "msg err";
+      return;
+    }
+    $("aiReviewStatus").textContent = "Running — this takes about 20–30 seconds...";
+    setTimeout(() => loadAIReview(currentId), 4000);
   };
 
   window.closeDetail = function() {
