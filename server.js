@@ -1586,7 +1586,7 @@ function handleSubmissionReport(req, res, id) {
     </div>
   </div>
   <div style="font-size:8.5pt;color:#aaa;margin-top:-6px;margin-bottom:10px;font-style:italic;">
-    * Pre-session document assessment (recorded at time of AI review): RMV readiness — <strong style="color:#888;">${esc((aiReview.rmv_readiness || "unknown").toLowerCase())}</strong>
+    * Pre-session document assessment (recorded at time of AI review): RMV readiness — <strong style="color:${aiReview.rmv_readiness === "ready" ? "#27ae60" : aiReview.rmv_readiness === "borderline" ? "#b8860b" : aiReview.rmv_readiness === "not_ready" ? "#c0392b" : "#888"};">${esc((aiReview.rmv_readiness || "unknown").toLowerCase())}</strong>
   </div>
 
   <!-- Overall Impressions -->
