@@ -445,7 +445,9 @@
             <div class="sub-card-meta">${esc(typeLabel)}${sub.species ? " &bull; " + esc(sub.species) : ""}${sub.program ? " &bull; " + esc(sub.program) : ""}</div>
           </div>
           <div class="sub-card-right">
-            <span class="badge ${sub.status || ""}">${statusLabel(sub.status)}</span>
+            ${sub.final_decision === "pass" ? `<span class="badge completed">Pass</span>`
+            : sub.final_decision === "fail"  ? `<span class="badge rejected">Not Passed</span>`
+            : `<span class="badge ${sub.status || ""}">${statusLabel(sub.status)}</span>`}
             <span style="font-size:11px;color:var(--muted);">${fmtDate(sub.created_ts)}</span>
           </div>
         </div>
