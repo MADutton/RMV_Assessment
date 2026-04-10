@@ -254,8 +254,32 @@
   let me = { email: null, role: null };
   let allSubmissions = [];
   let currentId = null;
+  let isDirty = false;
 
   const $ = (id) => document.getElementById(id);
+
+  function setDirty() {
+    if (isDirty) return;
+    isDirty = true;
+    const btn = $("saveStatusBtn");
+    btn.textContent = "Save";
+    const badge = document.createElement("span");
+    badge.id = "unsavedBadge";
+    badge.style.cssText = "font-size:11px;color:var(--warn);margin-left:10px;font-weight:600;";
+    badge.textContent = "● Unsaved changes";
+    btn.parentNode.insertBefore(badge, btn.nextSibling);
+  }
+
+  function clearDirty() {
+    isDirty = false;
+    const badge = $("unsavedBadge");
+    if (badge) badge.remove();
+  }
+
+  function confirmIfDirty() {
+    if (!isDirty) return true;
+    return confirm("You have unsaved changes. Discard them and continue?");
+  }
 
   function esc(s) {
     return String(s || "").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
@@ -368,6 +392,8 @@
   }
 
   window.openDetail = async function(id) {
+    if (currentId && currentId !== id && !confirmIfDirty()) return;
+    clearDirty();
     currentId = id;
     const r = await fetch(`/api/submissions/${id}`);
     const sub = await r.json().catch(() => ({}));
@@ -636,6 +662,8 @@
   };
 
   window.closeDetail = function() {
+    if (!confirmIfDirty()) return;
+    clearDirty();
     $("detailPane").style.display = "none";
     currentId = null;
   };
@@ -668,6 +696,7 @@
 
     msg.textContent = "Saved.";
     msg.className = "msg ok";
+    clearDirty();
 
     if (statusOverride) $("statusSel").value = statusOverride;
     if (decisionOverride) $("finalDecisionSel").value = decisionOverride;
@@ -679,6 +708,19 @@
   $("markReadyBtn").addEventListener("click", () => saveStatus("rmv_ready"));
   $("rejectBtn").addEventListener("click", () => {
     if (confirm("Mark this submission as rejected?")) saveStatus("rejected", "fail");
+  });
+
+  // Mark dirty when any decision field changes
+  ["statusSel", "finalDecisionSel"].forEach(id => {
+    $(id).addEventListener("change", () => { if (currentId) setDirty(); });
+  });
+  ["reviewerNotes", "applicantFeedback"].forEach(id => {
+    $(id).addEventListener("input", () => { if (currentId) setDirty(); });
+  });
+
+  // Warn on browser/tab close if there are unsaved changes
+  window.addEventListener("beforeunload", (e) => {
+    if (isDirty) { e.preventDefault(); e.returnValue = ""; }
   });
 
   [$("filterStatus"), $("filterType")].forEach(el => el.addEventListener("change", renderQueue));
