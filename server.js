@@ -1309,6 +1309,425 @@ async function runAIGrading(submissionId) {
   }
 }
 
+// ─── RMV Report ───────────────────────────────────────────────────────────────
+
+// GET /api/submissions/:id/report — standalone print-optimized HTML report
+function handleSubmissionReport(req, res, id) {
+  const email = requireFaculty(req, res);
+  if (!email) return;
+
+  const sub = getSubmissionById.get(id);
+  if (!sub) return apiError(res, 404, "Submission not found");
+
+  let aiReview = null;
+  let rmvGrading = null;
+  let rmvResponses = null;
+  let rmvQuestions = null;
+
+  try { aiReview   = sub.ai_review_json && sub.ai_review_json !== "running" ? JSON.parse(sub.ai_review_json) : null; } catch {}
+  try { rmvGrading = sub.rmv_grading_json && sub.rmv_grading_json !== "running" ? JSON.parse(sub.rmv_grading_json) : null; } catch {}
+  try { rmvResponses = sub.rmv_responses_json ? JSON.parse(sub.rmv_responses_json) : null; } catch {}
+  try { rmvQuestions = sub.rmv_questions_finalized_json ? JSON.parse(sub.rmv_questions_finalized_json) : null; } catch {}
+
+  const esc = (s) => String(s || "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+  const fmt = (ts) => ts ? new Date(ts).toLocaleString("en-US", { dateStyle: "medium", timeStyle: "short" }) : "—";
+  const fmtDate = (ts) => ts ? new Date(ts).toLocaleDateString("en-US", { dateStyle: "long" }) : "—";
+
+  const SCORE_LABELS = ["Missing / Fail (0)", "Minimal (1)", "Partial (2)", "Mostly Complete (3)", "Complete (4)"];
+
+  // Section score rows
+  let aiSectionRows = "";
+  if (aiReview?.section_scores) {
+    const maxScore = sub.submission_type === "case_summary" ? 400 : 420;
+    const entries = Object.entries(aiReview.section_scores);
+    aiSectionRows = entries.map(([key, val]) => {
+      const barPct = Math.round((val.score / 4) * 100);
+      const scoreColors = ["#c0392b","#e67e22","#f39c12","#2980b9","#27ae60"];
+      const color = scoreColors[val.score] || "#888";
+      return `<tr>
+        <td style="padding:6px 10px;font-size:11px;text-transform:capitalize;white-space:nowrap;">${esc(key.replace(/_/g, " "))}</td>
+        <td style="padding:6px 10px;min-width:100px;">
+          <div style="display:flex;align-items:center;gap:6px;">
+            <div style="flex:1;height:7px;border-radius:4px;background:#e0e0e0;min-width:60px;">
+              <div style="width:${barPct}%;height:100%;border-radius:4px;background:${color};"></div>
+            </div>
+            <span style="font-size:11px;font-weight:700;color:${color};min-width:24px;">${val.score}/4</span>
+          </div>
+        </td>
+        <td style="padding:6px 10px;font-size:11px;color:#444;line-height:1.5;">${esc(val.rationale || "")}</td>
+      </tr>`;
+    }).join("");
+  }
+
+  // RMV Q&A rows
+  let rmvQARows = "";
+  if (rmvResponses?.length) {
+    const grades = rmvGrading?.response_grades || [];
+    const gradeColors = ["#c0392b","#e67e22","#f39c12","#2980b9","#27ae60"];
+    rmvQARows = rmvResponses.map((item, i) => {
+      const grade = grades[i];
+      const gradeColor = grade ? (gradeColors[grade.score] || "#888") : null;
+      const wc = (item.a || "").trim().split(/\s+/).filter(Boolean).length;
+      return `
+        <div class="qa-block" style="border:1px solid #ddd;border-radius:8px;overflow:hidden;margin-bottom:12px;page-break-inside:avoid;">
+          <div style="background:#f5f5f5;padding:8px 12px;border-bottom:1px solid #ddd;display:flex;justify-content:space-between;align-items:flex-start;gap:10px;">
+            <div style="font-size:11px;font-weight:700;color:#1a4078;line-height:1.5;flex:1;"><strong>Q${i+1}:</strong> ${esc(item.q)}</div>
+            ${grade ? `<div style="flex-shrink:0;text-align:right;">
+              <span style="font-size:13px;font-weight:800;color:${gradeColor};">${grade.score}/4</span>
+              ${(grade.flags||[]).length ? `<div style="font-size:9px;color:#c0392b;margin-top:2px;">${grade.flags.map(f=>esc(f)).join(" · ")}</div>` : ""}
+            </div>` : ""}
+          </div>
+          <div style="padding:10px 12px;font-size:11px;color:#222;line-height:1.65;white-space:pre-wrap;">${item.a ? esc(item.a) : '<em style="color:#aaa;">No response recorded</em>'}</div>
+          ${grade?.rationale ? `<div style="padding:6px 12px;background:#fafafa;border-top:1px solid #eee;font-size:10px;color:#666;display:flex;justify-content:space-between;">
+            <span>${wc} words</span>
+            <em>${esc(grade.rationale)}</em>
+          </div>` : `<div style="padding:4px 12px;background:#fafafa;border-top:1px solid #eee;font-size:10px;color:#999;">${wc} words</div>`}
+        </div>`;
+    }).join("");
+  }
+
+  // Confidence colors (print-friendly)
+  const confPrintColors = { high: "#27ae60", medium: "#2980b9", low: "#e67e22", concerning: "#c0392b" };
+  const recPrintColors  = { pass: "#27ae60", borderline: "#e67e22", fail: "#c0392b" };
+  const decisionPrintColors = { pass: "#27ae60", fail: "#c0392b", pending: "#888" };
+
+  const submittedDate = fmtDate(sub.created_ts);
+  const reportDate    = fmt(Date.now());
+
+  const html = `<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>RMV Report — ${esc(sub.case_title || `Submission #${sub.id}`)}</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 11pt;
+    color: #111;
+    background: #fff;
+    padding: 0;
+  }
+  .page {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 32px 36px;
+  }
+  h1 { font-size: 17pt; color: #1a2e54; margin-bottom: 4px; }
+  h2 { font-size: 12pt; color: #1a2e54; margin: 18px 0 6px; border-bottom: 1.5px solid #c8d6ea; padding-bottom: 3px; }
+  h3 { font-size: 10.5pt; color: #333; margin: 12px 0 4px; }
+  .header-bar {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 2.5px solid #1a2e54;
+    padding-bottom: 10px;
+    margin-bottom: 16px;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .report-title { font-size: 9pt; color: #888; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 3px; }
+  .meta-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    gap: 8px 16px;
+    background: #f7f9fc;
+    border: 1px solid #dde4ef;
+    border-radius: 6px;
+    padding: 12px 14px;
+    margin-bottom: 14px;
+  }
+  .meta-item label { font-size: 8.5pt; color: #888; display: block; margin-bottom: 1px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .meta-item .val  { font-size: 10.5pt; font-weight: 600; color: #111; }
+  .badge {
+    display: inline-block;
+    font-size: 9pt;
+    font-weight: 700;
+    padding: 2px 10px;
+    border-radius: 999px;
+    border: 1.5px solid currentColor;
+    letter-spacing: 0.03em;
+  }
+  table { width: 100%; border-collapse: collapse; font-size: 10.5pt; }
+  th {
+    background: #eef2f8;
+    color: #444;
+    text-align: left;
+    padding: 6px 10px;
+    font-size: 9pt;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  td { vertical-align: top; border-bottom: 1px solid #eee; }
+  .impressions-row {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  .impression-box {
+    flex: 1 1 200px;
+    border: 1.5px solid;
+    border-radius: 7px;
+    padding: 8px 12px;
+  }
+  .score-summary {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 12px;
+  }
+  .score-box {
+    flex: 1 1 150px;
+    border: 1.5px solid;
+    border-radius: 7px;
+    padding: 8px 12px;
+  }
+  .score-box label { font-size: 8.5pt; color: #888; display: block; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .score-box .big  { font-size: 18pt; font-weight: 800; line-height: 1; }
+  .score-box .sub  { font-size: 9pt; margin-top: 2px; }
+  .tag-list { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 4px; }
+  .tag { font-size: 9pt; padding: 2px 8px; border-radius: 4px; border: 1px solid; }
+  .section-header { font-size: 8.5pt; font-weight: 700; color: #666; text-transform: uppercase; letter-spacing: 0.07em; margin: 4px 0 3px; }
+  .disclaimer {
+    margin-top: 20px;
+    padding: 8px 12px;
+    background: #f5f5f5;
+    border-left: 3px solid #aaa;
+    font-size: 9pt;
+    color: #666;
+    line-height: 1.5;
+  }
+  .print-btn {
+    position: fixed;
+    top: 16px;
+    right: 16px;
+    padding: 9px 20px;
+    background: #1a2e54;
+    color: #fff;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    font-family: system-ui, sans-serif;
+    z-index: 999;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+  }
+  .print-btn:hover { background: #253f72; }
+  @media print {
+    .print-btn { display: none; }
+    .page { max-width: 100%; padding: 16px 20px; }
+    body { font-size: 9.5pt; }
+    h1 { font-size: 14pt; }
+    h2 { font-size: 10.5pt; }
+    .qa-block { page-break-inside: avoid; }
+    .score-summary, .impressions-row { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<button class="print-btn" onclick="window.print()">🖨 Print / Save PDF</button>
+<div class="page">
+
+  <!-- Header -->
+  <div class="header-bar">
+    <div>
+      <div class="report-title">Reflective Mastery Verification — Official Review Report</div>
+      <h1>${esc(sub.case_title || "Untitled Case")}</h1>
+      <div style="font-size:9.5pt;color:#555;margin-top:3px;">
+        ${esc(sub.submission_type === "case_summary" ? "Case Summary" : "Case Report")}
+        &nbsp;·&nbsp; Submission #${sub.id}
+        &nbsp;·&nbsp; Submitted ${submittedDate}
+      </div>
+    </div>
+    <div style="text-align:right;">
+      <div style="font-size:8.5pt;color:#888;">Report generated</div>
+      <div style="font-size:9.5pt;font-weight:600;">${reportDate}</div>
+      <div style="font-size:8.5pt;color:#888;margin-top:6px;">Final Decision</div>
+      <span class="badge" style="color:${decisionPrintColors[sub.final_decision] || "#888"};font-size:10pt;">
+        ${esc((sub.final_decision || "pending").toUpperCase())}
+      </span>
+    </div>
+  </div>
+
+  <!-- Submission Metadata -->
+  <div class="meta-grid">
+    ${[
+      ["Applicant", sub.applicant_name || sub.applicant_email],
+      ["Email", sub.applicant_email],
+      ["Program", sub.program],
+      ["Specialty", sub.specialty],
+      ["Species", sub.species],
+      ["Case date", sub.case_date],
+      ["Revision", sub.revision_number || "v1"],
+      ["RMV session", sub.rmv_session_status],
+    ].filter(([,v]) => v).map(([k,v]) => `
+      <div class="meta-item"><label>${esc(k)}</label><div class="val">${esc(v)}</div></div>
+    `).join("")}
+  </div>
+
+  ${aiReview ? `
+  <!-- ═══ AI REVIEW SECTION ════════════════════════════════════════ -->
+  <h2>AI Review — Written Submission Assessment</h2>
+  <div style="font-size:9pt;color:#888;margin-bottom:10px;">Reviewed ${aiReview.reviewed_at ? fmt(aiReview.reviewed_at) : "—"} · AI assessment is advisory only, for use by faculty reviewer</div>
+
+  <!-- Score summary boxes -->
+  <div class="score-summary">
+    <div class="score-box" style="border-color:${aiReview.estimated_pass ? "#27ae60" : "#c0392b"};">
+      <label>Estimated Score</label>
+      <div class="big" style="color:${aiReview.estimated_pass ? "#27ae60" : "#c0392b"};">${aiReview.estimated_total || 0}/${aiReview.estimated_max || (sub.submission_type === "case_summary" ? 400 : 420)}</div>
+      <div class="sub" style="color:${aiReview.estimated_pass ? "#27ae60" : "#c0392b"};">${(aiReview.estimated_pct||0).toFixed(1)}% — ${aiReview.estimated_pass ? "PASS" : "FAIL"}</div>
+    </div>
+    <div class="score-box" style="border-color:#aaa;">
+      <label>Word Count</label>
+      <div class="big" style="color:${aiReview.word_count_pass ? "#27ae60" : "#c0392b"};">${(aiReview.word_count_estimate||0).toLocaleString()}</div>
+      <div class="sub" style="color:#666;">${esc(aiReview.word_count_note || "")}</div>
+    </div>
+    <div class="score-box" style="border-color:#aaa;">
+      <label>RMV Readiness</label>
+      <div class="big" style="color:${aiReview.rmv_readiness === "ready" ? "#27ae60" : aiReview.rmv_readiness === "borderline" ? "#e67e22" : "#c0392b"};font-size:13pt;margin-top:4px;">${esc((aiReview.rmv_readiness || "").toUpperCase())}</div>
+    </div>
+  </div>
+
+  <!-- Overall Impressions -->
+  <h3>Overall Impressions (Pass/Fail)</h3>
+  <div class="impressions-row">
+    <div class="impression-box" style="border-color:${aiReview.overall_impression_a?.pass ? "#27ae60" : "#c0392b"};">
+      <div style="font-size:9pt;font-weight:700;color:${aiReview.overall_impression_a?.pass ? "#27ae60" : "#c0392b"};margin-bottom:4px;">
+        Impression A — ${aiReview.overall_impression_a?.pass ? "PASS" : "FAIL"}
+      </div>
+      <div style="font-size:10pt;color:#333;line-height:1.5;">${esc(aiReview.overall_impression_a?.rationale || "Not evaluated")}</div>
+      <div style="font-size:9pt;color:#666;margin-top:4px;font-style:italic;">Demonstrates diplomate-level clinical management and acumen</div>
+    </div>
+    <div class="impression-box" style="border-color:${aiReview.overall_impression_b?.pass ? "#27ae60" : "#c0392b"};">
+      <div style="font-size:9pt;font-weight:700;color:${aiReview.overall_impression_b?.pass ? "#27ae60" : "#c0392b"};margin-bottom:4px;">
+        Impression B — ${aiReview.overall_impression_b?.pass ? "PASS" : "FAIL"}
+      </div>
+      <div style="font-size:10pt;color:#333;line-height:1.5;">${esc(aiReview.overall_impression_b?.rationale || "Not evaluated")}</div>
+      <div style="font-size:9pt;color:#666;margin-top:4px;font-style:italic;">Professional quality; minimal organizational/grammatical errors</div>
+    </div>
+  </div>
+
+  ${(aiReview.auto_fail_reasons||[]).length ? `
+  <div style="padding:8px 12px;border-radius:6px;border:1.5px solid #c0392b;background:#fdf3f2;font-size:10pt;color:#c0392b;margin-bottom:10px;">
+    <strong>Auto-fail conditions triggered:</strong> ${aiReview.auto_fail_reasons.map(f => esc(f)).join(" · ")}
+  </div>` : ""}
+
+  ${(aiReview.formatting_deductions||0) > 0 ? `
+  <div style="padding:6px 12px;border-radius:6px;border:1px solid #e67e22;background:#fef9f2;font-size:9.5pt;color:#b45309;margin-bottom:10px;">
+    Formatting deductions: <strong>−${aiReview.formatting_deductions} pts</strong> — ${(aiReview.formatting_notes||[]).map(n=>esc(n)).join(", ")}
+  </div>` : ""}
+
+  <!-- Section Scores -->
+  <h3>Section Scores</h3>
+  <table style="margin-bottom:12px;">
+    <thead><tr><th style="width:22%;">Section</th><th style="width:18%;">Score</th><th>Rationale</th></tr></thead>
+    <tbody>${aiSectionRows}</tbody>
+  </table>
+
+  <!-- Strengths & Weaknesses -->
+  <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:12px;">
+    <div style="flex:1 1 200px;">
+      <div class="section-header" style="color:#27ae60;">Strengths</div>
+      ${(aiReview.strengths||[]).map(s=>`<div style="font-size:10pt;padding:4px 8px;border-left:3px solid #27ae60;margin-bottom:4px;color:#222;">${esc(s)}</div>`).join("") || "<div style='font-size:10pt;color:#aaa;'>None identified</div>"}
+    </div>
+    <div style="flex:1 1 200px;">
+      <div class="section-header" style="color:#c0392b;">Weaknesses</div>
+      ${(aiReview.weaknesses||[]).map(w=>`<div style="font-size:10pt;padding:4px 8px;border-left:3px solid #c0392b;margin-bottom:4px;color:#222;">${esc(w)}</div>`).join("") || "<div style='font-size:10pt;color:#aaa;'>None identified</div>"}
+    </div>
+  </div>
+
+  ${(aiReview.flags||[]).length ? `
+  <div style="margin-bottom:12px;">
+    <div class="section-header" style="color:#e67e22;">Flags</div>
+    <div class="tag-list">
+      ${aiReview.flags.map(f=>`<span class="tag" style="color:#b45309;border-color:#e67e22;background:#fef9f2;">${esc(f)}</span>`).join("")}
+    </div>
+  </div>` : ""}
+
+  ` : `<div style="font-size:10pt;color:#aaa;margin:10px 0;">No AI review data available for this submission.</div>`}
+
+  ${(rmvGrading || rmvResponses) ? `
+  <!-- ═══ RMV SESSION SECTION ══════════════════════════════════════ -->
+  <h2 style="margin-top:22px;">RMV Session — Authorship Verification</h2>
+  <div style="font-size:9pt;color:#888;margin-bottom:10px;">
+    ${sub.rmv_session_started_ts ? `Session started ${fmt(sub.rmv_session_started_ts)}` : ""}
+    ${sub.rmv_responses_ts ? ` · Responses submitted ${fmt(sub.rmv_responses_ts)}` : ""}
+    ${sub.rmv_timed_expired ? " · ⏱ Auto-submitted at time expiry" : ""}
+  </div>
+
+  ${rmvGrading ? `
+  <!-- Authorship Assessment -->
+  <div class="score-summary">
+    <div class="score-box" style="border-color:${confPrintColors[rmvGrading.authorship_confidence] || "#888"};">
+      <label>Authorship Confidence</label>
+      <div class="big" style="color:${confPrintColors[rmvGrading.authorship_confidence] || "#888"};font-size:14pt;">${esc((rmvGrading.authorship_confidence||"unknown").toUpperCase())}</div>
+    </div>
+    <div class="score-box" style="border-color:${recPrintColors[rmvGrading.recommendation] || "#888"};">
+      <label>AI Recommendation</label>
+      <div class="big" style="color:${recPrintColors[rmvGrading.recommendation] || "#888"};font-size:14pt;">${esc((rmvGrading.recommendation||"unknown").toUpperCase())}</div>
+    </div>
+    ${rmvGrading.response_grades?.length ? `
+    <div class="score-box" style="border-color:#aaa;">
+      <label>Average Response Score</label>
+      <div class="big" style="color:#1a2e54;font-size:14pt;">
+        ${(rmvGrading.response_grades.reduce((s,g) => s + (g.score||0), 0) / rmvGrading.response_grades.length).toFixed(1)}/4
+      </div>
+    </div>` : ""}
+  </div>
+
+  <div style="font-size:10.5pt;color:#333;line-height:1.65;margin-bottom:10px;padding:10px 12px;background:#f7f9fc;border-left:4px solid #1a2e54;border-radius:0 6px 6px 0;">
+    <strong>Authorship rationale:</strong> ${esc(rmvGrading.authorship_rationale || "")}
+  </div>
+
+  ${(rmvGrading.concerns||[]).length ? `
+  <div style="margin-bottom:12px;">
+    <div class="section-header" style="color:#c0392b;">Concerns Identified</div>
+    ${rmvGrading.concerns.map(c => `<div style="font-size:10pt;padding:4px 8px;border-left:3px solid #c0392b;margin-bottom:4px;color:#333;">${esc(c)}</div>`).join("")}
+  </div>` : ""}
+  ` : ""}
+
+  ${rmvResponses?.length ? `
+  <!-- Q&A Detail -->
+  <h3>Question-by-Question Responses</h3>
+  <div style="font-size:9pt;color:#888;margin-bottom:8px;">Scored 0–4: 0=No/incorrect response, 1=Generic, 2=Partial, 3=Mostly specific, 4=Case-specific &amp; accurate</div>
+  ${rmvQARows}
+  ` : ""}
+  ` : `<div style="font-size:10pt;color:#aaa;margin:10px 0;">RMV session not yet completed.</div>`}
+
+  <!-- ═══ FACULTY DECISION ═══════════════════════════════════════════ -->
+  <h2 style="margin-top:22px;">Faculty Decision</h2>
+  <div class="impressions-row" style="margin-bottom:12px;">
+    <div class="impression-box" style="flex:0 0 auto;min-width:140px;border-color:${decisionPrintColors[sub.final_decision] || "#888"};">
+      <label style="font-size:8.5pt;color:#888;text-transform:uppercase;letter-spacing:0.05em;display:block;margin-bottom:4px;">Final Decision</label>
+      <div style="font-size:17pt;font-weight:800;color:${decisionPrintColors[sub.final_decision] || "#888"};">${esc((sub.final_decision||"Pending").toUpperCase())}</div>
+    </div>
+    ${sub.reviewer_notes ? `
+    <div style="flex:1 1 200px;border:1px solid #ddd;border-radius:7px;padding:8px 12px;">
+      <div style="font-size:8.5pt;color:#888;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:5px;">Reviewer Notes <em style="color:#aaa;text-transform:none;">(internal)</em></div>
+      <div style="font-size:10.5pt;color:#333;line-height:1.6;white-space:pre-wrap;">${esc(sub.reviewer_notes)}</div>
+    </div>` : ""}
+  </div>
+
+  ${sub.applicant_feedback ? `
+  <div style="border:1px solid #c8d6ea;border-radius:7px;padding:10px 14px;margin-bottom:12px;">
+    <div style="font-size:8.5pt;color:#888;text-transform:uppercase;letter-spacing:0.05em;margin-bottom:5px;">Applicant Feedback</div>
+    <div style="font-size:10.5pt;color:#333;line-height:1.6;white-space:pre-wrap;">${esc(sub.applicant_feedback)}</div>
+  </div>` : ""}
+
+  <div class="disclaimer">
+    <strong>Disclaimer:</strong> AI-generated scores and rationale are provided as a decision-support tool only. All final determinations are made by credentialed ABVP faculty reviewers. This report is confidential and intended for internal credentialing use only. Generated by the RMV Portal — Reflective Mastery Verification Platform.
+  </div>
+
+</div>
+</body>
+</html>`;
+
+  res.writeHead(200, { "Content-Type": "text/html; charset=utf-8" });
+  res.end(html);
+}
+
 // ─── Users CSV sync ───────────────────────────────────────────────────────────
 
 function parseCSV(text) {
@@ -1471,6 +1890,9 @@ async function router(req, res) {
 
   const rmvRespondMatch = pathname.match(/^\/api\/submissions\/(\d+)\/rmv\/respond$/);
   if (rmvRespondMatch && method === "POST") return handleSubmitRMVResponses(req, res, rmvRespondMatch[1]);
+
+  const reportMatch = pathname.match(/^\/api\/submissions\/(\d+)\/report$/);
+  if (reportMatch && method === "GET") return handleSubmissionReport(req, res, reportMatch[1]);
 
   // Admin user management
   if (method === "POST" && pathname === "/api/admin/sync-users") return handleSyncUsers(req, res);

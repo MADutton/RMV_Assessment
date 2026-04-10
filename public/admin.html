@@ -198,6 +198,7 @@
     <div style="margin-top:12px;display:flex;gap:10px;flex-wrap:wrap;">
       <button class="btn btn-ok" id="saveStatusBtn">Save</button>
       <button class="btn btn-danger" id="rejectBtn">Reject</button>
+      <a id="downloadReportBtn" class="btn" href="#" target="_blank" style="margin-left:auto;">⬇ Download Report</a>
     </div>
     <div class="msg" id="detailMsg"></div>
 
@@ -378,6 +379,7 @@
 
     $("detailTitle").textContent = `Submission #${sub.id} — ${esc(sub.case_title || "")}`;
     $("detailFileLink").href = `/api/submissions/${id}/file`;
+    $("downloadReportBtn").href = `/api/submissions/${id}/report`;
 
     $("detailMeta").innerHTML = [
       ["Applicant", sub.applicant_email],
