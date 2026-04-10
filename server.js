@@ -1584,10 +1584,9 @@ function handleSubmissionReport(req, res, id) {
       <div class="big" style="color:${aiReview.word_count_pass ? "#27ae60" : "#c0392b"};">${(aiReview.word_count_estimate||0).toLocaleString()}</div>
       <div class="sub" style="color:#666;">${esc(aiReview.word_count_note || "")}</div>
     </div>
-    <div class="score-box" style="border-color:#aaa;">
-      <label>RMV Readiness</label>
-      <div class="big" style="color:${aiReview.rmv_readiness === "ready" ? "#27ae60" : aiReview.rmv_readiness === "borderline" ? "#e67e22" : "#c0392b"};font-size:13pt;margin-top:4px;">${esc((aiReview.rmv_readiness || "").toUpperCase())}</div>
-    </div>
+  </div>
+  <div style="font-size:8.5pt;color:#aaa;margin-top:-6px;margin-bottom:10px;font-style:italic;">
+    * Pre-session document assessment (recorded at time of AI review): RMV readiness — <strong style="color:#888;">${esc((aiReview.rmv_readiness || "unknown").toLowerCase())}</strong>
   </div>
 
   <!-- Overall Impressions -->
