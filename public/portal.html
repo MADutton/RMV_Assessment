@@ -314,20 +314,20 @@
   ];
   const STATUS_ORDER = { submitted: 0, under_review: 1, rmv_ready: 2, completed: 3 };
 
-  function buildPipeline(status) {
+  function buildPipeline(status, finalDecision) {
     const rejected = status === "rejected";
-    const currentIdx = rejected ? 1 : (STATUS_ORDER[status] ?? 0);
+    // If a final decision has been recorded (pass or fail), show all steps complete
+    const decided = finalDecision === "pass" || finalDecision === "fail";
+    const currentIdx = rejected ? 1 : decided ? PIPE_STEPS.length : (STATUS_ORDER[status] ?? 0);
 
     return `<div class="pipeline">${PIPE_STEPS.map((step, i) => {
       let cls = "";
       if (rejected && i === currentIdx) cls = "fail";
       else if (i < currentIdx) cls = "done";
-      else if (i === currentIdx) cls = "active";
+      else if (i === currentIdx && !decided) cls = "active";
+      else if (decided) cls = "done";
 
-      const dotContent = rejected && i === currentIdx ? "✕"
-        : i < currentIdx ? "✓"
-        : i === currentIdx ? "●"
-        : "";
+      const dotContent = rejected && i === currentIdx ? "✕" : i < currentIdx || decided ? "✓" : i === currentIdx ? "●" : "";
 
       return `<div class="pipe-step ${cls}">
         <div class="pipe-dot">${dotContent}</div>
@@ -494,7 +494,7 @@
 
     contentEl.innerHTML = `
       <!-- Status pipeline -->
-      ${buildPipeline(sub.status)}
+      ${buildPipeline(sub.status, sub.final_decision)}
 
       <!-- Decision banner -->
       ${buildDecisionBanner(sub)}
