@@ -788,23 +788,65 @@ PASS/FAIL OVERRIDES (automatic fail regardless of score):
 `;
 
 const CR_RUBRIC = `
-CASE REPORT RUBRIC (score each section 0-4):
-- Title (weight 5%, max 20 pts): 4=accurately describes contents; 2=somewhat describes; 0=does not accurately describe
-- Introduction of Topic (weight 7.5%, max 30 pts): 4=complete overview of general concept ~1 paragraph; 3=mostly complete ~1 paragraph; 2=somewhat complete may exceed 1 paragraph; 1=incomplete overview; 0=missing or no overview
-- Literature Review (weight 20%, max 80 pts): 4=current high-quality refs, ≤3 top clinical problems, complete concise thorough pathophysiology/history/presentation/differentials/diagnostics/treatment/prognosis for each; 3=mostly complete 1-2 omissions; 2=somewhat complete possibly >3 problems; 1=not current, moderate-low quality; 0=not current, low quality, incomplete
-- Case Report Section (weight 30%, max 120 pts): 4=complete description of patient/population, chief complaint, history, clinical findings, all procedures/medications/complications/comorbidities/justifications, full outcome and follow-up; 3=most present 1-2 omissions; 2=some present partial follow-up >2 omissions; 1=minimal description minimal follow-up; 0=incomplete or missing
-- Discussion & Critique (weight 25%, max 100 pts): 4=constructive evaluation of deficiencies/mistakes/complications, identifies changes, demonstrates learning, no new material; 3=mostly constructive minimal new material 1-2 omissions; 2=somewhat constructive new material possible >2 omissions; 1=minimal significant new material; 0=does not critically evaluate
-- Endnotes (weight 5%, max 20 pts): 4=present and properly cited for all appropriate items; 2=mostly present and properly cited; 0=not present or improperly cited
-- References (weight 7.5%, max 30 pts): 4=current, applicable, comprehensive for all problems; 3=most relevant cited; 2=listed but more current/applicable available; 1=very few relevant; 0=inappropriate or incomplete
-- Labs/Tables (weight 5%, max 20 pts): 4=relevant, clearly displayed/described; 2=present but not entirely relevant or could be clearer; 0=missing, not relevant, or illegible
+CASE REPORT RUBRIC — ABVP 2025 (score each section 0-4):
 
-PASS/FAIL OVERRIDES:
-- Overall Impression A: Case management commensurate with ABVP diplomate level (Yes/No)
-- Overall Impression B: Professional presentation, minimal errors (Yes/No)
-- Word count must NOT exceed 19,000 words (excluding tables, labs, images, refs, endnotes, headings) (Yes/No)
-- Any section scoring 0 = automatic fail
+- Title (weight 5%, max 20 pts):
+  4=Title accurately describes the contents of the case report
+  2=Title somewhat describes the contents of the case report
+  0=Title does not accurately describe the contents of the case report
+
+- Introduction of Topic (weight 7.5%, max 30 pts):
+  4=Provides a complete overview of the general concept of the paper (~1 paragraph)
+  3=Mostly complete overview of the general concept of the paper (~1 paragraph)
+  2=Somewhat complete overview of the general concept of the paper (may be more than ~1 paragraph)
+  1=Section is an incomplete overview of the general concept of the paper (may be more than ~1 paragraph)
+  0=Intro is missing or does not provide an overview of the general concept of the paper
+
+- Literature Review (weight 20%, max 80 pts):
+  4=Literature cited is current and high quality. No more than 3 top clinical problems are stated. Complete, concise, and thorough description provided for pathophysiology, typical history and presentation, differential diagnoses, and diagnostic approach for each clinical problem. Includes complete synopsis of the treatment and management options for the clinical problem or diagnosis, and current recommended therapies/procedures. Expected outcome and prognosis is discussed.
+  3=Literature cited is mostly current and high quality. No more than 3 top clinical problems are stated. Mostly complete, concise, and thorough description provided. Mostly complete synopsis of treatment and management options and current recommended therapies/procedures. Expected outcome and prognosis is discussed. 1-2 significant omissions.
+  2=Literature cited is somewhat current and of moderate quality. There may be more than 3 top clinical problems stated. Somewhat complete description provided. Somewhat complete synopsis of treatment and management options. Expected outcome and prognosis may not be discussed fully. More than 2 significant omissions.
+  1=Literature cited is not current and is of moderate to low quality. More than 3 top clinical problems may be stated. Description is not complete, concise, or thorough. Incomplete synopsis of treatment and management options. Expected outcome and prognosis is poorly discussed. Many significant omissions.
+  0=Literature cited is not current and is of low quality and incomplete for the problems discussed. May have more than 3 top clinical problems stated. Does not include complete, concise, or thorough description. Does not include complete synopsis of treatment and management options or current recommended therapies/procedures. Expected outcome and prognosis is not discussed.
+
+- Case Report Section (weight 30%, max 120 pts):
+  4=Complete description of the patient or population, the chief complaint, and relevant history and clinical findings. All relevant procedures, medications, complications, co-morbidities, and justification for deviations from standard procedures are discussed. Outcome includes patient or case outcome, results of clinical procedures or medical management, and full follow up of the case.
+  3=Mostly complete description of the patient or population, the chief complaint, and relevant history and clinical findings. Most relevant procedures, medications, complications, co-morbidities, and justifications are discussed. Outcome includes most information for patient or case outcome, results of clinical procedures or medical management, and full follow up. 1-2 significant omissions.
+  2=Somewhat complete description of the patient or population, the chief complaint, and relevant history and clinical findings. Some relevant procedures, medications, complications, co-morbidities, and justifications are discussed. Outcome includes some patient or case outcome with partial follow up. More than 2 significant omissions.
+  1=Minimal description of the patient or population, the chief complaint, and relevant history and clinical findings. Few relevant procedures, medications, complications, co-morbidities, and justifications are discussed. Minimal discussion of patient or case outcome with minimal follow up. Many significant omissions.
+  0=Description of patient or population, chief complaint, and relevant history and clinical findings are incomplete or missing. Relevant procedures, medications, complications, co-morbidities, or justifications are incomplete or missing. Case outcome, results of clinical procedures, medical management, and case follow-up are incomplete or missing.
+
+- Discussion & Critique (weight 25%, max 100 pts):
+  4=Complete constructive evaluation of case deficiencies, mistakes, and/or complications. Able to identify potential changes to be made in future cases. Demonstrates ability to learn from an imperfect case. New material has not been added.
+  3=Mostly complete constructive evaluation of case deficiencies, mistakes, and/or complications. Able to identify potential changes. Demonstrates ability to learn from an imperfect case. Minimal new material may have been added. 1-2 significant omissions.
+  2=Somewhat complete constructive evaluation. Moderate ability to identify potential changes. Demonstrates some ability to learn from an imperfect case. New material may have been added. More than 2 significant omissions.
+  1=Minimal constructive evaluation. Minimal changes discussed for future cases. Minimal demonstration of ability to learn. Significant new material may have been added. Many significant omissions.
+  0=Does not critically evaluate case deficiencies, mistakes, and/or complications. Unable to identify potential changes. Does not demonstrate ability to learn from an imperfect case. Significant new material has been added.
+
+- Endnotes (weight 5%, max 20 pts):
+  4=Endnotes are present and properly cited for all appropriate items
+  2=Endnotes are mostly present and properly cited for all appropriate items
+  0=Endnotes are not present and/or are improperly cited for appropriate items
+
+- References (weight 7.5%, max 30 pts):
+  4=References are current, applicable, and comprehensive for all problems identified and discussed
+  3=Most relevant and current applicable references are cited
+  2=References are listed, but more current, applicable, or specific references are available
+  1=Includes very few relevant references for the topics of discussion
+  0=References are inappropriate or incomplete for the topics of discussion
+
+- Labs/Tables (weight 5%, max 20 pts):
+  4=Lab results presented in the report are relevant to the case and are clearly displayed and described in the case report
+  2=Lab results are present in the report, but are not entirely relevant to the case or could be more clearly displayed or described in the case report
+  0=Lab results are missing OR results are not relevant to the case OR are illegible without description in the case report
+
+PASS/FAIL OVERRIDES (automatic fail regardless of score):
+- Overall Impression A (Pass/Fail): Case demonstrates management commensurate with an ABVP diplomate level of practice by effectively displaying applicant's clinical acumen, expertise and ability to thoroughly work-up a case and follow it from beginning to end
+- Overall Impression B (Pass/Fail): Overall structure and presentation of the document has minimal organizational, grammatical or spelling errors and is of professional quality
+- Word count must NOT exceed 19,000 words (excluding tables, lab results, images, references, endnotes, and section headings) — exceeding this limit = automatic fail
+- Any section scoring 0 = automatic fail for the entire case
 - Minimum passing score: 294/420 (70%)
-- Formatting deductions: -5 pts each for (1) not PDF, (2) wrong font/size, (3) labs not at end in chronological order
+- Formatting deductions: -5 pts each for (1) not PDF format, (2) wrong font/size (must be Times, Arial, Calibri, or Helvetica; size 11 or 12), (3) labs/tables/figures not in chronological order at end of paper
 `;
 
 const SYSTEM_PROMPT = `You are an expert ABVP credentials reviewer with deep knowledge of veterinary clinical practice and the ABVP certification process. You evaluate case submissions using official ABVP rubric criteria and identify strengths, weaknesses, and areas for improvement. You also generate targeted Reflective Mastery Verification (RMV) questions designed to probe whether the applicant truly authored and understands their submission.
