@@ -1030,22 +1030,24 @@ function handleGetRMVSession(req, res, id) {
 
   let questions = null;
   let responses = null;
-  try { questions = sub.rmv_questions_finalized_json ? JSON.parse(sub.rmv_questions_finalized_json) : null; } catch {}
-  try { responses = sub.rmv_responses_json ? JSON.parse(sub.rmv_responses_json) : null; } catch {}
-
+  let aiQuestions = null;
   let grading = null;
-  try { grading = sub.rmv_grading_json && sub.rmv_grading_json !== "running" ? JSON.parse(sub.rmv_grading_json) : null; } catch {}
+  try { questions    = sub.rmv_questions_finalized_json ? JSON.parse(sub.rmv_questions_finalized_json) : null; } catch {}
+  try { responses    = sub.rmv_responses_json           ? JSON.parse(sub.rmv_responses_json)           : null; } catch {}
+  try { aiQuestions  = sub.rmv_question_set_json        ? JSON.parse(sub.rmv_question_set_json)        : null; } catch {}
+  try { grading      = sub.rmv_grading_json && sub.rmv_grading_json !== "running" ? JSON.parse(sub.rmv_grading_json) : null; } catch {}
 
   return json(res, 200, {
     session_status: sub.rmv_session_status || "not_started",
     questions,
+    ai_questions:   aiQuestions,
     responses,
-    sent_ts:          sub.rmv_questions_sent_ts || null,
-    started_ts:       sub.rmv_session_started_ts || null,
-    expires_ts:       sub.rmv_session_expires_ts || null,
-    responses_ts:     sub.rmv_responses_ts || null,
-    timed_expired:    sub.rmv_timed_expired ? true : false,
-    grading_status:   sub.rmv_grading_json === "running" ? "running" : grading ? "done" : "none",
+    sent_ts:        sub.rmv_questions_sent_ts    || null,
+    started_ts:     sub.rmv_session_started_ts   || null,
+    expires_ts:     sub.rmv_session_expires_ts   || null,
+    responses_ts:   sub.rmv_responses_ts         || null,
+    timed_expired:  sub.rmv_timed_expired ? true : false,
+    grading_status: sub.rmv_grading_json === "running" ? "running" : grading ? "done" : "none",
     grading,
   });
 }

@@ -814,16 +814,8 @@
 
     if (status === "not_started" || status === "questions_sent") {
       // Editable question list + send button
-      // Pre-populate from finalized questions if resending, else from AI review
-      let initialQs = session.questions || null;
-      if (!initialQs) {
-        // Try to pull from the rendered AI question list
-        const aiQsEl = $("aiRMVQuestions");
-        if (aiQsEl) {
-          const items = aiQsEl.querySelectorAll("li");
-          if (items.length) initialQs = Array.from(items).map(li => li.textContent.trim());
-        }
-      }
+      // Pre-populate from finalized questions if resending, else from AI-generated questions
+      let initialQs = session.questions || session.ai_questions || null;
       rmvEditorQuestions = initialQs ? [...initialQs] : [""];
 
       const sentNote = status === "questions_sent"
@@ -837,7 +829,7 @@
         ${sentNote}
         <div style="font-size:12px;color:var(--muted);margin-bottom:8px;">
           Edit the questions below, then send to the applicant.
-          ${!initialQs ? '<span style="color:var(--warn);">Run AI Review first to auto-populate questions.</span>' : ""}
+          ${!initialQs ? '<span style="color:var(--warn);">Run AI Review first to auto-populate questions, or add them manually below.</span>' : ""}
         </div>
         <div id="rmvQList" style="display:flex;flex-direction:column;gap:8px;margin-bottom:12px;"></div>
         <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;">
