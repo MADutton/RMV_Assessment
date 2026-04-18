@@ -1,0 +1,83 @@
+{
+  "section_id": "05_recognition_assessment",
+  "label": "Recognition, Diagnosis, and Assessment/Measurement of Pain",
+  "blueprint_weight": 0.2690,
+  "prompts": [
+    {
+      "prompt_id": "s5_p1",
+      "phase_id": "concept_check",
+      "sequence": 1,
+      "prompt_type": "primary",
+      "text": "This fellowship taught both validated acute pain assessment scales and chronic pain clinical metrology instruments (CMIs). Distinguish between these two tool categories — what each is designed to measure, when each is used, and by whom. Then, for dogs and cats separately, name at least one validated instrument from each category, describe the specific behavioral or functional domains it measures, and state the rescue analgesia threshold score for the acute pain scales you name.",
+      "followups": [
+        {
+          "prompt_id": "s5_p1_f1",
+          "trigger": "vague_generic_answer",
+          "text": "Based on the content covered in this fellowship, describe the five specific action units assessed in the Feline Grimace Scale, the maximum possible score on that scale, the score threshold at which rescue analgesia is indicated, and explain why a facial action unit approach is particularly valid for assessing pain in cats that are caged or reluctant to move."
+        },
+        {
+          "prompt_id": "s5_p1_f2",
+          "trigger": "cannot_apply",
+          "text": "Based on the content covered in this fellowship, explain the FAS scale — what FAS stands for, what the three components measure independently, the consequence of a high FAS score on concurrent acute pain scale interpretation, and what clinical intervention must precede re-scoring a cat that presents with a high FAS."
+        }
+      ]
+    },
+    {
+      "prompt_id": "s5_p2",
+      "phase_id": "applied_reasoning",
+      "sequence": 2,
+      "prompt_type": "primary",
+      "text": "A 14-year-old domestic shorthair cat presents for routine wellness. The owner reports the cat is 'just getting old' — sleeping more, jumping less, sometimes hiding. No prior structured pain assessment has been performed. Walk me through your complete pain assessment workflow: what specific history questions you ask and why, which validated instrument or instruments you apply and at what point in the visit, what physical examination findings you specifically look for, and how you distinguish under-recognized chronic pain from cognitive dysfunction, hyperthyroidism, or normal aging.",
+      "followups": [
+        {
+          "prompt_id": "s5_p2_f1",
+          "trigger": "vague_generic_answer",
+          "text": "Based on the content covered in this fellowship, give me the three or four behavioral history questions with the highest sensitivity for detecting unrecognized chronic musculoskeletal pain in a geriatric cat. Specifically address: changes in jumping height or reluctance to jump, litter box entry behavior, grooming pattern, and interaction with family members. Explain why each question is diagnostically meaningful."
+        },
+        {
+          "prompt_id": "s5_p2_f2",
+          "trigger": "cannot_apply",
+          "text": "Based on the content covered in this fellowship, the owner rates this cat's pain as 2 out of 10 on a verbal scale, but your Feline Grimace Scale score during examination is 6 out of 10. Explain why this discrepancy is expected rather than contradictory — what each measure captures — which score should drive your treatment decision and why, and what this tells you about the limitations of relying solely on owner-reported assessment."
+        }
+      ]
+    },
+    {
+      "prompt_id": "s5_p3",
+      "phase_id": "prioritization_safety",
+      "sequence": 3,
+      "prompt_type": "primary",
+      "text": "Under-recognition of pain is harmful, but so is over-attribution. This fellowship identified specific clinical situations where pain is systematically missed and others where it may be incorrectly assumed. Describe two scenarios — one under-recognition failure and one over-attribution risk — relevant to the species and conditions covered in this fellowship. For each, what specific assessment practice closes the gap, and what is the patient harm from getting it wrong in either direction?",
+      "followups": [
+        {
+          "prompt_id": "s5_p3_f1",
+          "trigger": "vague_generic_answer",
+          "text": "Based on the content covered in this fellowship, walk me through the specific behavioral mechanism — from an evolutionary standpoint — that causes rabbits, birds, and small rodents to actively suppress pain display, and what minimum assessment standard you apply when a prey species presents post-procedurally."
+        },
+        {
+          "prompt_id": "s5_p3_f2",
+          "trigger": "unsupported_conclusion",
+          "text": "Based on the content covered in this fellowship, a stoic dog scores 1 out of 24 on the Glasgow Composite Measure Pain Scale Short Form but has a heart rate of 140 bpm, is reluctant to bear weight, and has not eaten since surgery. What does this discordance tell you about the limitations of relying on any single assessment instrument, and what multimodal assessment approach resolves the ambiguity?"
+        }
+      ]
+    },
+    {
+      "prompt_id": "s5_p4",
+      "phase_id": "reflection_transfer",
+      "sequence": 4,
+      "prompt_type": "primary",
+      "text": "Pain as the fourth vital sign requires system-level implementation, not just individual clinician behavior. Describe the concrete workflow change you will implement — a checklist item, an intake form revision, a staff role, a recheck protocol — to operationalize validated pain assessment on every patient that needs it in your practice. Then tell me where you are still uncertain about which assessment instrument to use in which patient type, and what is your specific plan to resolve that uncertainty.",
+      "followups": [
+        {
+          "prompt_id": "s5_p4_f1",
+          "trigger": "vague_generic_answer",
+          "text": "Based on the content covered in this fellowship, for a dog managed long-term for OA with NSAID and gabapentin, name a specific validated chronic pain CMI you would use at each recheck — such as the Canine Brief Pain Inventory or the Liverpool Osteoarthritis in Dogs scale — the minimum recheck frequency recommended, and what score change or functional finding would trigger treatment escalation."
+        },
+        {
+          "prompt_id": "s5_p4_f2",
+          "trigger": "cannot_apply",
+          "text": "Based on the content covered in this fellowship, a practice owner tells you that pain scoring will slow down appointments. Walk me through how you would demonstrate that systematic pain assessment can be integrated into a standard appointment without significant added time, and — using the WASVA pain guidelines position that pain is the fourth vital sign — what the practice-level benefit is for both patient outcomes and client retention."
+        }
+      ]
+    }
+  ]
+}

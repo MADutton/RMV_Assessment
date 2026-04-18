@@ -1,0 +1,48 @@
+{
+  "exam_id": "capm_fellowship_final_rmv_v1",
+  "followup_rules_version": "1.0.0",
+  "cap": {
+    "max_followups_per_phase": 2,
+    "max_total_prompts": 60,
+    "max_primary_prompts": 20
+  },
+  "permitted_trigger_types": [
+    {
+      "trigger_id": "vague_generic_answer",
+      "label": "Vague or generic answer not demonstrating fellowship mastery",
+      "description": "Candidate gives a correct-sounding but generic answer not grounded in specific fellowship content."
+    },
+    {
+      "trigger_id": "cannot_apply",
+      "label": "Cannot apply concept to clinical scenario",
+      "description": "Candidate understands a concept abstractly but cannot translate it into clinical practice."
+    },
+    {
+      "trigger_id": "missing_safety",
+      "label": "Misses a major safety consideration from the fellowship",
+      "description": "Candidate omits a contraindication, risk, or limitation explicitly covered in fellowship transcripts."
+    },
+    {
+      "trigger_id": "unsupported_conclusion",
+      "label": "States conclusion without justification",
+      "description": "Candidate makes a recommendation without mechanism-based or fellowship-grounded reasoning."
+    },
+    {
+      "trigger_id": "misunderstands_objective",
+      "label": "Misunderstands a central fellowship objective",
+      "description": "Candidate's response indicates a fundamental misunderstanding of a high-priority learning objective."
+    }
+  ],
+  "prohibited_followup_reasons": [
+    "Broadening to oral board topics outside the fellowship curriculum",
+    "Quizzing on trivia not covered in fellowship transcripts",
+    "Teaching toward the correct answer",
+    "Excessive probing of minor details already adequately covered"
+  ],
+  "followup_language_principles": [
+    "Always anchor: 'Based on the content covered in this fellowship...'",
+    "Ask one focused question only",
+    "Do not signal correctness or incorrectness",
+    "Use neutral framing: 'Walk me through...', 'Be more specific about...', 'Explain how you would...'"
+  ]
+}

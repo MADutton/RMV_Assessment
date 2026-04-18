@@ -1,0 +1,51 @@
+{
+  "exam_id": "capm_fellowship_final_rmv_v1",
+  "consolidated_objectives": {
+    "01_techniques": [
+      "Describe the mechanisms of action of locoregional, neuraxial, acupuncture, and photobiomodulation techniques",
+      "Select and plan an appropriate locoregional block for a given surgical procedure and species",
+      "Apply correct laser fluence (J/cm\u00b2) parameters for a given indication and patient type",
+      "Identify absolute and relative contraindications to PBM, locoregional blocks, and acupuncture",
+      "Integrate multiple techniques into a synergistic perioperative or chronic pain management plan",
+      "Recognize and manage immediate complications of locoregional anesthesia (LAST, block failure)",
+      "Identify scope-of-competence boundaries and appropriate referral thresholds"
+    ],
+    "02_neuro": [
+      "Trace the nociceptive pathway from periphery to cortex, naming fiber types and neurotransmitters",
+      "Explain central sensitization, wind-up, and their clinical consequences for pain management",
+      "Describe descending inhibitory pathway anatomy and how analgesic drug classes engage it",
+      "Distinguish peripheral from central sensitization and their different treatment targets",
+      "Explain the neurophysiologic basis of allodynia and hyperalgesia",
+      "Identify species-specific neuroanatomic differences (avian, reptile) relevant to analgesia selection",
+      "Map major drug class mechanisms to specific receptor/pathway targets in the pain pathway"
+    ],
+    "03_pharmacology": [
+      "State the mechanism of action, key clinical properties, and major adverse effect for each analgesic drug class",
+      "Select and justify appropriate analgesics for patients with complicating conditions (renal disease, cardiac disease, species differences)",
+      "Identify high-risk drug combinations and explain the mechanism of harm",
+      "Build an opioid-sparing or opioid-free multimodal analgesic protocol for a specified patient",
+      "Apply species-specific pharmacologic constraints (feline NSAID limitations, butorphanol ceiling in cats)",
+      "Recognize opioid tolerance, dependence, and misuse in the clinical context",
+      "Describe controlled substance requirements relevant to opioid use in veterinary practice"
+    ],
+    "04_non_pharm": [
+      "Identify the evidence base and mechanism of analgesia for major non-pharmacological modalities",
+      "Build a species-specific non-pharmacological pain management plan for a companion animal",
+      "Integrate non-pharmacological modalities synergistically with pharmacological treatment",
+      "Recognize contraindications to specific non-pharmacological modalities",
+      "Counsel owners on environmental modifications and home-based pain management strategies",
+      "Apply weight management and nutritional principles in pain management planning",
+      "Identify when non-pharmacological modalities alone are insufficient and escalation is required"
+    ],
+    "05_recognition_assessment": [
+      "Distinguish validated acute pain scales from chronic pain clinical metrology instruments",
+      "Select and apply the appropriate validated pain assessment tool for a given species and pain context",
+      "Recognize subtle behavioral indicators of chronic pain in cats and exotic species",
+      "Apply the FAS scale and explain how fear, anxiety, and stress complicate pain assessment",
+      "Identify clinical signs distinguishing neuropathic from nociceptive pain",
+      "Classify surgical procedures by pain severity (high vs. low) and adjust analgesic planning accordingly",
+      "Operationalize pain as a vital sign in clinical workflow",
+      "Recognize common under-recognition pitfalls (prey species, geriatric patients, stoic breeds)"
+    ]
+  }
+}
