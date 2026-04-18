@@ -1,0 +1,49 @@
+{
+  "exam_id": "capm_fellowship_final_rmv_v1",
+  "domain_rubric": {
+    "scale": "0-5 per domain, max 30 per section",
+    "levels": {
+      "0": "Incorrect, unsafe, or absent. Critical misunderstanding or refusal to engage.",
+      "1": "Major gaps. Fellowship content not meaningfully understood or demonstrated.",
+      "2": "Partially demonstrated. Some understanding but falls short of fellowship-level mastery.",
+      "3": "Adequate mastery. Meets minimum competency expected of a fellowship graduate.",
+      "4": "Strong mastery. Nuanced, goes beyond minimum with clinically meaningful integration.",
+      "5": "Excellent mastery. Exceptional depth, integration, and clinical judgment."
+    },
+    "domains": [
+      "core_concept_understanding",
+      "clinical_application",
+      "prioritization_decision_making",
+      "justification",
+      "boundaries_uncertainty",
+      "mastery_depth"
+    ]
+  },
+  "weighted_scoring": {
+    "method": "Each section scored 0-30, converted to 0-100%, multiplied by blueprint weight. Sum = weighted final %.",
+    "formula": "final_pct = SUM( (section_raw / 30) * section_blueprint_weight ) * 100",
+    "section_weights": {
+      "01_techniques": 0.2527,
+      "02_neuro": 0.1440,
+      "03_pharmacology": 0.1848,
+      "04_non_pharm": 0.1495,
+      "05_recognition_assessment": 0.2690
+    }
+  },
+  "outcome_thresholds": {
+    "mastered": { "min_pct": 70, "label": "PASS — Fellowship Mastery Demonstrated" },
+    "borderline_review": { "min_pct": 60, "max_pct": 69.9, "label": "BORDERLINE — Human Review Required" },
+    "not_yet_mastered": { "max_pct": 59.9, "label": "FAIL — Remediation and Retry Required" }
+  },
+  "critical_failure_rules": [
+    "A score of 0 in prioritization_decision_making OR boundaries_uncertainty in ANY section triggers human_review_required regardless of weighted total.",
+    "Any response demonstrating an unsafe practice recommendation (e.g., NSAID + corticosteroid without contraindication awareness; laser over confirmed neoplasia) must be flagged for human_review_required."
+  ],
+  "review_recommendation_logic": {
+    "mastered_high_confidence": "spot_audit_eligible",
+    "mastered_low_confidence": "human_review_required",
+    "borderline": "human_review_required",
+    "not_yet_mastered": "assign_remediation_and_retry",
+    "critical_safety_flag": "human_review_required"
+  }
+}

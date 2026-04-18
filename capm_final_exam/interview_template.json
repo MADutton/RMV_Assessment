@@ -1,0 +1,67 @@
+{
+  "template_id": "capm_final_exam_rmv_interview_v1",
+  "product_id": "capm_fellowship_final_exam",
+  "exam_id": "capm_fellowship_final_rmv_v1",
+  "structure": "sequential_sections",
+  "sections": [
+    {
+      "section_id": "01_techniques",
+      "label": "Techniques the Fellow is expected to know",
+      "blueprint_weight": 0.2527,
+      "phases": [
+        { "phase_id": "concept_check", "label": "Concept Check", "sequence": 1 },
+        { "phase_id": "applied_reasoning", "label": "Applied Reasoning", "sequence": 2 },
+        { "phase_id": "prioritization_safety", "label": "Prioritization and Safety", "sequence": 3 },
+        { "phase_id": "reflection_transfer", "label": "Reflection and Transfer", "sequence": 4 }
+      ]
+    },
+    {
+      "section_id": "02_neuro",
+      "label": "Neuroanatomy, neuropharmacology, and neurophysiology",
+      "blueprint_weight": 0.1440,
+      "phases": [
+        { "phase_id": "concept_check", "label": "Concept Check", "sequence": 1 },
+        { "phase_id": "applied_reasoning", "label": "Applied Reasoning", "sequence": 2 },
+        { "phase_id": "prioritization_safety", "label": "Prioritization and Safety", "sequence": 3 },
+        { "phase_id": "reflection_transfer", "label": "Reflection and Transfer", "sequence": 4 }
+      ]
+    },
+    {
+      "section_id": "03_pharmacology",
+      "label": "Pharmacology",
+      "blueprint_weight": 0.1848,
+      "phases": [
+        { "phase_id": "concept_check", "label": "Concept Check", "sequence": 1 },
+        { "phase_id": "applied_reasoning", "label": "Applied Reasoning", "sequence": 2 },
+        { "phase_id": "prioritization_safety", "label": "Prioritization and Safety", "sequence": 3 },
+        { "phase_id": "reflection_transfer", "label": "Reflection and Transfer", "sequence": 4 }
+      ]
+    },
+    {
+      "section_id": "04_non_pharm",
+      "label": "Non-pharmacological approaches to pain management",
+      "blueprint_weight": 0.1495,
+      "phases": [
+        { "phase_id": "concept_check", "label": "Concept Check", "sequence": 1 },
+        { "phase_id": "applied_reasoning", "label": "Applied Reasoning", "sequence": 2 },
+        { "phase_id": "prioritization_safety", "label": "Prioritization and Safety", "sequence": 3 },
+        { "phase_id": "reflection_transfer", "label": "Reflection and Transfer", "sequence": 4 }
+      ]
+    },
+    {
+      "section_id": "05_recognition_assessment",
+      "label": "Recognition, Diagnosis, and Assessment/Measurement of Pain",
+      "blueprint_weight": 0.2690,
+      "phases": [
+        { "phase_id": "concept_check", "label": "Concept Check", "sequence": 1 },
+        { "phase_id": "applied_reasoning", "label": "Applied Reasoning", "sequence": 2 },
+        { "phase_id": "prioritization_safety", "label": "Prioritization and Safety", "sequence": 3 },
+        { "phase_id": "reflection_transfer", "label": "Reflection and Transfer", "sequence": 4 }
+      ]
+    }
+  ],
+  "cap": {
+    "max_followups_per_phase": 2,
+    "max_total_prompts": 60
+  }
+}

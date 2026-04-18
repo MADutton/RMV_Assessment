@@ -1,0 +1,31 @@
+{
+  "exam_id": "capm_fellowship_final_rmv_v1",
+  "program": "Companion Animal Pain Management (CAPM) Fellowship",
+  "exam_title": "CAPM Fellowship Final Exam — Remote Mastery Verification (RMV)",
+  "exam_type": "final_summative",
+  "format": "rmv_multi_section_interview",
+  "rmv_template_id": "capm_final_exam_rmv_interview_v1",
+  "pass_threshold_percent": 70,
+  "borderline_low_percent": 60,
+  "estimated_duration_minutes": 150,
+  "sections_count": 5,
+  "primary_prompts_count": 20,
+  "max_followups_per_phase": 2,
+  "max_total_prompts": 60,
+  "source_corpus": {
+    "description": "All 95 CAPM fellowship transcripts",
+    "location": "MADutton/CEHub-Mastery-Hub:orgs/abvp-aml-pilot/transcripts/",
+    "transcript_count": 95
+  },
+  "scoring_domains": [
+    "core_concept_understanding",
+    "clinical_application",
+    "prioritization_decision_making",
+    "justification",
+    "boundaries_uncertainty",
+    "mastery_depth"
+  ],
+  "status": "active",
+  "version": "1.0.0",
+  "created_date": "2026-04-18"
+}
