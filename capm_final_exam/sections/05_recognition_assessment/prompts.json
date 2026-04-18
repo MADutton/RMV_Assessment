@@ -1,0 +1,83 @@
+{
+  "section_id": "05_recognition_assessment",
+  "label": "Recognition, Diagnosis, and Assessment/Measurement of Pain",
+  "blueprint_weight": 0.2690,
+  "prompts": [
+    {
+      "prompt_id": "s5_p1",
+      "phase_id": "concept_check",
+      "sequence": 1,
+      "prompt_type": "primary",
+      "text": "This fellowship taught both validated acute pain assessment scales and chronic pain clinical metrology instruments (CMIs). Distinguish between these two tool categories — what each is designed to measure, when each is used, and by whom. Then, for dogs and for cats separately, name at least one validated instrument from each category and describe what behavioral or functional domains it actually measures.",
+      "followups": [
+        {
+          "prompt_id": "s5_p1_f1",
+          "trigger": "vague_generic_answer",
+          "text": "Based on the content covered in this fellowship, what are the specific action units assessed in the Feline Grimace Scale, and why is a facial action unit approach particularly useful for cats compared to a behavioral observation scale that requires the cat to move?"
+        },
+        {
+          "prompt_id": "s5_p1_f2",
+          "trigger": "cannot_apply",
+          "text": "Based on the content covered in this fellowship, explain the FAS scale — what FAS stands for, what the three components measure independently, and why a high FAS score requires you to interpret any concurrent pain scale score with caution."
+        }
+      ]
+    },
+    {
+      "prompt_id": "s5_p2",
+      "phase_id": "applied_reasoning",
+      "sequence": 2,
+      "prompt_type": "primary",
+      "text": "A 14-year-old domestic shorthair cat presents for a routine wellness examination. The owner reports the cat is 'just getting old' — sleeping more, jumping less, and sometimes hiding. No prior structured pain assessment has been performed. Walk me through your complete pain assessment workflow for this visit: what specific history questions you ask and why, which validated instrument or instruments you use and at what point in the visit, what physical examination findings you specifically look for, and how you distinguish under-recognized chronic pain from cognitive dysfunction, hyperthyroidism, or normal aging.",
+      "followups": [
+        {
+          "prompt_id": "s5_p2_f1",
+          "trigger": "vague_generic_answer",
+          "text": "Based on the content covered in this fellowship, give me the three or four behavioral history questions with the highest sensitivity for detecting unrecognized chronic musculoskeletal pain in a geriatric cat, and explain why each is diagnostically meaningful."
+        },
+        {
+          "prompt_id": "s5_p2_f2",
+          "trigger": "cannot_apply",
+          "text": "Based on the content covered in this fellowship, the owner scores this cat as 2/10 on a verbal rating scale, but the Feline Grimace Scale score during examination is 6/10. How do you reconcile this discrepancy, and how does it affect your treatment decision?"
+        }
+      ]
+    },
+    {
+      "prompt_id": "s5_p3",
+      "phase_id": "prioritization_safety",
+      "sequence": 3,
+      "prompt_type": "primary",
+      "text": "Under-recognition of pain is harmful, but so is over-attribution. This fellowship identified specific clinical situations where pain is systematically missed and others where it may be incorrectly assumed. Describe two scenarios — one under-recognition failure and one over-attribution risk — relevant to the species and conditions covered in this fellowship. For each, what specific assessment practice closes the gap, and what is the patient harm that results from getting it wrong in either direction?",
+      "followups": [
+        {
+          "prompt_id": "s5_p3_f1",
+          "trigger": "vague_generic_answer",
+          "text": "Based on the content covered in this fellowship, walk me through the specific behavioral mechanism — from an evolutionary standpoint — that causes rabbits, birds, and small rodents to actively suppress pain display, and what minimum assessment standard you apply when a prey species presents post-procedurally."
+        },
+        {
+          "prompt_id": "s5_p3_f2",
+          "trigger": "unsupported_conclusion",
+          "text": "Based on the content covered in this fellowship, a stoic dog scores 1/10 on a pain scale but has a heart rate of 140 bpm, is reluctant to bear weight, and has not eaten since surgery. What does this discordance tell you about the limitations of relying on any single assessment instrument?"
+        }
+      ]
+    },
+    {
+      "prompt_id": "s5_p4",
+      "phase_id": "reflection_transfer",
+      "sequence": 4,
+      "prompt_type": "primary",
+      "text": "Pain as the fourth vital sign requires system-level implementation, not just individual clinician behavior. Describe the concrete workflow change you will implement — a checklist item, an intake form revision, a staff role, a recheck protocol — to operationalize validated pain assessment on every patient that needs it in your practice. Then tell me where you are still uncertain about which assessment instrument to use in which patient type, and what is your specific plan to resolve that uncertainty.",
+      "followups": [
+        {
+          "prompt_id": "s5_p4_f1",
+          "trigger": "vague_generic_answer",
+          "text": "Based on the content covered in this fellowship, for a dog managed long-term for OA with NSAID and gabapentin, what is the minimum recheck frequency and the specific assessment instruments you would use at each visit — and what score or finding would trigger you to escalate?"
+        },
+        {
+          "prompt_id": "s5_p4_f2",
+          "trigger": "cannot_apply",
+          "text": "Based on the content covered in this fellowship, a practice owner tells you that pain scoring will slow down appointments. Walk me through how you would demonstrate that systematic pain assessment can be integrated into a standard appointment without significant added time, and what the practice-level benefit is."
+        }
+      ]
+    }
+  ]
+}
