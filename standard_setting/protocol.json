@@ -1,0 +1,49 @@
+{
+  "method": "Modified Angoff",
+  "version": "1.0",
+  "exam_id": "capm_fellowship_final_rmv_v1",
+  "exam_title": "CAPM Fellowship Final Exam (Remote Mastery Verification)",
+  "procedure": {
+    "minimum_panelists": 5,
+    "recommended_panelists": 7,
+    "rounds": 2,
+    "rating_scale": {
+      "min": 0,
+      "max": 5,
+      "step": 0.5,
+      "anchors": {
+        "0": "Incorrect, unsafe, or absent. Critical misunderstanding or refusal to engage.",
+        "1": "Major gaps. Fellowship content not meaningfully understood or demonstrated.",
+        "2": "Partially demonstrated. Some understanding but falls short of fellowship-level mastery.",
+        "3": "Adequate mastery. Meets minimum competency expected of a fellowship graduate.",
+        "4": "Strong mastery. Nuanced, goes beyond minimum with clinically meaningful integration.",
+        "5": "Excellent mastery. Exceptional depth, integration, and clinical judgment."
+      }
+    },
+    "minimum_competency_definition": "A minimally competent CAPM fellow has completed all fellowship requirements and demonstrates the lowest acceptable level of knowledge and clinical reasoning to practice independently as a CAPM diplomate. They have no critical safety gaps and no major conceptual errors, but may lack depth or nuance beyond the essential minimum.",
+    "rating_question": "What score (0\u20135) would a minimally competent CAPM fellow receive on this domain in this section of the exam?",
+    "rating_instructions": [
+      "Rate the candidate who is just barely qualified to pass \u2014 not the average or excellent fellow.",
+      "A rating of 3 indicates the candidate meets minimum competency on that domain.",
+      "Ratings below 3 indicate below-minimum performance on that domain.",
+      "You may rate in 0.5 increments. Provide a rationale if your rating is unusually high or low.",
+      "After Round 1, items with panelist SD > 1.0 will be flagged for group discussion before Round 2."
+    ],
+    "discrepancy_threshold_sd": 1.0,
+    "cut_score_formula": {
+      "description": "Weighted sum of section-level minimum competency percentages.",
+      "steps": [
+        "For each section: sum the mean panelist ratings across all 6 domains = mce_raw (0\u201330)",
+        "Convert to percentage: mce_pct = mce_raw / 30",
+        "Apply blueprint weight: section_contribution = mce_pct \u00d7 blueprint_weight",
+        "Sum all sections: recommended_cut_pct = SUM(section_contribution) \u00d7 100"
+      ]
+    }
+  },
+  "panelist_qualifications": [
+    "Current or former CAPM fellow in good standing",
+    "Active clinical practice in companion animal pain management",
+    "No financial conflict of interest with exam pass rates",
+    "Commitment to 2-round rating process (approximately 3 hours total)"
+  ]
+}

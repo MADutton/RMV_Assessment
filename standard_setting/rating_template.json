@@ -1,0 +1,88 @@
+{
+  "exam_id": "capm_fellowship_final_rmv_v1",
+  "total_cells": 30,
+  "sections": [
+    {
+      "section_id": "01_techniques",
+      "label": "Techniques",
+      "blueprint_weight": 0.2527,
+      "context": "Locoregional anesthesia (canine, feline, exotic), epidural catheter placement (dog, cat, rabbit, ferret), nerve locator technique, ultrasound-guided injection, wound infusion catheters, acupuncture, electroacupuncture, photobiomodulation/Class IV laser.",
+      "example_prompts": [
+        "Describe the steps for a femoral and sciatic nerve block in a dog undergoing stifle surgery.",
+        "What are the key differences in epidural catheter placement between cats and rabbits?"
+      ]
+    },
+    {
+      "section_id": "02_neuro",
+      "label": "Neuroanatomy, Neuropharmacology & Neurophysiology",
+      "blueprint_weight": 0.1440,
+      "context": "Nociceptive pathway anatomy, A\u03b4 and C fiber types, dorsal horn modulation, wind-up, central sensitization, descending inhibitory pathways, peripheral sensitization, inflammatory mediators, alpha-2 adrenoceptor physiology, opioid receptor types, NMDA receptor role, avian and reptile neuroanatomy.",
+      "example_prompts": [
+        "Explain the mechanism of wind-up and its clinical significance in chronic pain management.",
+        "How does the alpha-2 adrenoceptor contribute to analgesia at the spinal level?"
+      ]
+    },
+    {
+      "section_id": "03_pharmacology",
+      "label": "Pharmacology",
+      "blueprint_weight": 0.1848,
+      "context": "Opioid pharmacology (full mu, partial mu, kappa, mixed agonists), NSAID mechanisms and species differences, alpha-2 agonists, NMDA antagonists (ketamine, amantadine), corticosteroids, adjunct analgesics (gabapentin, tramadol, TCAs), opioid-free multimodal analgesia, drug interaction risks, controlled substance compliance.",
+      "example_prompts": [
+        "What is the recommended amantadine dose for dogs, and what is its mechanism of action?",
+        "Why is tramadol less reliably analgesic in dogs compared to cats?"
+      ]
+    },
+    {
+      "section_id": "04_non_pharm",
+      "label": "Non-Pharmacological Pain Management",
+      "blueprint_weight": 0.1495,
+      "context": "Physical rehabilitation and therapeutic exercise, weight management, environmental and behavioral modifications, acupuncture and electroacupuncture, photobiomodulation, non-pharmacological approaches by species (dog, cat, rabbit, bird, reptile, ferret, rodents), nutraceuticals, TENS, integration into multimodal plans.",
+      "example_prompts": [
+        "What are the key differences between 2 Hz and 100 Hz electroacupuncture stimulation in terms of neurotransmitters released?",
+        "Describe an appropriate non-pharmacological pain management plan for an obese arthritic cat."
+      ]
+    },
+    {
+      "section_id": "05_recognition_assessment",
+      "label": "Pain Recognition, Diagnosis & Assessment",
+      "blueprint_weight": 0.2690,
+      "context": "Validated pain scales \u2014 acute vs. chronic (dogs and cats), clinical metrology instruments (CMIs) and owner questionnaires, grimace scales (cats, rabbits, rats, mice), FAS scale, osteoarthritis recognition and staging, neuropathic pain recognition, surgical pain categorization, feline chronic pain behavioral indicators, species-specific recognition for exotics, WASVA/WSAVA guidelines, under-recognition pitfalls.",
+      "example_prompts": [
+        "What is the threshold score for the Feline Grimace Scale that indicates analgesic intervention is warranted?",
+        "Describe the WSAVA pain assessment approach and its key components."
+      ]
+    }
+  ],
+  "domains": [
+    {
+      "domain": "core_concept_understanding",
+      "label": "Core Concept Understanding",
+      "description": "Accuracy and completeness of foundational knowledge relevant to the section."
+    },
+    {
+      "domain": "clinical_application",
+      "label": "Clinical Application",
+      "description": "Ability to apply concepts to real clinical scenarios with appropriate specificity."
+    },
+    {
+      "domain": "prioritization_decision_making",
+      "label": "Prioritization & Decision-Making",
+      "description": "Ability to prioritize among options and make sound clinical decisions under uncertainty."
+    },
+    {
+      "domain": "justification",
+      "label": "Justification",
+      "description": "Ability to explain the reasoning behind clinical choices with evidence-based support."
+    },
+    {
+      "domain": "boundaries_uncertainty",
+      "label": "Boundaries & Uncertainty",
+      "description": "Recognition of limitations, contraindications, and when to seek additional information."
+    },
+    {
+      "domain": "mastery_depth",
+      "label": "Mastery Depth",
+      "description": "Depth and nuance of knowledge beyond surface-level recall; integration across topics."
+    }
+  ]
+}
