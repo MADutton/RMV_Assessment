@@ -3,85 +3,87 @@
   "domains": {
     "core_concept_understanding": {
       "high_value_elements": [
-        "Correctly describes PBM mechanism: photons absorbed by cytochrome C oxidase in mitochondria, producing ATP, nitric oxide, and reactive oxygen species",
-        "Accurately explains locoregional mechanism: sodium channel blockade preventing action potential propagation",
-        "Correctly identifies acupuncture/electroacupuncture analgesia via endogenous opioid release and spinal cord modulation",
-        "Describes epidural analgesia as neuraxial blockade of afferent pain signals at the spinal level",
-        "Associates each technique with an appropriate primary clinical indication"
+        "Correctly identifies PBM target: cytochrome C oxidase in mitochondria; downstream mediators: ATP, nitric oxide, reactive oxygen species; wavelength range 635-904 nm",
+        "Accurately explains locoregional mechanism: sodium channel blockade preventing action potential propagation along peripheral nerve fibers",
+        "Correctly identifies electroacupuncture analgesia: low frequency (2 Hz) stimulates release of enkephalins and beta-endorphins; high frequency (100 Hz) stimulates dynorphin release at spinal cord level",
+        "Describes epidural analgesia as neuraxial blockade of afferent nociceptive signals at the spinal level; correctly identifies L7-S1 as the standard lumbosacral landmark in dogs",
+        "Associates each technique with an anatomically and mechanistically appropriate primary clinical indication"
       ],
       "major_concerns": [
-        "Confuses PBM photobiomodulation with thermal/surgical laser effects",
+        "Confuses PBM photobiomodulation with thermal/surgical laser effects or cannot state the mitochondrial target",
         "Cannot explain how any of the four technique categories produces analgesia mechanistically",
-        "States PBM works by 'heating tissue' without distinguishing photobiomodulation from photothermal effects",
-        "Cannot distinguish locoregional from systemic analgesia in mechanism"
+        "States PBM works by heating tissue without distinguishing photobiomodulation from photothermal effects",
+        "Cannot distinguish locoregional from systemic analgesia in mechanism or clinical application"
       ]
     },
     "clinical_application": {
       "high_value_elements": [
-        "Selects anatomically appropriate nerve block for TECA-BO (inferior alveolar, auriculotemporal, or auricular/mandibular blocks)",
-        "Chooses appropriate local anesthetic with rationale for concentration and volume relative to patient weight",
-        "Integrates postoperative PBM or acupuncture into a coherent multimodal plan",
-        "Applies laser parameter adjustments for a large, dark-coated dog (coat color adjustment, increased fluence)",
-        "Describes appropriate post-procedural monitoring for locoregional patients"
+        "Selects anatomically appropriate nerve branches for TECA-BO: inferior alveolar, auriculotemporal, and great auricular nerves with rationale for each relative to surgical field",
+        "Calculates maximum safe local anesthetic dose for a 34 kg dog; recognizes cats have a substantially lower IV lidocaine toxicity threshold (~47 mg/kg) compared to dogs (~80 mg/kg)",
+        "Integrates postoperative PBM or acupuncture into a coherent multimodal plan with mechanistic rationale",
+        "Applies laser parameter adjustments for a large, dark-coated, obese dog: increased fluence for dark coat absorption, depth penetration adjustment for BCS 8/9",
+        "Describes loss of resistance technique as the standard confirmation method for epidural needle placement"
       ],
       "major_concerns": [
-        "Selects a locoregional technique anatomically inappropriate for the surgical site",
-        "Cannot describe or calculate maximum safe local anesthetic dose",
+        "Selects a locoregional technique anatomically inappropriate for the TECA-BO surgical field",
+        "Cannot describe or calculate maximum safe local anesthetic dose; does not recognize species difference in LA toxicity threshold",
         "Proposes laser as a standalone analgesic replacing pharmacological management",
-        "Ignores patient comorbidities when selecting technique"
+        "Ignores patient comorbidities (obesity, advanced age, cardiac breed risk) when selecting technique"
       ]
     },
     "prioritization_decision_making": {
       "high_value_elements": [
-        "Prioritizes safety screening (neoplasia, cardiac disease, open growth plates, pregnancy, coat moisture, eye protection) before any PBM session",
-        "Identifies Doberman breed risk for dilated cardiomyopathy; recommends cardiac screening before modalities using electrical current or laser near thorax",
-        "Sequences technique delivery logically within a perioperative timeline",
-        "Correctly identifies when a technique is outside personal scope and describes a safe referral pathway"
+        "Prioritizes full contraindication screening before any PBM session: active neoplasia, cardiac arrhythmia or pacemaker, open growth plates, pregnancy, active hemorrhage, eyes unprotected, deep active infection",
+        "Identifies Doberman breed risk for dilated cardiomyopathy; recommends cardiac screening before any modality using electrical current (electroacupuncture) near the thorax",
+        "Sequences technique delivery logically within a perioperative timeline; does not delay pharmacological analgesia waiting for technique setup",
+        "Correctly identifies when a technique is outside personal scope and describes a safe referral pathway without delay to patient care"
       ],
       "major_concerns": [
-        "Fails to identify neoplasia as an absolute PBM contraindication",
+        "Fails to identify active neoplasia as an absolute PBM contraindication",
         "Does not screen for cardiac disease in a Doberman before electroacupuncture or laser",
-        "Cannot identify LAST as a serious complication requiring immediate intervention",
-        "Applies laser over a wet coat without recognizing this as a dosing safety issue"
+        "Cannot identify LAST as a serious complication or describe its clinical signs",
+        "Applies laser over a wet or dark coat without recognizing the dosing safety implication"
       ]
     },
     "justification": {
       "high_value_elements": [
-        "Provides mechanism-based rationale for nerve block selection at TECA-BO",
-        "Explains why on-contact PBM delivery produces superior tissue penetration versus off-contact",
-        "Justifies electroacupuncture for spinal/neuropathic indications with specific neurophysiologic reasoning",
-        "Explains why a dark coat requires higher fluence and how to adjust parameters"
+        "Provides mechanism-based rationale for nerve branch selection at TECA-BO referencing the sensory territory of each branch",
+        "Explains why electroacupuncture at 2-100 Hz range targets different endogenous opioid peptides at spinal versus supraspinal levels",
+        "Justifies electroacupuncture for spinal or neuropathic indications with specific neurophysiologic reasoning tied to frequency selection",
+        "Explains why dark coat requires higher fluence and how the clinician adjusts parameters to maintain target tissue dose",
+        "Justifies choice of ultrasound guidance versus nerve stimulator versus combined approach for specific block type"
       ],
       "major_concerns": [
-        "Makes technique selections without any supporting rationale",
-        "Relies on anecdote rather than fellowship-taught principles",
-        "Cannot explain why a chosen block is anatomically appropriate for the procedure"
+        "Makes technique selections without supporting mechanistic or anatomical rationale",
+        "Relies on anecdote or habit rather than fellowship-taught principles",
+        "Cannot explain why a chosen nerve block is anatomically appropriate for the surgical site"
       ]
     },
     "boundaries_uncertainty": {
       "high_value_elements": [
-        "Acknowledges scope-of-competence limits for techniques not yet trained in",
-        "Identifies PBM contraindications: neoplasia, active hemorrhage, pregnancy, eyes, open growth plates, deep active infection, active cardiac arrhythmia, pacemaker",
-        "Recognizes limits of evidence for some PBM indications while identifying well-supported uses",
-        "Describes appropriate training pathway before independently performing new locoregional techniques"
+        "Acknowledges scope-of-competence limits for techniques requiring additional hands-on credentialing",
+        "States full PBM contraindication list: neoplasia, active hemorrhage, pregnancy, unprotected eyes, open growth plates, deep active infection, active cardiac arrhythmia, pacemaker",
+        "Recognizes limits of evidence for some PBM indications while identifying well-supported uses (chronic musculoskeletal pain, neurologic rehabilitation)",
+        "Describes appropriate credentialing pathway before independently performing new locoregional or neuraxial techniques"
       ],
       "major_concerns": [
         "Cannot name a single contraindication to Class IV laser therapy",
         "Presents all techniques as equally applicable to all patients without contraindication awareness",
-        "Claims readiness for techniques clearly beyond introduction level without acknowledging skill gap"
+        "Claims readiness for techniques clearly requiring supervised training without acknowledging skill gap"
       ]
     },
     "mastery_depth": {
       "high_value_elements": [
-        "Integrates multiple techniques synergistically with mechanistic rationale for each combination",
-        "Understands why synergism allows dose reduction of individual pharmacologic agents",
-        "References DM rehabilitation research (255-day vs. 55-day survival) when discussing PBM for neurological patients",
-        "Applies continuous wave vs. superpulsed distinction with clinical implications for dose delivery"
+        "Integrates multiple techniques synergistically with mechanistic rationale for each combination and dose-sparing benefit",
+        "Understands why multimodal technique combinations allow dose reduction of individual pharmacologic agents",
+        "Correctly applies continuous wave versus superpulsed laser distinction with clinical implications for thermal safety and dose delivery",
+        "Can discuss force plate gait analysis as an objective outcome measure to evaluate response to acupuncture or other techniques",
+        "Correctly identifies loss of resistance technique for epidural confirmation and the significance of the vertebral landmark L7-S1 for lumbosacral access in dogs"
       ],
       "major_concerns": [
-        "Cannot discuss any interaction between techniques",
-        "Treats techniques as interchangeable without mechanism-based patient matching",
-        "Names techniques without understanding clinical decision points"
+        "Cannot discuss any interaction or synergy between techniques",
+        "Treats all techniques as interchangeable without mechanism-based patient matching",
+        "Names techniques without understanding clinical decision points or delivery parameters"
       ]
     }
   }
