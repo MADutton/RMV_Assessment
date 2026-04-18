@@ -3,83 +3,84 @@
   "domains": {
     "core_concept_understanding": {
       "high_value_elements": [
-        "Correctly identifies A-delta fibers (fast, sharp, well-localized pain) and C fibers (slow, dull, aching, poorly localized)",
-        "Names substance P and glutamate as key excitatory neurotransmitters at the dorsal horn synapse",
-        "Correctly identifies NMDA receptor activation as the mechanism underlying wind-up",
-        "Describes central sensitization as increased excitability of dorsal horn neurons following repeated nociceptive input",
-        "Names descending inhibitory system components: periaqueductal gray, raphe nucleus/locus coeruleus, dorsolateral funiculus, dorsal horn"
+        "Correctly names A-delta (fast, sharp) and C fibers (slow, burning/aching) as the primary nociceptive afferents",
+        "Correctly identifies substance P and glutamate as primary neurotransmitters at the dorsal horn synapse; names NK-1 receptor for substance P and AMPA/NMDA receptors for glutamate",
+        "Correctly describes wind-up: repeated C-fiber input activates NMDA receptor due to removal of Mg2+ block, leading to central sensitization",
+        "Identifies PAG (periaqueductal gray) as the primary brainstem origin of descending inhibition; serotonin and norepinephrine as the two descending inhibitory neurotransmitters",
+        "Names at least three pathway-level drug targets: opioids at dorsal horn and supraspinal levels, NMDA antagonists at dorsal horn, alpha-2 agonists at dorsal horn, NSAIDs at peripheral transduction"
       ],
       "major_concerns": [
-        "Reverses A-delta and C fiber roles",
-        "Cannot name any dorsal horn neurotransmitter",
-        "Does not know what the NMDA receptor does or why it matters clinically",
-        "Cannot locate central sensitization anatomically or explain why it occurs"
+        "Cannot name the fiber types involved in nociception or confuses A-beta (touch) with nociceptive fibers",
+        "Cannot describe what happens at the dorsal horn during wind-up or does not know the NMDA receptor plays a central role",
+        "Cannot identify any point in the nociceptive pathway where fellowship-taught drugs act",
+        "Confuses peripheral sensitization with central sensitization"
       ]
     },
     "clinical_application": {
       "high_value_elements": [
-        "Correctly attributes allodynia extending beyond the primary lesion to central sensitization, not just peripheral inflammation",
-        "Explains why NSAIDs alone cannot reverse established central sensitization",
-        "Correctly selects NMDA antagonist (ketamine or amantadine) for wind-up management with receptor-level rationale",
-        "Selects gabapentin based on alpha-2-delta calcium channel subunit mechanism",
-        "Applies species-specific neuroanatomic considerations to analgesic selection for non-canine patients"
+        "Correctly identifies allodynia extending beyond the lesion site as evidence of central sensitization, not peripheral-only disease",
+        "Adds an NMDA antagonist to address wind-up: ketamine CRI (approximately 60 mg/L at 5-10 mL/kg/hr IV) for perioperative use, or amantadine 3-5 mg/kg once daily for chronic outpatient management",
+        "Adds a gabapentinoid (gabapentin or pregabalin) targeting the alpha-2-delta subunit of voltage-gated calcium channels to reduce central sensitization",
+        "Correctly identifies that NSAIDs alone are insufficient once central sensitization is established because they act peripherally on COX without blocking dorsal horn NMDA receptor activation",
+        "For rabbits, correctly identifies that the spinal cord extends to approximately L6-S1 (compared to approximately S3 in dogs), requiring caudal needle placement adjustment for epidurals"
       ],
       "major_concerns": [
-        "Attributes allodynia cranial to the lesion site to peripheral inflammation rather than central sensitization",
-        "Cannot identify a second drug class targeting a different pathway node",
-        "Recommends NSAID dose escalation as the primary response to NSAID treatment failure in central sensitization"
+        "Recommends only dose escalation of the NSAID without adding a centrally acting agent",
+        "Cannot name specific NMDA antagonist options or their doses",
+        "Does not recognize the spatial distribution of allodynia as evidence of central versus peripheral sensitization",
+        "Recommends epidural at the same landmark in a rabbit as in a dog without recognizing the anatomic difference"
       ]
     },
     "prioritization_decision_making": {
       "high_value_elements": [
-        "Recognizes that allodynia outside the primary lesion territory indicates central rather than peripheral sensitization",
-        "Identifies reptile and avian neuroanatomic considerations affecting dosing (thermal biology, metabolic rate)",
-        "Prioritizes addressing central sensitization before pain chronifies further",
-        "Applies current scientific position that reptiles have functional nociceptive systems warranting analgesia"
+        "Prioritizes addressing central sensitization early; recognizes that delay allows further neuroplastic changes that are harder to reverse",
+        "Correctly applies COAST staging (0-4) framework to guide OA management decisions and escalation thresholds",
+        "Identifies that cats' glucuronidation deficiency (Phase II hepatic metabolism) requires exclusion or dose reduction of drugs relying on this pathway, including some NSAIDs",
+        "Correctly sequences central sensitization treatment: NSAID for peripheral inflammation PLUS NMDA antagonist PLUS gabapentinoid for central component"
       ],
       "major_concerns": [
-        "Treats allodynia outside the lesion territory as peripheral pathology only",
-        "States reptiles do not feel pain and analgesia is unnecessary",
-        "Cannot distinguish neuropathic from nociceptive pain clinically"
+        "Treats established central sensitization the same as acute nociceptive pain without mechanism-based escalation",
+        "Does not recognize any species-specific neuroanatomic or pharmacokinetic constraint",
+        "Cannot identify the COAST staging system or explain when OA escalation is warranted"
       ]
     },
     "justification": {
       "high_value_elements": [
-        "Explains the molecular basis for NMDA antagonist use in wind-up (glutamate binding site blockade)",
-        "Connects gabapentin mechanism (alpha-2-delta subunit) to reduction of excitatory neurotransmitter release",
-        "Explains why descending inhibition augmentation is logical in central sensitization",
-        "Provides mechanism-based client communication about why single-agent therapy fails"
+        "Explains the Mg2+ block mechanism: at resting membrane potential NMDA receptor is blocked by Mg2+; sustained depolarization from repeated C-fiber input removes this block, allowing Ca2+ influx and wind-up",
+        "Explains why amantadine is preferred for chronic oral outpatient NMDA blockade versus ketamine, which requires IV administration",
+        "Explains the evolutionary basis for pain masking in prey species (rabbits, birds) and why this requires proactive multimodal assessment rather than waiting for behavioral pain signs",
+        "Explains why cats' glucuronidation deficiency results in prolonged drug half-lives and why dosing intervals must be extended accordingly"
       ],
       "major_concerns": [
-        "Cannot explain why any selected drug acts at the dorsal horn level",
-        "Provides only drug names without mechanistic or clinical justification",
-        "Cannot connect central sensitization to treatment failure"
+        "Cannot explain the Mg2+ block or why NMDA receptor activation requires sustained depolarization",
+        "Cannot justify the choice of amantadine versus ketamine for different clinical contexts",
+        "Cannot provide mechanism-based explanation for any species-specific pharmacologic difference"
       ]
     },
     "boundaries_uncertainty": {
       "high_value_elements": [
-        "Acknowledges that non-mammalian nociceptive systems differ and require species-specific assessment",
-        "Recognizes limits of extrapolating mammalian dose guidelines to birds and reptiles",
-        "Acknowledges uncertainty about full reversibility of central sensitization",
-        "Identifies when neuropathic pain complexity warrants specialist consultation"
+        "Acknowledges that the exact dose and duration of NMDA antagonist therapy for established central sensitization in dogs is not definitively established",
+        "Recognizes that validated neurologic assessment tools for pain in exotic species (rabbits, birds, reptiles) are limited or absent",
+        "Identifies when a neuropathic pain presentation warrants specialist consultation (e.g., MRI for structural lesion causing central sensitization)",
+        "Acknowledges uncertainty about long-term neuroplastic reversibility and sets realistic expectations with owners"
       ],
       "major_concerns": [
-        "Applies canine neurophysiology and dosing directly to avian or reptile patients without modification",
-        "Claims full certainty about topics where the fellowship explicitly acknowledged uncertainty",
-        "Cannot identify any neurophysiologic scenario warranting specialist referral"
+        "Claims to fully reverse established central sensitization with any single drug without acknowledging treatment limitations",
+        "Cannot identify any limit to the applicability of canine neurophysiology data to exotic species",
+        "Has no specialist referral threshold for complex neuropathic pain presentations"
       ]
     },
     "mastery_depth": {
       "high_value_elements": [
-        "Discusses gate control theory and how it informs TENS and physical modality mechanisms",
-        "Explains why C fiber blockade by PBM contributes to synergism with pharmacologic analgesics",
-        "Discusses serotonin's role in descending modulation and why SNRIs can be useful in neuropathic pain",
-        "Connects bradykinin pathophysiology to the rationale for targeted peripheral interventions in early central sensitization"
+        "Distinguishes peripheral sensitization (lowered threshold of peripheral nociceptors due to local inflammatory mediators) from central sensitization (NMDA-mediated amplification at dorsal horn) with clinical implications for treatment target",
+        "Discusses neuroplasticity: chronic pain causes structural changes in the dorsal horn that persist beyond the initiating stimulus, explaining why early aggressive analgesia prevents chronic pain development",
+        "Integrates Epstein fellowship content on neuropathic pain: allodynia, hyperalgesia, spontaneous pain, and the importance of combining pharmacologic classes targeting different pathway nodes",
+        "Correctly names the three brainstem nuclei contributing to descending inhibition taught in the neuroanatomy content and explains why augmenting this system (e.g., with SNRIs or TCAs) can reduce central sensitization"
       ],
       "major_concerns": [
-        "Cannot discuss any nuance in neurophysiology beyond surface-level facts",
-        "Treats pain pathways as a simple linear relay without modulation points",
-        "Cannot explain why addressing multiple pathway nodes simultaneously is superior to single-target therapy"
+        "Cannot distinguish peripheral from central sensitization clinically or pharmacologically",
+        "Treats neuropathic pain as identical to acute nociceptive pain in drug selection",
+        "Cannot name any mechanism by which early aggressive analgesia prevents chronic pain development"
       ]
     }
   }
