@@ -1,0 +1,83 @@
+{
+  "section_id": "03_pharmacology",
+  "label": "Pharmacology",
+  "blueprint_weight": 0.1848,
+  "prompts": [
+    {
+      "prompt_id": "s3_p1",
+      "phase_id": "concept_check",
+      "sequence": 1,
+      "prompt_type": "primary",
+      "text": "The pharmacology curriculum organized analgesics into several major classes: opioids (full mu, partial mu, kappa), NSAIDs, alpha-2 adrenoceptor agonists, NMDA antagonists, corticosteroids, and adjuncts. For each class, tell me: the primary receptor or enzyme it targets, one clinically important species-specific consideration that changes how you use it, and one major adverse effect you actively monitor for.",
+      "followups": [
+        {
+          "prompt_id": "s3_p1_f1",
+          "trigger": "vague_generic_answer",
+          "text": "Based on the content covered in this fellowship, you described NSAIDs in general terms. Specifically: what enzyme pathway do NSAIDs inhibit, what is the significance of COX-1 versus COX-2 selectivity for GI safety, and why does this distinction matter differently in cats than in dogs?"
+        },
+        {
+          "prompt_id": "s3_p1_f2",
+          "trigger": "missing_safety",
+          "text": "Based on the content covered in this fellowship, describe the cardiovascular sequence that occurs after dexmedetomidine administration — the initial hemodynamic change, the reflex response, and the net cardiovascular state at 15 minutes — and name the patient population in which this sequence is most dangerous."
+        }
+      ]
+    },
+    {
+      "prompt_id": "s3_p2",
+      "phase_id": "applied_reasoning",
+      "sequence": 2,
+      "prompt_type": "primary",
+      "text": "An 11-year-old domestic shorthair cat presents with IRIS Stage 3 CKD, bilateral elbow osteoarthritis on radiographs, and an acute-on-chronic neuropathic pain flare following a dog-bite wound to the hindlimb. Construct a multimodal pharmacologic analgesic plan for this patient. For each drug you include, justify why it is appropriate given this patient's comorbidities. Explicitly address why you have included or excluded: long-term NSAIDs, full mu opioids for home use, and gabapentin.",
+      "followups": [
+        {
+          "prompt_id": "s3_p2_f1",
+          "trigger": "missing_safety",
+          "text": "Based on the content covered in this fellowship, what is the specific renal physiologic mechanism that makes NSAIDs dangerous in a patient with reduced renal reserve, and under what narrow circumstances — if any — would short-term NSAID use still be considered in an IRIS Stage 3 cat?"
+        },
+        {
+          "prompt_id": "s3_p2_f2",
+          "trigger": "unsupported_conclusion",
+          "text": "Based on the content covered in this fellowship, explain specifically why a partial mu agonist rather than a full mu agonist is the preferred home opioid choice for this cat, and what route of administration is most practical for owner-administered use in cats."
+        }
+      ]
+    },
+    {
+      "prompt_id": "s3_p3",
+      "phase_id": "prioritization_safety",
+      "sequence": 3,
+      "prompt_type": "primary",
+      "text": "This fellowship covered several high-risk prescribing scenarios: NSAIDs combined with corticosteroids; opioid diversion and controlled substance compliance; alpha-2 agonists in cardiovascularly compromised patients; and opioid stacking. Choose two of these and for each: describe the specific mechanism of harm, identify the patient-level red flags that should trigger a prescribing pause, and describe the practice-level safeguard you would put in place.",
+      "followups": [
+        {
+          "prompt_id": "s3_p3_f1",
+          "trigger": "vague_generic_answer",
+          "text": "Based on the content covered in this fellowship, a client phones to report their dog is on carprofen prescribed by you, and a second veterinarian has just prescribed prednisone for an allergic reaction. Walk me through exactly what you say to that client and to the prescribing veterinarian — what the risk is, what needs to happen, and over what timeframe."
+        },
+        {
+          "prompt_id": "s3_p3_f2",
+          "trigger": "missing_safety",
+          "text": "Based on the content covered in this fellowship, what specific record-keeping requirements must a veterinary practice maintain for Schedule II and III opioids, and what are the clinical and legal consequences of failing to meet them?"
+        }
+      ]
+    },
+    {
+      "prompt_id": "s3_p4",
+      "phase_id": "reflection_transfer",
+      "sequence": 4,
+      "prompt_type": "primary",
+      "text": "Opioid-sparing and opioid-free multimodal analgesia was a recurring theme throughout this fellowship. In your current practice environment, what will it realistically take to move a meaningful percentage of your surgical and chronic pain patients toward opioid-sparing protocols? Where do you still view opioids as non-negotiable, and for those cases, how has this fellowship changed how you use them?",
+      "followups": [
+        {
+          "prompt_id": "s3_p4_f1",
+          "trigger": "vague_generic_answer",
+          "text": "Based on the content covered in this fellowship, describe one specific opioid-free analgesic protocol — with actual drug names and routes — for a 5-year-old dog undergoing elective TPLO in a practice that does not stock hydromorphone or oxymorphone."
+        },
+        {
+          "prompt_id": "s3_p4_f2",
+          "trigger": "cannot_apply",
+          "text": "Based on the content covered in this fellowship, you identified cases where full mu opioids remain necessary. For two of those scenarios, describe the lowest-risk opioid choice and delivery method this fellowship would support."
+        }
+      ]
+    }
+  ]
+}
