@@ -1,0 +1,182 @@
+{
+  "exam_id": "capm_fellowship_final_rmv_v1",
+  "blueprint_source": "CAPM Fellowship Final Exam Blueprint (Job Task Analysis)",
+  "sections": [
+    {
+      "section_id": "01_techniques",
+      "label": "Techniques the Fellow is expected to know",
+      "blueprint_weight": 0.2527,
+      "blueprint_weight_pct": "25.27%",
+      "primary_topics": [
+        "Locoregional anesthesia — canine, feline, exotic",
+        "Epidural catheter placement — dog, cat, rabbit, ferret",
+        "Nerve locator technique",
+        "Ultrasound-guided injection",
+        "Wound infusion catheters",
+        "Acupuncture and electroacupuncture",
+        "Photobiomodulation / Class IV laser therapy",
+        "Monitoring and post-procedure care"
+      ],
+      "key_transcripts": [
+        "Locoregional Anesthesia in Canines.docx",
+        "Locoregional Anesthesia in Felines.docx",
+        "Locoregional Anesthesia in Exotic Pets.docx",
+        "Locoregional.docx",
+        "Veterinary Locoregional Anesthesia - An Overview.docx",
+        "Appendices for Veterinary Locoregional Anesthesia.docx",
+        "Monitoring and Post-procedure Care for Veterinary Locoregional Anesthesia.docx",
+        "Instructions on using ultrasound guided injection techniques.docx",
+        "Using a nerve locator.docx",
+        "Placing epidural catheter in a dog.docx",
+        "Placing epidural catheter in a cat.docx",
+        "Placing an epidural catheter in a rabbit.docx",
+        "Placing an epidural catheter in a ferret.docx",
+        "Use of Wound Infusion Catheters.docx",
+        "Acupuncture.docx",
+        "Veterinary Acupuncture in Dogs.docx",
+        "The Use of Photobiomodulation.docx",
+        "PBM transcription.docx",
+        "Future Directions and Advanced Technologies in Veterinary Anesthesia.docx"
+      ]
+    },
+    {
+      "section_id": "02_neuro",
+      "label": "Neuroanatomy, neuropharmacology, and neurophysiology",
+      "blueprint_weight": 0.1440,
+      "blueprint_weight_pct": "14.40%",
+      "primary_topics": [
+        "Nociceptive pathway anatomy",
+        "Fiber types (Aδ, C) and neurotransmitters",
+        "Dorsal horn modulation, wind-up, central sensitization",
+        "Descending inhibitory pathways",
+        "Peripheral sensitization and inflammatory mediators",
+        "Alpha-2 adrenoceptor physiology",
+        "Opioid receptor types and distribution",
+        "NMDA receptor role in wind-up",
+        "Avian neuroanatomy considerations",
+        "Reptile neuroanatomy considerations"
+      ],
+      "key_transcripts": [
+        "Essays on Common Concepts in Veterinary Neuroanatomy, Neuropharmacology, and Neurophysiology _ Dutton.docx",
+        "Essays on Common Concepts in Veterinary Neuroanatomy, Neuropharmacology, and Neurophysiology _ Dutton_v2.docx",
+        "Avian neuroanatomy.docx",
+        "Reptile neuroanatomy.docx",
+        "Physiology of the \u03b1-2 Adrenoceptor in Veterinary Medicine.docx",
+        "The Physiology of the \u03b1-2 Adrenoceptor - An Insight into Veterinary Medicine.docx",
+        "Binding to Opioid Receptors and Modulation of Neurotransmitter Release in Opioid Action.docx",
+        "NMDA Antagonists in Veterinary Pain Management - An In-depth Exploration for Specialists.docx",
+        "Veterinary Pain Management - A Deep Dive into NMDA Receptors and Antagonists.docx",
+        "Mechanisms of Analgesia of \u03b1-2 Medications in Veterinary Medicine.docx"
+      ]
+    },
+    {
+      "section_id": "03_pharmacology",
+      "label": "Pharmacology with subcategories",
+      "blueprint_weight": 0.1848,
+      "blueprint_weight_pct": "18.48%",
+      "primary_topics": [
+        "Opioid pharmacology — full mu, partial mu, kappa, mixed agonists",
+        "NSAID mechanisms, classification, species differences",
+        "Alpha-2 adrenoceptor agonists — clinical use and adverse effects",
+        "NMDA antagonists — ketamine, amantadine",
+        "Corticosteroids in pain management",
+        "Adjunct analgesics — gabapentin, amantadine, TCAs",
+        "Opioid-free multimodal analgesia",
+        "Drug combinations and interaction risks",
+        "Controlled substance compliance"
+      ],
+      "key_transcripts": [
+        "Morphine.docx", "Fentanyl.docx", "Buprenorphine.docx", "Methadone.docx",
+        "Hydromorphone.docx", "Butorphanol.docx", "Tramadol.docx",
+        "Chemistry of Opioids in Veterinary Medicine An In-Depth Analysis.docx",
+        "Emerging Trends in Opioid Research - Implications for the Veterinary Market.docx",
+        "Opioid Abuse and Addiction in Veterinary Medicine - A Comprehensive Examination.docx",
+        "Ethical Considerations in Opioid Use in Veterinary Medicine.docx",
+        "General Principles of Opioid-Free Pain Management in Veterinary Medicine.docx",
+        "Opioid-Free Multimodal Pain Management in Cats - A Comprehensive Approach.docx",
+        "Opioid-Free Multimodal Pain Management in Dogs - An In-Depth Exploration.docx",
+        "Nonsteroidal Anti-Inflammatory Drugs (NSAIDs) in Veterinary Medicine Mechanisms, Classification, and Clinical Use.docx",
+        "Pharmacokinetics and Pharmacodynamics of NSAIDs in Animals.docx",
+        "Safety Considerations in the Use of Nonsteroidal Anti-Inflammatory Drugs (NSAIDs) in Veterinary Medicine.docx",
+        "Clinical Uses of \u03b1-2 Adrenoceptor Agonists in Veterinary Medicine - Beyond the Surface.docx",
+        "Adverse Effects of \u03b1-2 Adrenoceptor Agonists in Veterinary Medicine - Dogs, Cats, and Exotic Pets.docx",
+        "Corticosteroids in Pain Management Mechanism of Action and Implications.docx",
+        "Overview of adjunct medications.docx",
+        "Epstein chronic med update 2024.docx",
+        "Epstein other pain meds 1.docx",
+        "Epstein other pain meds 2.docx"
+      ]
+    },
+    {
+      "section_id": "04_non_pharm",
+      "label": "Non-pharmacological approaches to pain management",
+      "blueprint_weight": 0.1495,
+      "blueprint_weight_pct": "14.95%",
+      "primary_topics": [
+        "Physical rehabilitation and therapeutic exercise",
+        "Weight management and nutrition",
+        "Environmental and behavioral modifications",
+        "Acupuncture and electroacupuncture",
+        "Photobiomodulation as non-pharmacological modality",
+        "Non-pharmacological approaches by species (dog, cat, rabbit, bird, reptile, ferret, rodents)",
+        "Nutraceuticals — omega-3 fatty acids",
+        "TENS and electrotherapy",
+        "Integration into multimodal plans"
+      ],
+      "key_transcripts": [
+        "Non-Pharmacological Pain Management in Dogs Exploring Behavioral Therapies, Physical Therapies, Environmental Modifications, and Nutrition.docx",
+        "Non-Pharmacological Pain Management in Cats An In-depth Exploration.docx",
+        "Non-Pharmacological Pain Management in Pet Birds An In-depth Exploration.docx",
+        "Non-Pharmacological Pain Management in Pet Rabbits.docx",
+        "Non-Pharmacological Pain Management in Pet Ferrets.docx",
+        "Non-Pharmacological Pain Management in Pet Guinea Pigs An In-Depth Analysis.docx",
+        "Non-Pharmacological Pain Management in Pet Mice Exploring Cage Setup, Mental Stimulation, and Nutritional Care.docx",
+        "Non-Pharmacological Pain Management in Pet Rats An In-Depth Analysis.docx",
+        "Non-Pharmacological Pain Management in Pet Reptiles.docx",
+        "Opioid-Free Multimodal Pain Management in Cats - A Comprehensive Approach.docx",
+        "Opioid-Free Multimodal Pain Management in Dogs - An In-Depth Exploration.docx",
+        "Opioid-Free Multimodal Pain Management in Ferrets - An Integrative Approach.docx",
+        "Opioid-Free Multimodal Pain Management in Pet Birds Challenges and Strategies.docx",
+        "Opioid-Free Multimodal Pain Management in Rabbits - An Integrative Perspective.docx",
+        "Opioid-Free Multimodal Pain Management in Pet Reptiles - A Specialist's Perspective.docx",
+        "FAS.docx",
+        "Veterinary Acupuncture in Dogs.docx",
+        "Acupuncture.docx",
+        "The Use of Photobiomodulation.docx",
+        "non-pharmacological approaches to pain management.docx"
+      ]
+    },
+    {
+      "section_id": "05_recognition_assessment",
+      "label": "Recognition, Diagnosis, clinical metrology instruments for Assessment/Measurement of pain",
+      "blueprint_weight": 0.2690,
+      "blueprint_weight_pct": "26.90%",
+      "primary_topics": [
+        "Validated pain scales — acute vs. chronic (dogs and cats)",
+        "Clinical metrology instruments (CMIs) and owner questionnaires",
+        "Grimace scales — cats, rabbits, rats, mice",
+        "FAS (Fear, Anxiety, Stress) scale",
+        "Osteoarthritis recognition and staging",
+        "Neuropathic pain recognition — allodynia, hyperalgesia, spontaneous pain",
+        "Surgical pain categorization (high vs. low)",
+        "Feline chronic pain — subtle behavioral indicators",
+        "Species-specific pain recognition — exotic species",
+        "WASVA/WSAVA pain guidelines",
+        "Under-recognition pitfalls — prey species, geriatric patients",
+        "Pain as a vital sign — systematic assessment"
+      ],
+      "key_transcripts": [
+        "FAS.docx",
+        "WASVA pain guidelines.docx",
+        "Feline Pain.docx",
+        "Epstein OA transcript.docx",
+        "Epstein chronic med update 2024.docx",
+        "Epstein high sx pain transcript.docx",
+        "Epstein low sx pain transcript.docx",
+        "Epstein neuropathic pain transcript.docx",
+        "Comparative Analysis of Pain Management in Canine, Feline, and Exotic Pets.docx",
+        "Case Studies and Clinical Examples in the Use of Nonsteroidal Anti-Inflammatories (NSAIDs) for Pain Management in Veterinary Medicine.docx"
+      ]
+    }
+  ]
+}
