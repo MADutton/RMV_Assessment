@@ -1,0 +1,83 @@
+{
+  "section_id": "02_neuro",
+  "label": "Neuroanatomy, neuropharmacology, and neurophysiology",
+  "blueprint_weight": 0.1440,
+  "prompts": [
+    {
+      "prompt_id": "s2_p1",
+      "phase_id": "concept_check",
+      "sequence": 1,
+      "prompt_type": "primary",
+      "text": "Trace the nociceptive pathway from a peripheral noxious stimulus — for example, a surgical skin incision — to conscious pain perception. As you move from periphery to cortex, name the primary fiber types involved at each level, the key neurotransmitters released at each relay, and identify at least three points in this pathway where the analgesic drug classes taught in this fellowship exert their effects.",
+      "followups": [
+        {
+          "prompt_id": "s2_p1_f1",
+          "trigger": "vague_generic_answer",
+          "text": "Based on the content covered in this fellowship, describe specifically what happens at the dorsal horn during prolonged or repeated nociceptive input — which receptor becomes active, what this process is called, and why it matters clinically."
+        },
+        {
+          "prompt_id": "s2_p1_f2",
+          "trigger": "missing_safety",
+          "text": "Based on the content covered in this fellowship, identify the descending inhibitory system: name the brainstem region, the descending tract, the two primary neurotransmitters involved, and one drug class from this fellowship that augments this system."
+        }
+      ]
+    },
+    {
+      "prompt_id": "s2_p2",
+      "phase_id": "applied_reasoning",
+      "sequence": 2,
+      "prompt_type": "primary",
+      "text": "A 9-year-old German Shepherd Dog presents with chronic lumbosacral pain that has failed to respond adequately to a full-dose NSAID after 8 weeks of therapy. On examination you identify allodynia in the paraspinal musculature extending well cranial to the primary lesion site. Using the neurophysiology taught in this fellowship, explain what has most likely happened at the dorsal horn, why it predicts poor response to NSAID monotherapy, and — based on receptor pharmacology alone — which two adjunctive drug classes you would add and what specific receptor or pathway each targets.",
+      "followups": [
+        {
+          "prompt_id": "s2_p2_f1",
+          "trigger": "unsupported_conclusion",
+          "text": "Based on the content covered in this fellowship, you recommended adding an NMDA antagonist. Explain specifically which receptor it targets, what that receptor's role is in wind-up, and why blocking it at this stage may still be clinically useful."
+        },
+        {
+          "prompt_id": "s2_p2_f2",
+          "trigger": "cannot_apply",
+          "text": "Based on the content covered in this fellowship, the allodynia in this dog extends beyond the primary lesion site. What does this spatial distribution tell you about whether this is peripheral or central sensitization, and how does that distinction change which part of the neuraxis you are targeting?"
+        }
+      ]
+    },
+    {
+      "prompt_id": "s2_p3",
+      "phase_id": "prioritization_safety",
+      "sequence": 3,
+      "prompt_type": "primary",
+      "text": "This fellowship included neuroanatomy content specific to non-canine species — including avian and reptile neuroanatomy. Choose two non-canine species covered in this fellowship and explain: (a) at least one neuroanatomic or neuropharmacologic difference from the dog or cat that is clinically relevant to analgesia selection; and (b) one common clinical mistake that results from ignoring that difference.",
+      "followups": [
+        {
+          "prompt_id": "s2_p3_f1",
+          "trigger": "vague_generic_answer",
+          "text": "Based on the content covered in this fellowship, what is the current scientific position on whether reptiles have the neuroanatomic capacity for pain perception, and what does that mean for your analgesic decision-making in practice?"
+        },
+        {
+          "prompt_id": "s2_p3_f2",
+          "trigger": "cannot_apply",
+          "text": "Based on the content covered in this fellowship, what thermal regulation and metabolic difference in birds should inform how you think about opioid dosing and monitoring relative to a mammalian patient of comparable body weight?"
+        }
+      ]
+    },
+    {
+      "prompt_id": "s2_p4",
+      "phase_id": "reflection_transfer",
+      "sequence": 4,
+      "prompt_type": "primary",
+      "text": "Of the neurophysiologic concepts covered in this fellowship — central sensitization, wind-up, descending inhibitory modulation, peripheral sensitization, or another you choose — which do you believe is most consistently under-applied by general practitioners, and how will you use it to make a concrete change in how you communicate with referring veterinarians or counsel owners about why a patient is not responding to single-agent therapy?",
+      "followups": [
+        {
+          "prompt_id": "s2_p4_f1",
+          "trigger": "vague_generic_answer",
+          "text": "Based on the content covered in this fellowship, give me a specific client conversation — as specific as possible — that translates central sensitization into language a pet owner can understand and act on."
+        },
+        {
+          "prompt_id": "s2_p4_f2",
+          "trigger": "cannot_apply",
+          "text": "Based on the content covered in this fellowship, a patient with established central sensitization is showing only partial response to gabapentin monotherapy. Walk me through the neurophysiologic rationale for why gabapentin alone may be insufficient and what you would add or change."
+        }
+      ]
+    }
+  ]
+}

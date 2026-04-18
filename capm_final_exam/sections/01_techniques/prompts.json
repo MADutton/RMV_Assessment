@@ -1,0 +1,83 @@
+{
+  "section_id": "01_techniques",
+  "label": "Techniques the Fellow is expected to know",
+  "blueprint_weight": 0.2527,
+  "prompts": [
+    {
+      "prompt_id": "s1_p1",
+      "phase_id": "concept_check",
+      "sequence": 1,
+      "prompt_type": "primary",
+      "text": "This fellowship covered four major technique toolkits: locoregional anesthesia, neuraxial (epidural) analgesia, acupuncture and electroacupuncture, and photobiomodulation. Walk me through the core mechanism by which each of these four techniques produces analgesia — not just what they do, but how — and identify the clinical presentation for which each is best suited.",
+      "followups": [
+        {
+          "prompt_id": "s1_p1_f1",
+          "trigger": "vague_generic_answer",
+          "text": "Based on the content covered in this fellowship, you described photobiomodulation in general terms. Be more specific: what is the primary intracellular target of near-infrared photons, and what three downstream biochemical mediators are produced as a result?"
+        },
+        {
+          "prompt_id": "s1_p1_f2",
+          "trigger": "cannot_apply",
+          "text": "Based on the content covered in this fellowship, you mentioned acupuncture produces endorphins. Walk me through specifically which type of acupuncture is most effective for compressive spinal conditions and intervertebral disc disease, and explain why — based on the underlying mechanism — it is particularly suited to that indication."
+        }
+      ]
+    },
+    {
+      "prompt_id": "s1_p2",
+      "phase_id": "applied_reasoning",
+      "sequence": 2,
+      "prompt_type": "primary",
+      "text": "A 7-year-old intact male Labrador Retriever, 34 kg, is scheduled for a total ear canal ablation with bulla osteotomy (TECA-BO). Build a complete locoregional and perioperative analgesia plan. Your plan must include: (a) which specific nerve block or blocks you would perform and why; (b) your local anesthetic choice, rationale, and how you approach dosing to avoid toxicity; (c) whether you would use ultrasound guidance, a nerve stimulator, or both, and why; and (d) at least one non-pharmacological technique from this fellowship you would integrate postoperatively.",
+      "followups": [
+        {
+          "prompt_id": "s1_p2_f1",
+          "trigger": "unsupported_conclusion",
+          "text": "Based on the content covered in this fellowship, you chose a local anesthetic but did not explain how you calculate the maximum dose to avoid local anesthetic systemic toxicity in this patient. Walk me through that calculation and the clinical signs of LAST you would monitor for in the first 30 minutes post-block."
+        },
+        {
+          "prompt_id": "s1_p2_f2",
+          "trigger": "missing_safety",
+          "text": "Based on the content covered in this fellowship, what specific contraindication screening step must be completed before you deliver any Class IV laser treatment to a geriatric dog in the postoperative period?"
+        }
+      ]
+    },
+    {
+      "prompt_id": "s1_p3",
+      "phase_id": "prioritization_safety",
+      "sequence": 3,
+      "prompt_type": "primary",
+      "text": "Your technician is preparing a 15-watt Class IV therapeutic laser for a 13-year-old Doberman Pinscher with chronic hip osteoarthritis and a BCS of 8/9. Before you deliver the first treatment, walk me through every contraindication and safety check — as covered in this fellowship — that must be cleared. If any check comes back positive, what is your decision threshold for proceeding versus choosing an alternative modality?",
+      "followups": [
+        {
+          "prompt_id": "s1_p3_f1",
+          "trigger": "missing_safety",
+          "text": "Based on the content covered in this fellowship, the Doberman is on a grain-free boutique diet and has no prior cardiac workup. What specific screening steps should be completed before using any modality involving electrical current or laser in this breed, and what is the clinical rationale?"
+        },
+        {
+          "prompt_id": "s1_p3_f2",
+          "trigger": "vague_generic_answer",
+          "text": "Based on the content covered in this fellowship, what adjustments must you make to laser delivery parameters specifically because this dog has a dark, dense coat — and what happens to your therapeutic dose if you do not account for this?"
+        }
+      ]
+    },
+    {
+      "prompt_id": "s1_p4",
+      "phase_id": "reflection_transfer",
+      "sequence": 4,
+      "prompt_type": "primary",
+      "text": "Of the techniques covered in this fellowship — locoregional anesthesia, neuraxial analgesia, acupuncture, electroacupuncture, and photobiomodulation — which will most meaningfully change your clinical practice in the next 90 days, and which do you still consider outside your current scope of competence? For the technique you are not yet deploying, what specific skill gap remains and what is the pathway to close it safely?",
+      "followups": [
+        {
+          "prompt_id": "s1_p4_f1",
+          "trigger": "vague_generic_answer",
+          "text": "Based on the content covered in this fellowship, you identified a technique you want to implement. What is the minimum training or credentialing pathway required before offering that modality to patients?"
+        },
+        {
+          "prompt_id": "s1_p4_f2",
+          "trigger": "cannot_apply",
+          "text": "Based on the content covered in this fellowship, describe one specific patient type you currently manage — breed, condition, age — for whom you would now modify your perioperative analgesic protocol based on locoregional or neuraxial techniques."
+        }
+      ]
+    }
+  ]
+}
