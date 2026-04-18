@@ -8,17 +8,17 @@
       "phase_id": "concept_check",
       "sequence": 1,
       "prompt_type": "primary",
-      "text": "Summarize the four or five non-pharmacological modalities with the strongest evidence and clinical utility in companion animal pain management as taught in this fellowship. For each, describe the proposed mechanism of analgesia and identify the specific patient presentation for which it has a first-line role — not merely as an adjunct, but as the primary or co-primary intervention.",
+      "text": "Summarize the four or five non-pharmacological modalities with the strongest evidence and clinical utility in companion animal pain management as taught in this fellowship. For each, describe the proposed mechanism of analgesia and identify the specific patient presentation for which it has a first-line or co-primary role — not merely as an adjunct. For weight management and rehabilitation exercise specifically, explain the mechanism of pain relief beyond simple mechanical load reduction.",
       "followups": [
         {
           "prompt_id": "s4_p1_f1",
           "trigger": "vague_generic_answer",
-          "text": "Based on the content covered in this fellowship, you mentioned acupuncture. Describe the two primary neurotransmitter-level mechanisms by which acupuncture produces analgesia, and distinguish how electroacupuncture differs from dry needling in its mechanism and clinical target."
+          "text": "Based on the content covered in this fellowship, you mentioned acupuncture or electroacupuncture. Distinguish how low-frequency electroacupuncture (approximately 2 Hz) differs from high-frequency electroacupuncture (approximately 100 Hz) in terms of the specific endogenous analgesic mediators released and the spinal versus supraspinal level of effect, and explain which frequency range has the strongest evidence for spinal cord compression and intervertebral disc disease."
         },
         {
           "prompt_id": "s4_p1_f2",
           "trigger": "cannot_apply",
-          "text": "Based on the content covered in this fellowship, beyond simple mechanical load reduction, explain the metabolic and inflammatory mechanism by which excess adipose tissue amplifies pain signaling, and give a realistic target outcome you would set for a specific patient."
+          "text": "Based on the content covered in this fellowship, beyond simple mechanical load reduction, explain the metabolic and inflammatory mechanism by which excess adipose tissue amplifies pain signaling in osteoarthritis — specifically the role of adipokines — and give a realistic target outcome you would discuss with an owner before concluding that weight management alone is insufficient."
         }
       ]
     },
@@ -27,17 +27,17 @@
       "phase_id": "applied_reasoning",
       "sequence": 2,
       "prompt_type": "primary",
-      "text": "An 8-year-old Labrador Retriever, 38 kg, BCS 7/9, presents with bilateral hip and elbow OA confirmed radiographically. The owner has financial constraints and is hesitant about long-term drug therapy. Build a non-pharmacological pain management plan that is realistic within these constraints. Be specific about: what the owner does at home daily, what the clinic provides and at what frequency, how you quantify whether the plan is working, and at what point non-pharmacological management alone becomes insufficient.",
+      "text": "An 8-year-old Labrador Retriever, 38 kg, BCS 7/9, presents with bilateral hip and elbow OA confirmed radiographically. Using the COAST staging framework introduced in this fellowship, stage this patient and build a realistic non-pharmacological pain management plan for an owner with financial constraints and hesitancy about long-term drug therapy. Be specific about: what the owner does at home daily, what the clinic provides and at what frequency, how you quantify whether the plan is working, and at what clinical threshold non-pharmacological management alone becomes insufficient.",
       "followups": [
         {
           "prompt_id": "s4_p2_f1",
           "trigger": "unsupported_conclusion",
-          "text": "Based on the content covered in this fellowship, you recommended therapeutic exercise. What specific types of exercise are most appropriate for this dog, and what types are contraindicated or require modification given bilateral elbow and hip disease?"
+          "text": "Based on the content covered in this fellowship, you recommended therapeutic exercise. What specific types of exercise are most appropriate for this dog, which are contraindicated or require modification given bilateral elbow and hip disease, and how do you use an objective measure such as force plate gait analysis to quantify the response and set realistic owner expectations?"
         },
         {
           "prompt_id": "s4_p2_f2",
           "trigger": "cannot_apply",
-          "text": "Based on the content covered in this fellowship, walk me through the specific environmental modifications — for the home environment — that this owner should implement to reduce pain flares and improve daily function. Be as specific as you would be in actual discharge instructions."
+          "text": "Based on the content covered in this fellowship, walk me through the specific environmental modifications for the home that this owner should implement to reduce pain flares and improve daily function. Be as specific as you would be in actual discharge instructions — include flooring surface, resting surfaces, food and water bowl height, access to outdoors, and exercise scheduling."
         }
       ]
     },
@@ -46,17 +46,17 @@
       "phase_id": "prioritization_safety",
       "sequence": 3,
       "prompt_type": "primary",
-      "text": "Non-pharmacological modalities are sometimes presented as inherently safe, but this fellowship taught that each carries specific risks when misapplied. Choose two modalities covered in this fellowship and for each: identify the specific patient types or conditions in which it could cause direct harm or delay appropriate escalation to pharmacological or surgical management.",
+      "text": "Non-pharmacological modalities are sometimes presented as inherently safe, but this fellowship taught that each carries specific risks when misapplied. Choose two modalities covered in this fellowship and for each: identify the specific patient types or conditions in which it could cause direct harm or inappropriately delay escalation to pharmacological or surgical management.",
       "followups": [
         {
           "prompt_id": "s4_p3_f1",
           "trigger": "missing_safety",
-          "text": "Based on the content covered in this fellowship, a client presents a 12-year-old dog with a confirmed splenic mass on ultrasound, alongside lumbosacral disc herniation causing pain. The client wants laser therapy for the back pain. Walk me through your decision-making and what you say to this client."
+          "text": "Based on the content covered in this fellowship, a client presents a 12-year-old dog with a confirmed splenic mass on ultrasound alongside lumbosacral disc herniation causing pain. The client requests photobiomodulation for the back pain. Walk me through your decision-making, the specific contraindication at issue, and what you say to this client."
         },
         {
           "prompt_id": "s4_p3_f2",
           "trigger": "vague_generic_answer",
-          "text": "Based on the content covered in this fellowship, at what clinical threshold does a non-pharmacological-only pain management plan become a standard-of-care failure — and how do you recognize that threshold before the patient is in crisis?"
+          "text": "Based on the content covered in this fellowship, at what specific clinical threshold — signs, validated scale scores, or duration of inadequate response — does a non-pharmacological-only pain management plan become a standard-of-care failure, and how do you recognize that threshold before the patient is in crisis?"
         }
       ]
     },
@@ -65,17 +65,17 @@
       "phase_id": "reflection_transfer",
       "sequence": 4,
       "prompt_type": "primary",
-      "text": "Non-pharmacological pain management often fails in practice not because the modality lacks efficacy, but because it is not consistently delivered. What is the single structural change — in scheduling, staffing, client communication, or follow-up protocols — that would have the largest impact on consistently offering non-pharmacological modalities in your practice? And for which species or patient type covered in this fellowship do you feel least prepared to offer these modalities, and why?",
+      "text": "Non-pharmacological pain management often fails in practice not because the modality lacks efficacy, but because it is not consistently delivered. What is the single structural change — in scheduling, staffing, client communication, or follow-up protocols — that would have the largest impact on consistently offering these modalities in your practice? And for which species or patient type covered in this fellowship do you feel least prepared to offer non-pharmacological pain management, and why?",
       "followups": [
         {
           "prompt_id": "s4_p4_f1",
           "trigger": "cannot_apply",
-          "text": "Based on the content covered in this fellowship, identify one non-pharmacological modality applicable to the species you feel least prepared for and describe how you would implement it, including owner education and safety screening."
+          "text": "Based on the content covered in this fellowship, identify one non-pharmacological modality applicable to the species you feel least prepared for and describe how you would implement it — including owner education, safety screening steps, expected response timeline, and the specific outcome measure you would use to determine whether it is working."
         },
         {
           "prompt_id": "s4_p4_f2",
           "trigger": "vague_generic_answer",
-          "text": "Based on the content covered in this fellowship, describe the specific conversation you would have with a client whose rabbit is recovering from a dental procedure, to introduce one home-based non-pharmacological pain management intervention for the post-discharge period."
+          "text": "Based on the content covered in this fellowship, describe the specific conversation you would have with a client whose rabbit is recovering from a dental procedure to introduce one home-based non-pharmacological pain management intervention for the post-discharge period, including the signs the owner should monitor and the timeline for follow-up assessment."
         }
       ]
     }

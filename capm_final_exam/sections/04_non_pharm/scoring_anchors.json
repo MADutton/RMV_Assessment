@@ -3,82 +3,85 @@
   "domains": {
     "core_concept_understanding": {
       "high_value_elements": [
-        "Correctly identifies acupuncture/electroacupuncture mechanism: endogenous opioid release, spinal cord modulation, serotonin increase, bradykinin decrease",
-        "Correctly describes PBM mechanism at the cellular level (cytochrome C, ATP, nitric oxide, ROS) as a non-pharmacological pain intervention",
-        "Identifies weight management as reducing both mechanical joint load AND inflammatory adipokine burden",
-        "Correctly identifies omega-3 fatty acids as modulating the arachidonic acid pathway toward pro-resolving mediators",
-        "Describes therapeutic exercise as producing analgesia via endorphin release and improved joint stability"
+        "Correctly identifies electroacupuncture frequency-dependent mediator release: low frequency (~2 Hz) stimulates enkephalin and beta-endorphin release at spinal and supraspinal levels; high frequency (~100 Hz) stimulates dynorphin release primarily at spinal cord level",
+        "Correctly identifies photobiomodulation (PBM) mechanism: photons in 635-904 nm range absorbed by cytochrome C oxidase in mitochondria, producing ATP, nitric oxide, and reactive oxygen species; anti-inflammatory, analgesic, tissue-healing effects",
+        "Correctly identifies adipokine mechanism of obesity amplifying OA pain: excess adipose tissue produces pro-inflammatory adipokines (including leptin dysregulation and adiponectin reduction) that upregulate inflammatory cytokines in joint tissue, amplifying nociceptor sensitization beyond mechanical load alone",
+        "Identifies therapeutic exercise as reducing pain through muscle strengthening (joint stability), endorphin release, and improved proprioception — not merely by redistributing mechanical load",
+        "Names at least four non-pharmacological modalities with evidence for companion animal pain: acupuncture/electroacupuncture, photobiomodulation, therapeutic exercise/rehabilitation, weight management, environmental modification"
       ],
       "major_concerns": [
-        "Cannot describe any mechanism for any non-pharmacological modality",
-        "States non-pharmacological modalities have no evidence base",
-        "Cannot distinguish electroacupuncture from dry needling in mechanism or indication"
+        "Cannot distinguish electroacupuncture from dry needling or explain the frequency-dependent mediator difference",
+        "Cannot explain PBM mechanism beyond 'it heats the tissue' or confuses therapeutic laser with surgical laser",
+        "Cannot explain why weight loss benefits OA pain beyond mechanical load reduction",
+        "Cannot name the intracellular target of PBM photons"
       ]
     },
     "clinical_application": {
       "high_value_elements": [
-        "Constructs a realistic home plan (specific exercises, environmental modifications, dietary changes) for an overweight OA Labrador",
-        "Identifies underwater treadmill as appropriate low-impact exercise reducing joint load while maintaining muscle strengthening",
-        "Applies species-appropriate non-pharmacological strategies for at least one non-canine species",
-        "Sets a measurable outcome (e.g., 10% body weight reduction, improved pain scale score) for the plan",
-        "Identifies the clinical threshold at which non-pharmacological management alone is insufficient and escalation is warranted"
+        "Applies COAST staging (0-4) to the 8-year-old Labrador: correctly identifies that bilateral radiographic OA with functional impairment places this dog in moderate to severe range requiring multimodal approach",
+        "Recommends weight loss as a first-line co-primary intervention with a realistic target (BCS 5/9 as goal) and explains adipokine mechanism of benefit beyond load reduction",
+        "Recommends therapeutic exercise including hydrotherapy, controlled leash walking, and proprioceptive exercises; correctly excludes high-impact activities (jumping, fetch, rough play) with bilateral elbow disease",
+        "Identifies force plate gait analysis as an objective non-owner-reported outcome measure to quantify treatment response and set owner expectations",
+        "For cats: correctly recommends environmental modifications including steps or ramps to elevated resting spots, lowered litter box walls, food and water bowls at accessible height, soft warm bedding in sunny areas",
+        "Identifies specific escalation threshold: persistent pain scale scores above treatment trigger threshold, owner-reported functional decline, or inability to perform baseline activities despite 4-8 weeks of consistent non-pharmacological management"
       ],
       "major_concerns": [
-        "Recommends high-impact exercise for a dog with severe bilateral OA",
-        "Constructs a plan with no measurable outcomes and no re-evaluation trigger",
-        "Cannot apply any species-specific environmental modification for any non-canine species"
+        "Cannot apply COAST staging or explain what it guides",
+        "Recommends non-pharmacological management as the sole long-term approach without identifying any escalation threshold",
+        "Cannot describe specific exercise types or identify contraindicated activities for a patient with specific joint disease",
+        "Has no objective outcome measure for non-pharmacological treatment response"
       ]
     },
     "prioritization_decision_making": {
       "high_value_elements": [
-        "Identifies PBM over confirmed neoplasia as an absolute contraindication and declines treatment with client explanation",
-        "Recognizes when non-pharmacological management alone is insufficient based on escalating pain score despite full non-pharm delivery",
-        "Prioritizes patient safety over owner preference when a non-pharm modality is contraindicated",
-        "Identifies when a non-pharmacological modality may delay necessary pharmacologic or surgical management"
+        "Identifies active neoplasia as an absolute contraindication to PBM: confirmed splenic mass requires withholding laser therapy to the region or systemically adjacent areas due to risk of stimulating tumor growth",
+        "Correctly applies clinical threshold for escalation: if non-pharmacological management has been consistently implemented for an adequate trial period (typically 4-8 weeks) without reaching the target pain scale score or functional improvement, pharmacological addition is indicated rather than abandoning the non-pharmacological components",
+        "Identifies risk of inappropriate delay: extended non-pharmacological-only management in a patient with scores at or above rescue analgesia thresholds constitutes under-treatment",
+        "Correctly identifies Synovetin OA (Tn-117, intra-articular radiopharmaceutical) as an emerging modality for canine elbow OA with approximately 1-year duration of effect from a single injection"
       ],
       "major_concerns": [
-        "Agrees to laser a dog with confirmed splenic mass without raising the contraindication",
-        "Has no escalation threshold and treats non-pharmacological plan as always sufficient",
-        "Cannot identify any scenario where non-pharmacological modalities are contraindicated or insufficient"
+        "Applies PBM to a patient with confirmed neoplasia without raising the contraindication",
+        "Cannot identify any clinical threshold at which non-pharmacological management alone becomes a standard-of-care failure",
+        "Presents all non-pharmacological modalities as without risk or as first-line replacements for necessary pharmacological management"
       ]
     },
     "justification": {
       "high_value_elements": [
-        "Explains the adipokine-inflammation connection when justifying weight management as a pain intervention",
-        "Applies gate control theory basis for TENS and physical therapy",
-        "Provides mechanism-based rationale for electroacupuncture over dry needling for a neurological patient",
-        "Justifies underwater treadmill over land-based exercise with specific biomechanical rationale"
+        "Explains why PBM is contraindicated over neoplasia: photobiomodulation promotes cell proliferation and angiogenesis; these same mechanisms that promote tissue healing may stimulate tumor growth",
+        "Explains force plate rationale: owner-reported assessments are subjective and prone to accommodation bias; force plate measures weight-bearing symmetry objectively and can detect improvement before owners subjectively perceive change",
+        "Explains adipokine mechanism: adipose tissue functions as an endocrine organ producing leptin (pro-inflammatory at high levels) and reduced adiponectin (normally anti-inflammatory); this adipokine imbalance sustains synovial inflammation independent of mechanical load",
+        "Justifies electroacupuncture over dry needling for IVDD and neuropathic conditions based on the spinal cord-level dynorphin release at high frequencies providing a segmental inhibitory effect"
       ],
       "major_concerns": [
-        "Recommends non-pharmacological modalities without any mechanism-based justification",
-        "Cannot connect a modality's mechanism to the specific patient's condition",
-        "Relies entirely on personal experience without any mechanism-based support"
+        "Cannot explain why any non-pharmacological modality is contraindicated in specific patient types",
+        "Cannot justify technique selection over alternatives with mechanism-based reasoning",
+        "Cannot explain why objective outcome measures are preferable to owner subjective assessment alone"
       ]
     },
     "boundaries_uncertainty": {
       "high_value_elements": [
-        "Acknowledges that evidence quality varies across non-pharmacological modalities and identifies which have strongest support",
-        "Identifies personal training gaps in specific modalities before offering them",
-        "Recognizes when complex rehabilitation cases should be referred to a certified rehabilitation therapist",
-        "Acknowledges uncertainty about nutraceutical dosing optimization in specific species"
+        "Acknowledges that evidence quality for many non-pharmacological modalities in veterinary medicine is lower than ideal; can distinguish well-supported uses from extrapolations",
+        "Identifies the credentialing requirement for acupuncture and electroacupuncture in veterinary practice: recognized programs (IVAS, Chi Institute, or equivalent) required in most jurisdictions",
+        "Recognizes limits of non-pharmacological management for severe or rapidly progressive pain and articulates a clear pharmacological or surgical escalation decision point",
+        "Acknowledges that exotic species (rabbits, birds, reptiles) have minimal species-validated non-pharmacological evidence and describes how to adapt and monitor carefully"
       ],
       "major_concerns": [
-        "Presents all non-pharmacological modalities as equally evidence-based",
-        "Has no referral threshold for rehabilitation cases beyond personal competence",
-        "Cannot identify any species for which they lack sufficient training in non-pharmacological management"
+        "Presents non-pharmacological modalities as universally safe, efficacious, and applicable to all species without evidence qualification",
+        "Cannot identify any training or credentialing requirement for acupuncture or electroacupuncture",
+        "Has no escalation threshold and would continue non-pharmacological-only management indefinitely regardless of response"
       ]
     },
     "mastery_depth": {
       "high_value_elements": [
-        "Discusses the synergism between PBM and electroacupuncture with mechanistic overlap",
-        "Integrates non-pharmacological and pharmacological modalities into a unified plan addressing mechanism, dose reduction, and monitoring",
-        "References specific PBM research (DM rehabilitation study, tendinopathy studies) when supporting clinical recommendations",
-        "Discusses practice systems challenges of delivering non-pharmacological modalities consistently"
+        "Integrates non-pharmacological modalities into a coherent multimodal plan where each component targets a different mechanism: weight management (adipokine reduction), exercise (muscle stabilization, endorphin), PBM (mitochondrial/anti-inflammatory), EA (endogenous opioid), environmental modification (load/stress reduction)",
+        "Applies COAST staging framework not just for OA diagnosis but to guide which modalities are appropriate at each disease stage",
+        "Discusses Synovetin OA as a bridge between pharmacological and interventional/regenerative categories: intra-articular radiopharmaceutical providing synovial anti-inflammatory effect lasting up to 1 year from a single injection",
+        "Connects the non-pharmacological content to the FAS and stress reduction content: recognizing that environmental modification in cats reduces both pain perception and stress-amplified pain, making it dual-purpose"
       ],
       "major_concerns": [
-        "Cannot integrate non-pharmacological and pharmacological modalities into a single coherent plan",
-        "Treats non-pharmacological modalities as entirely separate from pharmacological management",
-        "Lists modalities without understanding when, why, or how to apply them to specific patients"
+        "Cannot integrate non-pharmacological modalities with pharmacological management into a coherent multimodal construct",
+        "Treats non-pharmacological modalities as interchangeable add-ons without mechanism-based patient matching",
+        "Cannot discuss any emerging modality (Synovetin, regenerative medicine, PRP) in terms of mechanism and evidence status"
       ]
     }
   }
