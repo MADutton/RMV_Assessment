@@ -4,53 +4,62 @@
     "core_concept_understanding": {
       "high_value_elements": [
         "Correctly identifies full mu agonists (morphine, fentanyl, hydromorphone, methadone) and distinguishes from partial agonist (buprenorphine) and kappa agonist (butorphanol)",
-        "Correctly states NSAIDs work via COX enzyme inhibition reducing prostaglandin synthesis",
-        "Correctly identifies methadone's dual mechanism: mu agonist plus NMDA antagonist",
-        "Notes cats' glucuronidation deficiency as the basis for heightened NSAID caution in felines",
-        "Correctly describes grapiprant as an EP4 receptor antagonist, not a COX inhibitor",
-        "Correctly identifies ketamine and amantadine as NMDA antagonists with different routes and durations"
+        "Correctly states NSAIDs work via COX enzyme inhibition reducing prostaglandin synthesis; distinguishes COX-1 vs COX-2 selectivity implications for GI safety",
+        "Correctly identifies grapiprant as an EP4 receptor antagonist, not a COX inhibitor; appropriate for dogs with OA including those with GI sensitivity",
+        "Correctly identifies ketamine (IV CRI, approximately 60 mg/L at 5-10 mL/kg/hr) and amantadine (3-5 mg/kg once daily orally) as the two primary NMDA antagonist options taught, with different routes and clinical contexts",
+        "Correctly identifies tramadol: M1 (O-desmethyltramadol) as the active mu-opioid metabolite; CYP2D6 required for conversion; many dogs have limited CYP2D6 activity making tramadol act primarily as an SNRI in dogs; cats have effective analgesic response at 2 mg/kg TID",
+        "Correctly identifies anti-NGF monoclonal antibodies: frunevetmab (Solensia) for cats, bedinvetmab (Librela) for dogs; mechanism is NGF blockade preventing TrkA receptor activation on nociceptors",
+        "Notes cats' glucuronidation deficiency (Phase II hepatic metabolism) as the basis for heightened caution with multiple analgesic drug classes in felines",
+        "States acetaminophen is absolutely contraindicated in cats due to lack of glucuronidation causing methemoglobinemia even at standard doses"
       ],
       "major_concerns": [
-        "Reverses partial and full agonist properties",
+        "Reverses partial and full agonist properties or cannot name specific drugs in each class",
         "Cannot explain the feline NSAID caution beyond 'cats are sensitive to drugs'",
-        "Does not know methadone's NMDA antagonist property",
-        "Confuses corticosteroid and NSAID mechanism of action"
+        "Does not know tramadol's M1 metabolite or the species difference in CYP2D6 activity",
+        "Confuses corticosteroid and NSAID mechanism of action",
+        "Recommends acetaminophen for a cat"
       ]
     },
     "clinical_application": {
       "high_value_elements": [
-        "Correctly avoids or restricts long-term NSAIDs in IRIS Stage 3 CKD cat (PGE2 required for afferent arteriolar tone)",
-        "Selects buprenorphine via oral transmucosal (OTM) route as practical home opioid for cats",
-        "Includes gabapentin with explicit rationale for its role in neuropathic pain component",
-        "Adds an NMDA antagonist component to address the neuropathic pain flare",
-        "Recognizes that full mu opioids for long-term home use in cats have practical and safety limitations"
+        "Correctly avoids or restricts long-term NSAIDs in IRIS Stage 3-4 CKD cat (prostaglandin E2 required for afferent arteriolar tone; NSAID inhibition risks acute-on-chronic renal decompensation)",
+        "Includes Solensia (frunevetmab) anti-NGF as a preferred option for this CKD cat: renal-safe mechanism, monthly subcutaneous injection, specifically licensed for feline OA pain",
+        "Selects buprenorphine via oral transmucosal (OTM) route as the practical home opioid for cats; dose approximately 0.01-0.02 mg/kg q6-8h; notes ceiling effect on respiratory depression versus full mu agonists",
+        "Includes gabapentin with explicit dose reduction for Stage 3-4 CKD: half-life extends from approximately 4 hours in normal cats to 13-20 hours in Stage 3-4 CKD (linear correlation with IRIS stage)",
+        "Adds an NMDA antagonist component (amantadine 3-5 mg/kg once daily) to address the neuropathic pain flare component",
+        "Correctly administers zoledronate for osteosarcoma: 0.1-0.5 mg/kg IV over exactly 15 minutes in normal saline only (not dextrose), maximum 4 mg total; pre-screens for active dental disease (absolute contraindication due to jaw osteonecrosis risk)"
       ],
       "major_concerns": [
-        "Prescribes long-term NSAID in Stage 3 CKD without contraindication acknowledgment",
+        "Prescribes long-term NSAID in Stage 3 CKD without contraindication acknowledgment or renal monitoring plan",
+        "Does not recognize gabapentin half-life extension in CKD and prescribes standard dosing intervals",
         "Selects a drug route impractical or unsafe for owner administration in cats",
         "Fails to address the neuropathic pain component pharmacologically",
-        "Combines NSAID and corticosteroid without contraindication awareness"
+        "Combines NSAID and corticosteroid without contraindication awareness",
+        "Administers zoledronate in dextrose solution or without checking for dental disease"
       ]
     },
     "prioritization_decision_making": {
       "high_value_elements": [
-        "Immediately flags the NSAID plus corticosteroid combination as requiring intervention before dispensing",
-        "Identifies the boutique diet DCM risk in certain breeds as warranting cardiac screening before alpha-2 use",
-        "Correctly describes DEA Schedule II/III record-keeping requirements for opioids",
-        "Prioritizes patient safety over prescribing convenience in high-risk combinations"
+        "Immediately flags the NSAID plus corticosteroid combination as requiring intervention before dispensing (dual prostaglandin inhibition and mucosal barrier disruption causing GI hemorrhage risk)",
+        "Identifies bisphosphonate dental disease contraindication: active dental disease or planned dental procedures require bisphosphonate washout due to jaw osteonecrosis risk",
+        "Identifies boutique diet or DCM-associated breed risk as warranting cardiac screening before alpha-2 agonist use in certain patients",
+        "Correctly describes DEA Schedule II/III record-keeping requirements: drug log, biannual inventory, separate locked storage, disposal records",
+        "Prioritizes patient safety over prescribing convenience in all high-risk combinations"
       ],
       "major_concerns": [
         "Does not recognize the NSAID plus corticosteroid combination as dangerous",
-        "Has no response to the concurrent prescription scenario and dispenses both without intervention",
-        "Cannot describe any controlled substance compliance requirement"
+        "Has no response to the concurrent prescription scenario and would dispense both without intervention",
+        "Cannot describe any controlled substance compliance requirement",
+        "Does not know the bisphosphonate dental disease contraindication"
       ]
     },
     "justification": {
       "high_value_elements": [
-        "Explains the GI hemorrhage mechanism of NSAID plus corticosteroid (dual prostaglandin inhibition and mucosal barrier disruption)",
-        "Explains the renal hemodynamic mechanism of NSAID risk in CKD (afferent arteriolar tone dependent on PGE2)",
-        "Justifies buprenorphine over full mu for home use (ceiling effect on respiratory depression, practical OTM route in cats)",
-        "Justifies NMDA antagonist addition for neuropathic component based on wind-up mechanism"
+        "Explains the GI hemorrhage mechanism of NSAID plus corticosteroid: NSAIDs reduce gastroprotective prostaglandins while corticosteroids reduce mucosal repair and increase acid secretion",
+        "Explains the renal hemodynamic mechanism of NSAID risk in CKD: afferent arteriolar tone is prostaglandin-dependent when renal perfusion pressure is compromised; NSAID blockade causes acute tubular injury",
+        "Justifies buprenorphine over full mu agonist for home use: ceiling effect on respiratory depression, practical OTM absorption in cats (~50% bioavailability via OTM), owner safety",
+        "Justifies Solensia as renal-safe: mechanism does not involve renal prostaglandin pathways; monthly injection reduces compliance failure",
+        "Justifies amantadine addition for neuropathic component: NMDA receptor wind-up is the mechanism underlying central sensitization in neuropathic pain; gabapentin alone does not address this receptor"
       ],
       "major_concerns": [
         "Provides drug names without pharmacologic justification",
@@ -60,10 +69,11 @@
     },
     "boundaries_uncertainty": {
       "high_value_elements": [
-        "Acknowledges no NSAID is risk-free in CKD and articulates a clear monitoring plan if short-term use is considered",
-        "Recognizes species-specific evidence limits (e.g., tramadol efficacy debate in dogs)",
+        "Acknowledges no NSAID is risk-free in CKD and articulates a clear monitoring plan if short-term use is considered: baseline creatinine, urine specific gravity, recheck at 7 days",
+        "Recognizes the evolving evidence base for anti-NGF monoclonal antibodies and acknowledges that long-term safety data beyond 2 years is still accumulating",
         "Identifies opioid diversion as a real practice risk requiring proactive systemic safeguards",
-        "Acknowledges uncertainty about long-term gabapentin dosing optimization in cats"
+        "Acknowledges uncertainty about optimal gabapentin dosing in CKD cats and commits to starting low with clinical monitoring",
+        "Recognizes tramadol's limited evidence for analgesia in dogs and does not recommend it as a sole analgesic in that species"
       ],
       "major_concerns": [
         "Presents drugs as safe in contexts where the fellowship explicitly identified risks",
@@ -73,15 +83,15 @@
     },
     "mastery_depth": {
       "high_value_elements": [
-        "Discusses opioid-sparing rationale with specific protocol components, not merely as a concept",
-        "Discusses the pharmacokinetic basis for why fentanyl patches have a 12-24 hour onset in dogs",
-        "Integrates Epstein fellowship content on chronic pain medication updates and long-term OA management",
-        "Discusses synergistic rationale for combining drug classes targeting different pathway nodes"
+        "Discusses opioid-sparing rationale with specific protocol components: NSAID + gabapentinoid + NMDA antagonist + locoregional block for TPLO as a comprehensive opioid-minimizing construct",
+        "Integrates Epstein fellowship content on chronic pain medication updates: duloxetine approximately 1 mg/kg q24h orally for dogs for neuropathic/chronic pain; amitriptyline 0.5-2 mg/kg q12-24h dogs or 5-10 mg per cat once daily for feline interstitial cystitis and neuropathic pain",
+        "Distinguishes LDN (low-dose naltrexone) mechanism from opioid antagonism: at low doses, transient opioid receptor blockade triggers upregulation; anti-neuroinflammatory mechanism via glial TLR4 modulation",
+        "Discusses CBD evidence critically: starting dose 0.1-2 mg/kg BID; notes THC is toxic to pets (CNS depression, urinary leakage, tachycardia); requires product purity verification for THC content below 0.3%"
       ],
       "major_concerns": [
         "Cannot construct a realistic opioid-free or opioid-sparing protocol for a specific surgical case",
-        "Discusses pharmacology only in abstract terms disconnected from clinical decision-making",
-        "Cannot integrate the Epstein content on chronic pain management into practical protocols"
+        "Discusses pharmacology only in abstract terms disconnected from specific doses and routes",
+        "Cannot distinguish the Epstein fellowship guidance on chronic pain drug selection from basic pharmacology concepts"
       ]
     }
   }
