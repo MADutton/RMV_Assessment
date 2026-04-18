@@ -1,0 +1,88 @@
+{
+  "section_id": "05_recognition_assessment",
+  "domains": {
+    "core_concept_understanding": {
+      "high_value_elements": [
+        "Correctly distinguishes acute pain scales (used in-hospital by staff) from chronic CMIs (owner-reported, used over days to weeks at home)",
+        "Names at least one validated canine acute scale (Glasgow CMPS-SF, Colorado State University Pain Scale) and one CMI (Canine Brief Pain Inventory, Helsinki Chronic Pain Index)",
+        "Names at least one validated feline acute scale (UNESP-Botucatu, Feline Grimace Scale) and one chronic tool (Feline Musculoskeletal Pain Index)",
+        "Correctly describes FAS: Fear, Anxiety, Stress; explains elevated FAS scores distort acute pain scale scores",
+        "Correctly identifies Feline Grimace Scale action units: orbital tightening, ear position, muzzle tension, whisker change, head position"
+      ],
+      "major_concerns": [
+        "Cannot name a single validated pain scale for either dogs or cats",
+        "Confuses acute pain scale with CMI",
+        "Cannot describe what FAS stands for or what it measures",
+        "Believes a single numerical score captures all relevant pain information without behavioral context"
+      ]
+    },
+    "clinical_application": {
+      "high_value_elements": [
+        "Asks specific behavioral history questions targeting chronic feline musculoskeletal pain (jumping height, litter box access, grooming behavior, interaction level, sleep location)",
+        "Applies the Feline Grimace Scale during the examination, not before or after",
+        "Distinguishes chronic OA pain from cognitive dysfunction, hyperthyroidism, and normal aging with specific differentiating criteria",
+        "Reconciles discrepant owner versus clinical assessment scores with understanding of why each has limitations",
+        "Establishes a documented baseline allowing future comparisons to monitor treatment response"
+      ],
+      "major_concerns": [
+        "Relies solely on owner description without applying any validated instrument",
+        "Cannot describe history questions most sensitive for feline musculoskeletal pain",
+        "Attributes all behavioral changes in the geriatric cat to normal aging without structured assessment",
+        "Cannot reconcile a discrepancy between owner assessment and clinical scale score"
+      ]
+    },
+    "prioritization_decision_making": {
+      "high_value_elements": [
+        "Identifies prey species (rabbit, bird, rodent) pain under-recognition as the highest-priority assessment failure",
+        "Applies a minimum post-procedural assessment standard to all prey species regardless of clinical appearance",
+        "Recognizes risk of over-attributing quiet behavior to adequate analgesia in stoic breeds post-orthopedic surgery",
+        "Uses physiological indicators (HR, BP, respiratory rate) as adjuncts when behavioral signs are unreliable"
+      ],
+      "major_concerns": [
+        "Cannot identify the under-recognition risk for any prey species",
+        "Interprets a quiet, non-vocalizing post-surgical patient as necessarily pain-free",
+        "Has no strategy for assessing pain in a patient where behavioral scoring is unreliable",
+        "Cannot identify any scenario where pain could be over-attributed"
+      ]
+    },
+    "justification": {
+      "high_value_elements": [
+        "Explains the evolutionary basis for pain masking in prey species and why this creates systematic assessment failure",
+        "Explains why concordance between owner and clinical scores is not always expected (different behavioral domains, observation periods)",
+        "Justifies a facial action unit scale in cats based on the challenge of observing locomotor behaviors in a cage",
+        "Explains why pain as the fourth vital sign requires system-level workflow change to overcome individual clinician variability"
+      ],
+      "major_concerns": [
+        "Cannot explain why prey species mask pain",
+        "Cannot justify why a validated instrument is preferable to clinical intuition",
+        "Cannot explain why a discrepant score warrants further assessment rather than dismissal"
+      ]
+    },
+    "boundaries_uncertainty": {
+      "high_value_elements": [
+        "Acknowledges that validated tools do not exist for all species covered in the fellowship",
+        "Recognizes no single pain scale captures all pain dimensions and that multimodal assessment is needed",
+        "Acknowledges uncertainty about pain versus other behavioral causes (CDS, hyperthyroidism) and describes how to differentiate",
+        "Identifies when specialist consultation is appropriate for complex or ambiguous pain presentations"
+      ],
+      "major_concerns": [
+        "Claims to accurately assess pain in all species using the same scale",
+        "Has no acknowledgment of the limits of any assessment tool",
+        "Cannot identify any patient type for which current validated tools are insufficient or absent"
+      ]
+    },
+    "mastery_depth": {
+      "high_value_elements": [
+        "Connects Epstein fellowship content on OA, neuropathic pain, and surgical pain categorization (high vs. low) to pre-emptive assessment and analgesic planning",
+        "Integrates WASVA/WSAVA pain guidelines as a clinical practice standard, not merely an academic reference",
+        "Discusses how pain as a vital sign requires workflow and culture change at the practice level",
+        "Connects assessment accuracy directly to treatment outcome: unmeasured pain is effectively untreated pain"
+      ],
+      "major_concerns": [
+        "Cannot connect Epstein fellowship content on specific pain conditions to clinical assessment practice",
+        "Treats WASVA guidelines as aspirational rather than as a clinical standard",
+        "Cannot describe any practice-level implementation strategy for systematic pain assessment"
+      ]
+    }
+  }
+}
