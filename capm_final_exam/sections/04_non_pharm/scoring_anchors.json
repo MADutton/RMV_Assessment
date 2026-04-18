@@ -1,0 +1,85 @@
+{
+  "section_id": "04_non_pharm",
+  "domains": {
+    "core_concept_understanding": {
+      "high_value_elements": [
+        "Correctly identifies acupuncture/electroacupuncture mechanism: endogenous opioid release, spinal cord modulation, serotonin increase, bradykinin decrease",
+        "Correctly describes PBM mechanism at the cellular level (cytochrome C, ATP, nitric oxide, ROS) as a non-pharmacological pain intervention",
+        "Identifies weight management as reducing both mechanical joint load AND inflammatory adipokine burden",
+        "Correctly identifies omega-3 fatty acids as modulating the arachidonic acid pathway toward pro-resolving mediators",
+        "Describes therapeutic exercise as producing analgesia via endorphin release and improved joint stability"
+      ],
+      "major_concerns": [
+        "Cannot describe any mechanism for any non-pharmacological modality",
+        "States non-pharmacological modalities have no evidence base",
+        "Cannot distinguish electroacupuncture from dry needling in mechanism or indication"
+      ]
+    },
+    "clinical_application": {
+      "high_value_elements": [
+        "Constructs a realistic home plan (specific exercises, environmental modifications, dietary changes) for an overweight OA Labrador",
+        "Identifies underwater treadmill as appropriate low-impact exercise reducing joint load while maintaining muscle strengthening",
+        "Applies species-appropriate non-pharmacological strategies for at least one non-canine species",
+        "Sets a measurable outcome (e.g., 10% body weight reduction, improved pain scale score) for the plan",
+        "Identifies the clinical threshold at which non-pharmacological management alone is insufficient and escalation is warranted"
+      ],
+      "major_concerns": [
+        "Recommends high-impact exercise for a dog with severe bilateral OA",
+        "Constructs a plan with no measurable outcomes and no re-evaluation trigger",
+        "Cannot apply any species-specific environmental modification for any non-canine species"
+      ]
+    },
+    "prioritization_decision_making": {
+      "high_value_elements": [
+        "Identifies PBM over confirmed neoplasia as an absolute contraindication and declines treatment with client explanation",
+        "Recognizes when non-pharmacological management alone is insufficient based on escalating pain score despite full non-pharm delivery",
+        "Prioritizes patient safety over owner preference when a non-pharm modality is contraindicated",
+        "Identifies when a non-pharmacological modality may delay necessary pharmacologic or surgical management"
+      ],
+      "major_concerns": [
+        "Agrees to laser a dog with confirmed splenic mass without raising the contraindication",
+        "Has no escalation threshold and treats non-pharmacological plan as always sufficient",
+        "Cannot identify any scenario where non-pharmacological modalities are contraindicated or insufficient"
+      ]
+    },
+    "justification": {
+      "high_value_elements": [
+        "Explains the adipokine-inflammation connection when justifying weight management as a pain intervention",
+        "Applies gate control theory basis for TENS and physical therapy",
+        "Provides mechanism-based rationale for electroacupuncture over dry needling for a neurological patient",
+        "Justifies underwater treadmill over land-based exercise with specific biomechanical rationale"
+      ],
+      "major_concerns": [
+        "Recommends non-pharmacological modalities without any mechanism-based justification",
+        "Cannot connect a modality's mechanism to the specific patient's condition",
+        "Relies entirely on personal experience without any mechanism-based support"
+      ]
+    },
+    "boundaries_uncertainty": {
+      "high_value_elements": [
+        "Acknowledges that evidence quality varies across non-pharmacological modalities and identifies which have strongest support",
+        "Identifies personal training gaps in specific modalities before offering them",
+        "Recognizes when complex rehabilitation cases should be referred to a certified rehabilitation therapist",
+        "Acknowledges uncertainty about nutraceutical dosing optimization in specific species"
+      ],
+      "major_concerns": [
+        "Presents all non-pharmacological modalities as equally evidence-based",
+        "Has no referral threshold for rehabilitation cases beyond personal competence",
+        "Cannot identify any species for which they lack sufficient training in non-pharmacological management"
+      ]
+    },
+    "mastery_depth": {
+      "high_value_elements": [
+        "Discusses the synergism between PBM and electroacupuncture with mechanistic overlap",
+        "Integrates non-pharmacological and pharmacological modalities into a unified plan addressing mechanism, dose reduction, and monitoring",
+        "References specific PBM research (DM rehabilitation study, tendinopathy studies) when supporting clinical recommendations",
+        "Discusses practice systems challenges of delivering non-pharmacological modalities consistently"
+      ],
+      "major_concerns": [
+        "Cannot integrate non-pharmacological and pharmacological modalities into a single coherent plan",
+        "Treats non-pharmacological modalities as entirely separate from pharmacological management",
+        "Lists modalities without understanding when, why, or how to apply them to specific patients"
+      ]
+    }
+  }
+}

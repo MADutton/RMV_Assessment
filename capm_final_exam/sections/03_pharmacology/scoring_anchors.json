@@ -1,0 +1,88 @@
+{
+  "section_id": "03_pharmacology",
+  "domains": {
+    "core_concept_understanding": {
+      "high_value_elements": [
+        "Correctly identifies full mu agonists (morphine, fentanyl, hydromorphone, methadone) and distinguishes from partial agonist (buprenorphine) and kappa agonist (butorphanol)",
+        "Correctly states NSAIDs work via COX enzyme inhibition reducing prostaglandin synthesis",
+        "Correctly identifies methadone's dual mechanism: mu agonist plus NMDA antagonist",
+        "Notes cats' glucuronidation deficiency as the basis for heightened NSAID caution in felines",
+        "Correctly describes grapiprant as an EP4 receptor antagonist, not a COX inhibitor",
+        "Correctly identifies ketamine and amantadine as NMDA antagonists with different routes and durations"
+      ],
+      "major_concerns": [
+        "Reverses partial and full agonist properties",
+        "Cannot explain the feline NSAID caution beyond 'cats are sensitive to drugs'",
+        "Does not know methadone's NMDA antagonist property",
+        "Confuses corticosteroid and NSAID mechanism of action"
+      ]
+    },
+    "clinical_application": {
+      "high_value_elements": [
+        "Correctly avoids or restricts long-term NSAIDs in IRIS Stage 3 CKD cat (PGE2 required for afferent arteriolar tone)",
+        "Selects buprenorphine via oral transmucosal (OTM) route as practical home opioid for cats",
+        "Includes gabapentin with explicit rationale for its role in neuropathic pain component",
+        "Adds an NMDA antagonist component to address the neuropathic pain flare",
+        "Recognizes that full mu opioids for long-term home use in cats have practical and safety limitations"
+      ],
+      "major_concerns": [
+        "Prescribes long-term NSAID in Stage 3 CKD without contraindication acknowledgment",
+        "Selects a drug route impractical or unsafe for owner administration in cats",
+        "Fails to address the neuropathic pain component pharmacologically",
+        "Combines NSAID and corticosteroid without contraindication awareness"
+      ]
+    },
+    "prioritization_decision_making": {
+      "high_value_elements": [
+        "Immediately flags the NSAID plus corticosteroid combination as requiring intervention before dispensing",
+        "Identifies the boutique diet DCM risk in certain breeds as warranting cardiac screening before alpha-2 use",
+        "Correctly describes DEA Schedule II/III record-keeping requirements for opioids",
+        "Prioritizes patient safety over prescribing convenience in high-risk combinations"
+      ],
+      "major_concerns": [
+        "Does not recognize the NSAID plus corticosteroid combination as dangerous",
+        "Has no response to the concurrent prescription scenario and dispenses both without intervention",
+        "Cannot describe any controlled substance compliance requirement"
+      ]
+    },
+    "justification": {
+      "high_value_elements": [
+        "Explains the GI hemorrhage mechanism of NSAID plus corticosteroid (dual prostaglandin inhibition and mucosal barrier disruption)",
+        "Explains the renal hemodynamic mechanism of NSAID risk in CKD (afferent arteriolar tone dependent on PGE2)",
+        "Justifies buprenorphine over full mu for home use (ceiling effect on respiratory depression, practical OTM route in cats)",
+        "Justifies NMDA antagonist addition for neuropathic component based on wind-up mechanism"
+      ],
+      "major_concerns": [
+        "Provides drug names without pharmacologic justification",
+        "Cannot explain the mechanism behind any contraindication",
+        "States conclusions without mechanism-based reasoning"
+      ]
+    },
+    "boundaries_uncertainty": {
+      "high_value_elements": [
+        "Acknowledges no NSAID is risk-free in CKD and articulates a clear monitoring plan if short-term use is considered",
+        "Recognizes species-specific evidence limits (e.g., tramadol efficacy debate in dogs)",
+        "Identifies opioid diversion as a real practice risk requiring proactive systemic safeguards",
+        "Acknowledges uncertainty about long-term gabapentin dosing optimization in cats"
+      ],
+      "major_concerns": [
+        "Presents drugs as safe in contexts where the fellowship explicitly identified risks",
+        "Cannot identify a single limitation or monitoring requirement for any drug selected",
+        "Ignores controlled substance compliance obligations entirely"
+      ]
+    },
+    "mastery_depth": {
+      "high_value_elements": [
+        "Discusses opioid-sparing rationale with specific protocol components, not merely as a concept",
+        "Discusses the pharmacokinetic basis for why fentanyl patches have a 12-24 hour onset in dogs",
+        "Integrates Epstein fellowship content on chronic pain medication updates and long-term OA management",
+        "Discusses synergistic rationale for combining drug classes targeting different pathway nodes"
+      ],
+      "major_concerns": [
+        "Cannot construct a realistic opioid-free or opioid-sparing protocol for a specific surgical case",
+        "Discusses pharmacology only in abstract terms disconnected from clinical decision-making",
+        "Cannot integrate the Epstein content on chronic pain management into practical protocols"
+      ]
+    }
+  }
+}
