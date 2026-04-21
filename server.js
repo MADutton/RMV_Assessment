@@ -12,6 +12,7 @@ import Busboy from "busboy";
 import pdfParse from "pdf-parse/lib/pdf-parse.js";
 import mammoth from "mammoth";
 import OpenAI from "openai";
+import nodemailer from "nodemailer";
 
 // ─── Paths ────────────────────────────────────────────────────────────────────
 
@@ -36,6 +37,15 @@ const USERS_CSV_URL = process.env.USERS_CSV_URL || "";
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY || "";
 
 const openai = OPENAI_API_KEY ? new OpenAI({ apiKey: OPENAI_API_KEY }) : null;
+
+// ─── Magic link tokens ────────────────────────────────────────────────────────
+
+const MAGIC_TTL_MS = 15 * 60 * 1000;
+const magicTokens = new Map(); // token -> { email, expiresAt }
+setInterval(() => {
+  const now = Date.now();
+  for (const [t, e] of magicTokens) if (now > e.expiresAt) magicTokens.delete(t);
+}, 5 * 60 * 1000);
 
 // ─── Database ─────────────────────────────────────────────────────────────────
 
@@ -395,6 +405,11 @@ function getUserRole(email) {
   return user ? user.role : "learner";
 }
 
+function isAllowedEmail(email) {
+  if (ADMIN_EMAIL && email === ADMIN_EMAIL) return true;
+  return !!getUserByEmail.get(email);
+}
+
 // ─── Route handlers ───────────────────────────────────────────────────────────
 
 // GET /health
@@ -443,6 +458,72 @@ async function handleDevLogin(req, res) {
 function handleLogout(req, res) {
   clearSession(req, res);
   return json(res, 200, { ok: true });
+}
+
+// POST /auth/request — check email is registered, send magic link
+async function handleAuthRequest(req, res) {
+  const raw = await readBody(req);
+  let parsed = {};
+  try { parsed = JSON.parse(raw || "{}"); } catch {}
+  const email = (parsed.email || "").trim().toLowerCase();
+  if (!email || !email.includes("@")) return apiError(res, 400, "Valid email required");
+
+  if (!isAllowedEmail(email)) {
+    return json(res, 403, { registered: false });
+  }
+
+  const token = crypto.randomBytes(32).toString("hex");
+  magicTokens.set(token, { email, expiresAt: Date.now() + MAGIC_TTL_MS });
+  const link = `${BASE_URL}/auth/verify?token=${token}`;
+
+  const smtpHost = process.env.SMTP_HOST;
+  const smtpPort = Number(process.env.SMTP_PORT || 587);
+  const smtpUser = process.env.SMTP_USER;
+  const smtpPass = process.env.SMTP_PASS;
+  const smtpFrom = process.env.SMTP_FROM || smtpUser;
+
+  if (!smtpHost || !smtpUser || !smtpPass) {
+    console.warn(`[auth] SMTP not configured — magic link for ${email}: ${link}`);
+    return json(res, 200, { sent: true, dev_link: link });
+  }
+
+  try {
+    const transporter = nodemailer.createTransport({
+      host: smtpHost, port: smtpPort,
+      secure: smtpPort === 465,
+      auth: { user: smtpUser, pass: smtpPass },
+    });
+    await transporter.sendMail({
+      from: smtpFrom,
+      to: email,
+      subject: "Your RMV Portal sign-in link",
+      text: `Click to sign in (expires in 15 minutes):\n\n${link}\n\nIf you did not request this, ignore this email.`,
+      html: `<p>Click to sign in to the RMV Portal (link expires in 15 minutes):</p><p><a href="${link}">${link}</a></p><p>If you did not request this, ignore this email.</p>`,
+    });
+    return json(res, 200, { sent: true });
+  } catch (e) {
+    console.error("[auth] Magic link send failed:", e.message);
+    return apiError(res, 500, "Failed to send sign-in email. Please try again.");
+  }
+}
+
+// GET /auth/verify?token=... — verify magic link, create session, redirect home
+function handleAuthVerify(req, res) {
+  const url = new URL(req.url, BASE_URL);
+  const token = url.searchParams.get("token") || "";
+  const entry = magicTokens.get(token);
+
+  if (!entry || Date.now() > entry.expiresAt) {
+    magicTokens.delete(token);
+    res.writeHead(302, { Location: "/?login=expired" });
+    return res.end();
+  }
+
+  magicTokens.delete(token);
+  getOrCreateUser(entry.email);
+  createSession(res, entry.email);
+  res.writeHead(302, { Location: "/" });
+  res.end();
 }
 
 // POST /api/submissions — multipart file upload
@@ -1845,6 +1926,8 @@ async function router(req, res) {
 
   // Auth
   if (method === "GET"  && pathname === "/auth/me")         return handleAuthMe(req, res);
+  if (method === "POST" && pathname === "/auth/request")    return handleAuthRequest(req, res);
+  if (method === "GET"  && pathname === "/auth/verify")     return handleAuthVerify(req, res);
   if (method === "POST" && pathname === "/auth/dev-login")  return handleDevLogin(req, res);
   if (method === "POST" && pathname === "/auth/logout")     return handleLogout(req, res);
 
