@@ -1818,7 +1818,7 @@ function parseCSV(text) {
   for (let i = 1; i < lines.length; i++) {
     const line = lines[i].trim();
     if (!line) continue;
-    const vals = line.split(",").map(v => v.trim());
+    const vals = line.split(",").map(v => v.trim().replace(/^"|"$/g, ""));
     const row = {};
     headers.forEach((h, idx) => { row[h] = vals[idx] || ""; });
     rows.push(row);
