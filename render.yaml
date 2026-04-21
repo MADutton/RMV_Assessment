@@ -1,0 +1,23 @@
+services:
+  - type: web
+    name: rmv-assessment
+    runtime: node
+    buildCommand: npm install
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: AUTH_SECRET
+        generateValue: true
+      - key: BASE_URL
+        value: https://rmv-assessment.onrender.com
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: ADMIN_EMAIL
+        sync: false
+      - key: DATA_DIR
+        value: /var/data
+    disk:
+      name: rmv-data
+      mountPath: /var/data
+      sizeGB: 1
