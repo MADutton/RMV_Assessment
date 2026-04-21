@@ -13,6 +13,7 @@
       --accent: #58a6ff;
       --ok: #4cd964;
       --warn: #ffd166;
+      --err: #ff6b6b;
     }
     * { box-sizing: border-box; }
     body {
@@ -26,17 +27,34 @@
     .hero { text-align: center; padding: 60px 0 40px; }
     .hero h1 { font-size: 2.4rem; font-weight: 800; margin: 0 0 12px; }
     .hero p { font-size: 1.1rem; color: var(--muted); max-width: 560px; margin: 0 auto; }
-    .cards { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; margin-top: 40px; }
-    .card {
+
+    /* ── Login card ── */
+    .login-wrap { display: flex; justify-content: center; margin-top: 40px; }
+    .login-card {
       background: var(--card);
       border: 1px solid rgba(255,255,255,0.09);
       border-radius: 16px;
-      padding: 28px 24px;
-      flex: 1 1 240px;
-      max-width: 340px;
+      padding: 36px 32px;
+      width: 100%;
+      max-width: 420px;
     }
-    .card h2 { font-size: 1.1rem; margin: 0 0 8px; }
-    .card p { font-size: 0.9rem; color: var(--muted); line-height: 1.5; margin: 0 0 18px; }
+    .login-card h2 { font-size: 1.2rem; margin: 0 0 8px; }
+    .login-card p  { font-size: 0.9rem; color: var(--muted); margin: 0 0 20px; line-height: 1.5; }
+    .login-card input[type="email"] {
+      width: 100%;
+      padding: 11px 14px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.18);
+      background: rgba(255,255,255,0.07);
+      color: var(--text);
+      font-size: 0.95rem;
+      margin-bottom: 12px;
+      outline: none;
+    }
+    .login-card input[type="email"]::placeholder { color: var(--muted); }
+    .login-card input[type="email"]:focus { border-color: var(--accent); }
+
+    /* ── Shared button ── */
     .btn {
       display: inline-block;
       padding: 10px 22px;
@@ -49,15 +67,34 @@
       cursor: pointer;
     }
     .btn:hover { background: rgba(88,166,255,0.26); }
-    .pill {
-      display: inline-block;
-      font-size: 11px;
-      padding: 3px 10px;
-      border-radius: 999px;
-      border: 1px solid rgba(255,255,255,0.12);
-      color: var(--muted);
-      margin-bottom: 10px;
+    .btn:disabled { opacity: 0.5; cursor: default; }
+    .btn-full { width: 100%; text-align: center; }
+
+    /* ── Status messages ── */
+    .msg {
+      margin-top: 16px;
+      padding: 12px 14px;
+      border-radius: 10px;
+      font-size: 0.88rem;
+      line-height: 1.5;
     }
+    .msg.ok   { background: rgba(76,217,100,0.12); border: 1px solid rgba(76,217,100,0.3); color: var(--ok); }
+    .msg.warn { background: rgba(255,209,102,0.12); border: 1px solid rgba(255,209,102,0.3); color: var(--warn); }
+    .msg.err  { background: rgba(255,107,107,0.12); border: 1px solid rgba(255,107,107,0.3); color: var(--err); }
+
+    /* ── Portal cards ── */
+    .cards { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; margin-top: 40px; }
+    .card {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.09);
+      border-radius: 16px;
+      padding: 28px 24px;
+      flex: 1 1 240px;
+      max-width: 340px;
+    }
+    .card h2 { font-size: 1.1rem; margin: 0 0 8px; }
+    .card p  { font-size: 0.9rem; color: var(--muted); line-height: 1.5; margin: 0 0 18px; }
+
     footer { text-align: center; color: var(--muted); font-size: 12px; margin-top: 60px; }
   </style>
 </head>
@@ -70,7 +107,23 @@
       <p>Upload and submit case summaries and case reports for reflective mastery verification review.</p>
     </div>
 
-    <div class="cards">
+    <!-- Sign-in form (shown when unauthenticated) -->
+    <div id="login-section" style="display:none">
+      <div class="login-wrap">
+        <div class="login-card">
+          <h2>Sign in</h2>
+          <p>Enter your registered email address and we'll send you a sign-in link.</p>
+          <form id="login-form">
+            <input type="email" id="email-input" placeholder="your@email.com" autocomplete="email" required />
+            <button type="submit" class="btn btn-full">Send sign-in link</button>
+          </form>
+          <div id="login-msg" style="display:none"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Portal cards (shown when authenticated) -->
+    <div id="cards-section" class="cards" style="display:none">
       <div class="card">
         <h2>Submit a Case</h2>
         <p>Upload a case summary or case report for RMV faculty review. You can track the status of all your submissions after signing in.</p>
@@ -92,16 +145,83 @@
 
     <footer>RMV Portal &mdash; Reflective Mastery Verification Platform</footer>
   </div>
+
   <script>
+    const loginSection = document.getElementById("login-section");
+    const cardsSection = document.getElementById("cards-section");
+    const loginForm    = document.getElementById("login-form");
+    const emailInput   = document.getElementById("email-input");
+    const loginMsg     = document.getElementById("login-msg");
+    const facultyCard  = document.getElementById("faculty-card");
+
+    function showMsg(text, type) {
+      loginMsg.textContent = text;
+      loginMsg.className   = "msg " + type;
+      loginMsg.style.display = "";
+    }
+
+    function showCards(role) {
+      loginSection.style.display = "none";
+      cardsSection.style.display = "";
+      if (role === "faculty" || role === "admin") {
+        facultyCard.style.display = "";
+      }
+    }
+
+    // Check session on load
     (async () => {
       try {
-        const r = await fetch("/auth/me");
+        const r  = await fetch("/auth/me");
         const me = await r.json();
-        if (me.role === "faculty" || me.role === "admin") {
-          document.getElementById("faculty-card").style.display = "";
-        }
+        if (me.email) { showCards(me.role); return; }
       } catch {}
+
+      loginSection.style.display = "";
+      if (new URLSearchParams(location.search).get("login") === "expired") {
+        showMsg("Your sign-in link has expired. Please request a new one.", "warn");
+      }
     })();
+
+    // Handle form submission
+    loginForm.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = emailInput.value.trim().toLowerCase();
+      const btn   = loginForm.querySelector("button");
+      btn.disabled    = true;
+      btn.textContent = "Sending…";
+      loginMsg.style.display = "none";
+
+      try {
+        const r    = await fetch("/auth/request", {
+          method:  "POST",
+          headers: { "Content-Type": "application/json" },
+          body:    JSON.stringify({ email }),
+        });
+
+        if (r.ok) {
+          loginForm.style.display = "none";
+          showMsg(
+            "Check your inbox — we sent a sign-in link to " + email + ". The link expires in 15 minutes.",
+            "ok"
+          );
+        } else if (r.status === 403) {
+          showMsg(
+            "That email isn’t registered. Contact support@cehub.vet to request access.",
+            "warn"
+          );
+          btn.disabled    = false;
+          btn.textContent = "Send sign-in link";
+        } else {
+          showMsg("Something went wrong. Please try again.", "err");
+          btn.disabled    = false;
+          btn.textContent = "Send sign-in link";
+        }
+      } catch {
+        showMsg("Connection error. Please try again.", "err");
+        btn.disabled    = false;
+        btn.textContent = "Send sign-in link";
+      }
+    });
   </script>
 </body>
 </html>
