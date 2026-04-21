@@ -1,6 +1,6 @@
 services:
   - type: web
-    name: rmv-assessment
+    name: cs-and-cr-reviewer-rmv-assistant
     runtime: node
     buildCommand: npm install
     startCommand: npm start
@@ -10,7 +10,7 @@ services:
       - key: AUTH_SECRET
         generateValue: true
       - key: BASE_URL
-        value: https://rmv-assessment.onrender.com
+        value: https://cs-and-cr-reviewer-rmv-assistant.onrender.com
       - key: OPENAI_API_KEY
         sync: false
       - key: ADMIN_EMAIL
